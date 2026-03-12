@@ -14,6 +14,12 @@ import Operations from "./pages/Operations";
 import Analytics from "./pages/Analytics";
 import AIAssistant from "./pages/AIAssistant";
 import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
+import Reviews from "./pages/Reviews";
+import Notifications from "./pages/Notifications";
+import KYC from "./pages/KYC";
+import HelpCenter from "./pages/HelpCenter";
+import BrowseExpos from "./pages/BrowseExpos";
 import DashboardLayout from "./components/DashboardLayout";
 
 function Router() {
@@ -29,6 +35,12 @@ function Router() {
       <Route path="/analytics" component={() => <DashboardLayout><Analytics /></DashboardLayout>} />
       <Route path="/ai-assistant" component={() => <DashboardLayout><AIAssistant /></DashboardLayout>} />
       <Route path="/profile" component={() => <DashboardLayout><Profile /></DashboardLayout>} />
+      <Route path="/expos" component={() => <DashboardLayout><BrowseExpos /></DashboardLayout>} />
+      <Route path="/messages" component={() => <DashboardLayout><Messages /></DashboardLayout>} />
+      <Route path="/reviews" component={() => <DashboardLayout><Reviews /></DashboardLayout>} />
+      <Route path="/notifications" component={() => <DashboardLayout><Notifications /></DashboardLayout>} />
+      <Route path="/kyc" component={() => <DashboardLayout><KYC /></DashboardLayout>} />
+      <Route path="/help" component={() => <DashboardLayout><HelpCenter /></DashboardLayout>} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
