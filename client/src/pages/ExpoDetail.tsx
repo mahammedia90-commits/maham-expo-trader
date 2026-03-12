@@ -203,12 +203,12 @@ export default function ExpoDetail() {
       {/* Back Navigation */}
       <div className="flex items-center gap-3">
         <Link href="/expos">
-          <button className="glass-card p-2 rounded-lg text-white/50 hover:text-[#C5A55A] transition-colors">
+          <button className="glass-card p-2 rounded-lg t-secondary hover:text-[#C5A55A] transition-colors">
             <ArrowRight size={18} />
           </button>
         </Link>
         <div>
-          <h2 className="text-lg font-bold text-white/90">معرض الرياض الدولي للتقنية والابتكار</h2>
+          <h2 className="text-lg font-bold t-primary">معرض الرياض الدولي للتقنية والابتكار</h2>
           <p className="text-[10px] text-[#C5A55A]/50 font-['Inter']">Riyadh International Tech & Innovation Expo</p>
         </div>
       </div>
@@ -231,7 +231,7 @@ export default function ExpoDetail() {
                   <p className="text-sm font-bold text-[#E8D5A3]">
                     الوحدة {holdBooth.code} محجوزة مؤقتاً
                   </p>
-                  <p className="text-[10px] text-white/40 font-['Inter']">
+                  <p className="text-[10px] t-tertiary font-['Inter']">
                     Unit {holdBooth.code} temporarily held — Complete payment before timer expires
                   </p>
                 </div>
@@ -258,36 +258,36 @@ export default function ExpoDetail() {
           <div className="flex items-center gap-2">
             <MapPin size={14} className="text-[#C5A55A]/60" />
             <div>
-              <p className="text-xs text-white/70">الرياض</p>
-              <p className="text-[9px] text-white/30 font-['Inter']">Riyadh</p>
+              <p className="text-xs t-secondary">الرياض</p>
+              <p className="text-[9px] t-tertiary font-['Inter']">Riyadh</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Calendar size={14} className="text-[#C5A55A]/60" />
             <div>
-              <p className="text-xs text-white/70 font-['Inter']">15-19 Apr 2025</p>
-              <p className="text-[9px] text-white/30">5 أيام</p>
+              <p className="text-xs t-secondary font-['Inter']">15-19 Apr 2025</p>
+              <p className="text-[9px] t-tertiary">5 أيام</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Users size={14} className="text-[#C5A55A]/60" />
             <div>
-              <p className="text-xs text-white/70">45,000+ زائر</p>
-              <p className="text-[9px] text-white/30 font-['Inter']">Expected visitors</p>
+              <p className="text-xs t-secondary">45,000+ زائر</p>
+              <p className="text-[9px] t-tertiary font-['Inter']">Expected visitors</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Star size={14} className="text-[#FBBF24]" />
             <div>
-              <p className="text-xs text-white/70 font-['Inter']">4.8/5</p>
-              <p className="text-[9px] text-white/30">التقييم</p>
+              <p className="text-xs t-secondary font-['Inter']">4.8/5</p>
+              <p className="text-[9px] t-tertiary">التقييم</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Shield size={14} className="text-green-400/60" />
             <div>
               <p className="text-xs text-green-400/70">معتمد رسمياً</p>
-              <p className="text-[9px] text-white/30 font-['Inter']">Officially Licensed</p>
+              <p className="text-[9px] t-tertiary font-['Inter']">Officially Licensed</p>
             </div>
           </div>
         </div>
@@ -296,15 +296,15 @@ export default function ExpoDetail() {
       {/* Stats Bar */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "إجمالي الوحدات", labelEn: "Total Units", value: stats.total, color: "text-white/70" },
+          { label: "إجمالي الوحدات", labelEn: "Total Units", value: stats.total, color: "t-secondary" },
           { label: "متاحة", labelEn: "Available", value: stats.available, color: "text-green-400" },
           { label: "محجوزة", labelEn: "Reserved", value: stats.reserved, color: "text-yellow-400" },
           { label: "مباعة", labelEn: "Sold", value: stats.sold, color: "text-red-400" },
         ].map((s, i) => (
           <div key={i} className="glass-card rounded-xl p-3 text-center">
             <p className={`text-xl font-bold font-['Inter'] ${s.color}`}>{s.value}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">{s.label}</p>
-            <p className="text-[8px] text-white/20 font-['Inter']">{s.labelEn}</p>
+            <p className="text-[10px] t-tertiary mt-0.5">{s.label}</p>
+            <p className="text-[8px] t-muted font-['Inter']">{s.labelEn}</p>
           </div>
         ))}
       </div>
@@ -314,7 +314,7 @@ export default function ExpoDetail() {
         <select
           value={zoneFilter}
           onChange={(e) => setZoneFilter(e.target.value)}
-          className="bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]"
+          className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
         >
           <option value="all" className="bg-[#0A0A12]">كل المناطق | All Zones</option>
           <option value="A" className="bg-[#0A0A12]">المنطقة أ — الرئيسية</option>
@@ -325,7 +325,7 @@ export default function ExpoDetail() {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]"
+          className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
         >
           <option value="all" className="bg-[#0A0A12]">كل الأنواع | All Types</option>
           <option value="standard" className="bg-[#0A0A12]">قياسي — Standard</option>
@@ -343,7 +343,7 @@ export default function ExpoDetail() {
           ].map((l) => (
             <div key={l.status} className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: boothColors[l.status as BoothStatus], border: `1px solid ${boothBorders[l.status as BoothStatus]}` }} />
-              <span className="text-[10px] text-white/40">{l.label}</span>
+              <span className="text-[10px] t-tertiary">{l.label}</span>
             </div>
           ))}
         </div>
@@ -422,7 +422,7 @@ export default function ExpoDetail() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-base font-bold text-[#E8D5A3]">الوحدة {selectedBooth.code}</h3>
-                  <p className="text-[10px] text-white/30 font-['Inter']">Unit {selectedBooth.code} — {selectedBooth.zoneAr}</p>
+                  <p className="text-[10px] t-tertiary font-['Inter']">Unit {selectedBooth.code} — {selectedBooth.zoneAr}</p>
                 </div>
                 <span className={`px-2.5 py-1 rounded-lg text-[10px] ${
                   selectedBooth.status === "available" ? "bg-green-400/15 text-green-400" :
@@ -435,23 +435,23 @@ export default function ExpoDetail() {
 
               {/* Booth Details */}
               <div className="space-y-3 mb-5">
-                <div className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-xs text-white/40 flex items-center gap-2"><Building2 size={12} /> النوع</span>
-                  <span className="text-xs text-white/70">{selectedBooth.typeAr}</span>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Building2 size={12} /> النوع</span>
+                  <span className="text-xs t-secondary">{selectedBooth.typeAr}</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-xs text-white/40 flex items-center gap-2"><Ruler size={12} /> المساحة</span>
-                  <span className="text-xs text-white/70 font-['Inter']">{selectedBooth.sizeM2} م² ({selectedBooth.size})</span>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Ruler size={12} /> المساحة</span>
+                  <span className="text-xs t-secondary font-['Inter']">{selectedBooth.sizeM2} م² ({selectedBooth.size})</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-xs text-white/40 flex items-center gap-2"><MapPin size={12} /> المنطقة</span>
-                  <span className="text-xs text-white/70">{selectedBooth.zoneAr}</span>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
+                  <span className="text-xs t-tertiary flex items-center gap-2"><MapPin size={12} /> المنطقة</span>
+                  <span className="text-xs t-secondary">{selectedBooth.zoneAr}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-white/40 flex items-center gap-2"><Zap size={12} /> المميزات</span>
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Zap size={12} /> المميزات</span>
                   <div className="flex gap-1 flex-wrap justify-end">
                     {selectedBooth.features.map((f, i) => (
-                      <span key={i} className="px-1.5 py-0.5 rounded bg-white/[0.04] text-[9px] text-white/50">{f}</span>
+                      <span key={i} className="px-1.5 py-0.5 rounded bg-[var(--glass-bg)] text-[9px] t-secondary">{f}</span>
                     ))}
                   </div>
                 </div>
@@ -459,11 +459,11 @@ export default function ExpoDetail() {
 
               {/* Price */}
               <div className="glass-card rounded-xl p-4 mb-4 text-center">
-                <p className="text-[10px] text-white/30 mb-1">السعر الإجمالي | Total Price</p>
+                <p className="text-[10px] t-tertiary mb-1">السعر الإجمالي | Total Price</p>
                 <p className="text-2xl font-bold text-[#C5A55A] font-['Inter']">
-                  {selectedBooth.price.toLocaleString()} <span className="text-sm text-white/30">SAR</span>
+                  {selectedBooth.price.toLocaleString()} <span className="text-sm t-tertiary">SAR</span>
                 </p>
-                <p className="text-[10px] text-white/20 mt-1">شامل ضريبة القيمة المضافة 15%</p>
+                <p className="text-[10px] t-muted mt-1">شامل ضريبة القيمة المضافة 15%</p>
               </div>
 
               {/* Booking Actions */}
@@ -476,7 +476,7 @@ export default function ExpoDetail() {
                     <Lock size={14} />
                     تثبيت الوحدة (30 دقيقة)
                   </button>
-                  <p className="text-[9px] text-white/25 text-center flex items-center justify-center gap-1">
+                  <p className="text-[9px] t-muted text-center flex items-center justify-center gap-1">
                     <Info size={10} /> سيتم تثبيت الوحدة مؤقتاً لمدة 30 دقيقة لإتمام الدفع
                   </p>
                 </div>
@@ -489,10 +489,10 @@ export default function ExpoDetail() {
                       <Shield size={14} className="text-green-400/70" />
                       <p className="text-xs text-green-400/70">الإقرار القانوني</p>
                     </div>
-                    <p className="text-[10px] text-white/40 leading-relaxed">
+                    <p className="text-[10px] t-tertiary leading-relaxed">
                       أقر بأنني أوافق على شروط وأحكام منصة مهام إكسبو، وأن أي محاولة للتواصل المباشر مع المستثمر خارج المنصة ستعرضني لغرامة مالية قدرها 50,000 ريال سعودي.
                     </p>
-                    <p className="text-[9px] text-white/20 font-['Inter'] mt-1">
+                    <p className="text-[9px] t-muted font-['Inter'] mt-1">
                       I acknowledge that any attempt to bypass the platform will result in a SAR 50,000 penalty.
                     </p>
                   </div>
@@ -515,18 +515,18 @@ export default function ExpoDetail() {
               {bookingStep === "payment" && (
                 <div className="space-y-4">
                   <div className="glass-card rounded-xl p-4">
-                    <h4 className="text-xs font-bold text-white/70 mb-3">ملخص الدفع | Payment Summary</h4>
+                    <h4 className="text-xs font-bold t-secondary mb-3">ملخص الدفع | Payment Summary</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
-                        <span className="text-white/40">سعر الوحدة</span>
-                        <span className="text-white/70 font-['Inter']">{(selectedBooth.price * 0.87).toLocaleString()} SAR</span>
+                        <span className="t-tertiary">سعر الوحدة</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.87).toLocaleString()} SAR</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-white/40">ضريبة القيمة المضافة (15%)</span>
-                        <span className="text-white/70 font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} SAR</span>
+                        <span className="t-tertiary">ضريبة القيمة المضافة (15%)</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} SAR</span>
                       </div>
-                      <div className="flex justify-between text-xs pt-2 border-t border-white/5">
-                        <span className="text-white/60 font-bold">العربون (5%)</span>
+                      <div className="flex justify-between text-xs pt-2 border-t border-[var(--glass-border)]">
+                        <span className="t-secondary font-bold">العربون (5%)</span>
                         <span className="text-[#C5A55A] font-bold font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} SAR</span>
                       </div>
                     </div>
@@ -534,11 +534,11 @@ export default function ExpoDetail() {
 
                   {/* Payment Methods */}
                   <div className="space-y-2">
-                    <p className="text-[10px] text-white/40">طريقة الدفع | Payment Method</p>
+                    <p className="text-[10px] t-tertiary">طريقة الدفع | Payment Method</p>
                     {["بطاقة ائتمان | Credit Card", "مدى | Mada", "Apple Pay", "تحويل بنكي | Bank Transfer"].map((m, i) => (
-                      <label key={i} className="flex items-center gap-3 glass-card rounded-xl p-3 cursor-pointer hover:bg-white/[0.04] transition-colors">
+                      <label key={i} className="flex items-center gap-3 glass-card rounded-xl p-3 cursor-pointer hover:bg-[var(--glass-bg)] transition-colors">
                         <input type="radio" name="payment" defaultChecked={i === 0} className="accent-[#C5A55A]" />
-                        <span className="text-xs text-white/60">{m}</span>
+                        <span className="text-xs t-secondary">{m}</span>
                       </label>
                     ))}
                   </div>
@@ -550,7 +550,7 @@ export default function ExpoDetail() {
                     <CheckCircle2 size={14} />
                     تأكيد الدفع — {(selectedBooth.price * 0.05).toLocaleString()} SAR
                   </button>
-                  <p className="text-[9px] text-white/20 text-center">
+                  <p className="text-[9px] t-muted text-center">
                     العربون غير مسترد | Deposit is non-refundable
                   </p>
                 </div>
@@ -558,9 +558,9 @@ export default function ExpoDetail() {
             </motion.div>
           ) : (
             <div className="glass-card rounded-2xl p-8 text-center">
-              <Eye size={32} className="mx-auto text-white/10 mb-3" />
-              <p className="text-sm text-white/40">اختر وحدة من الخريطة</p>
-              <p className="text-[10px] text-white/20 font-['Inter']">Select a unit from the map</p>
+              <Eye size={32} className="mx-auto t-muted mb-3" />
+              <p className="text-sm t-tertiary">اختر وحدة من الخريطة</p>
+              <p className="text-[10px] t-muted font-['Inter']">Select a unit from the map</p>
             </div>
           )}
 
@@ -570,10 +570,10 @@ export default function ExpoDetail() {
               <Sparkles size={14} className="text-purple-400" />
               <h4 className="text-xs font-bold text-purple-300">اقتراح الذكاء الاصطناعي</h4>
             </div>
-            <p className="text-[11px] text-white/40 leading-relaxed">
+            <p className="text-[11px] t-tertiary leading-relaxed">
               بناءً على نشاطك التجاري في قطاع التقنية، ننصحك بالوحدات في المنطقة ب (التقنية) — خاصة الوحدات الزاوية B21 و B31 لأنها تحقق أعلى نسبة مرور زوار (34% أكثر من الوحدات القياسية).
             </p>
-            <p className="text-[9px] text-white/20 font-['Inter'] mt-2">
+            <p className="text-[9px] t-muted font-['Inter'] mt-2">
               AI suggests Zone B corner units for 34% higher foot traffic based on your tech sector.
             </p>
           </div>

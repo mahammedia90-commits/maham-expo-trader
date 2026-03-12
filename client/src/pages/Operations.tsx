@@ -35,8 +35,8 @@ export default function Operations() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white/90">الخدمات التشغيلية</h2>
-          <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Operational Services</p>
+          <h2 className="text-xl font-bold t-primary">الخدمات التشغيلية</h2>
+          <p className="text-xs t-gold/50 font-['Inter']">Operational Services</p>
         </div>
         <button
           onClick={() => toast.info("طلب خدمة جديدة — سيتم التواصل معك خلال ٢٤ ساعة")}
@@ -60,8 +60,8 @@ export default function Operations() {
               className="glass-card rounded-2xl p-5"
             >
               <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/10 flex items-center justify-center">
-                  <s.icon size={18} className="text-[#C5A55A]" />
+                <div className="w-10 h-10 rounded-xl bg-gold-subtle flex items-center justify-center">
+                  <s.icon size={18} className="t-gold" />
                 </div>
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]"
@@ -71,12 +71,12 @@ export default function Operations() {
                   {sc.ar}
                 </span>
               </div>
-              <h4 className="text-sm font-bold text-white/85 mb-0.5">{s.nameAr}</h4>
-              <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-2">{s.nameEn}</p>
-              <p className="text-[11px] text-white/40 leading-relaxed mb-3">{s.desc}</p>
-              <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                <span className="text-xs text-white/50">التكلفة</span>
-                <span className="text-xs text-[#C5A55A] font-medium">{s.cost}</span>
+              <h4 className="text-sm font-bold t-primary mb-0.5">{s.nameAr}</h4>
+              <p className="text-[10px] t-gold/50 font-['Inter'] mb-2">{s.nameEn}</p>
+              <p className="text-[11px] t-tertiary leading-relaxed mb-3">{s.desc}</p>
+              <div className="flex items-center justify-between pt-3 border-t border-[var(--glass-border)]">
+                <span className="text-xs t-secondary">التكلفة</span>
+                <span className="text-xs t-gold font-medium">{s.cost}</span>
               </div>
             </motion.div>
           );
@@ -85,10 +85,10 @@ export default function Operations() {
 
       {/* Timeline */}
       <div className="glass-card rounded-2xl p-6">
-        <h3 className="text-base font-bold text-white/90 mb-1">الجدول الزمني للتجهيز</h3>
-        <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-6">Setup Timeline</p>
+        <h3 className="text-base font-bold t-primary mb-1">الجدول الزمني للتجهيز</h3>
+        <p className="text-[10px] t-gold/50 font-['Inter'] mb-6">Setup Timeline</p>
         <div className="relative">
-          <div className="absolute right-4 top-0 bottom-0 w-px bg-white/8" />
+          <div className="absolute right-4 top-0 bottom-0 w-px bg-[var(--glass-bg-hover)]" />
           <div className="space-y-6">
             {timeline.map((t, i) => (
               <motion.div
@@ -99,17 +99,17 @@ export default function Operations() {
                 className="flex items-start gap-4 relative"
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shrink-0 ${
-                  t.done ? "bg-[#4ADE80]/15 border border-[#4ADE80]/30" : "bg-white/5 border border-white/10"
+                  t.done ? "bg-[#4ADE80]/15 border border-[#4ADE80]/30" : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
                 }`}>
-                  {t.done ? <CheckCircle size={14} className="text-[#4ADE80]" /> : <Clock size={14} className="text-white/30" />}
+                  {t.done ? <CheckCircle size={14} className="text-[#4ADE80]" /> : <Clock size={14} className="t-tertiary" />}
                 </div>
                 <div className="flex-1 pb-2">
                   <div className="flex items-center gap-3 mb-1">
-                    <span className={`text-xs font-medium ${t.done ? "text-[#4ADE80]" : "text-white/50"}`}>{t.dateAr}</span>
-                    <span className="text-[9px] text-white/20 font-['Inter']">{t.dateEn}</span>
+                    <span className={`text-xs font-medium ${t.done ? "text-[#4ADE80]" : "t-secondary"}`}>{t.dateAr}</span>
+                    <span className="text-[9px] t-muted font-['Inter']">{t.dateEn}</span>
                   </div>
-                  <p className={`text-sm ${t.done ? "text-white/70" : "text-white/40"}`}>{t.taskAr}</p>
-                  <p className="text-[10px] text-white/20 font-['Inter']">{t.taskEn}</p>
+                  <p className={`text-sm ${t.done ? "t-secondary" : "t-tertiary"}`}>{t.taskAr}</p>
+                  <p className="text-[10px] t-muted font-['Inter']">{t.taskEn}</p>
                 </div>
               </motion.div>
             ))}

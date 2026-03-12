@@ -4,53 +4,74 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import ExpoMap from "./pages/ExpoMap";
-import Bookings from "./pages/Bookings";
-import Contracts from "./pages/Contracts";
-import Payments from "./pages/Payments";
-import Operations from "./pages/Operations";
-import Analytics from "./pages/Analytics";
-import AIAssistant from "./pages/AIAssistant";
-import Profile from "./pages/Profile";
-import Messages from "./pages/Messages";
-import Reviews from "./pages/Reviews";
-import Notifications from "./pages/Notifications";
-import KYC from "./pages/KYC";
-import HelpCenter from "./pages/HelpCenter";
-import BrowseExpos from "./pages/BrowseExpos";
+import { lazy, Suspense } from "react";
 import DashboardLayout from "./components/DashboardLayout";
+
+// Lazy load pages for performance
+const Home = lazy(() => import("./pages/Home"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const ExpoMap = lazy(() => import("./pages/ExpoMap"));
+const Bookings = lazy(() => import("./pages/Bookings"));
+const Contracts = lazy(() => import("./pages/Contracts"));
+const Payments = lazy(() => import("./pages/Payments"));
+const Operations = lazy(() => import("./pages/Operations"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const AIAssistant = lazy(() => import("./pages/AIAssistant"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Reviews = lazy(() => import("./pages/Reviews"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const KYC = lazy(() => import("./pages/KYC"));
+const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const BrowseExpos = lazy(() => import("./pages/BrowseExpos"));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-40">
+      <div className="w-8 h-8 border-2 border-[#C5A55A]/30 border-t-[#C5A55A] rounded-full animate-spin" />
+    </div>
+  );
+}
+
+function DashPage({ children }: { children: React.ReactNode }) {
+  return (
+    <DashboardLayout>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
+    </DashboardLayout>
+  );
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/dashboard" component={() => <DashboardLayout><Dashboard /></DashboardLayout>} />
-      <Route path="/map" component={() => <DashboardLayout><ExpoMap /></DashboardLayout>} />
-      <Route path="/bookings" component={() => <DashboardLayout><Bookings /></DashboardLayout>} />
-      <Route path="/contracts" component={() => <DashboardLayout><Contracts /></DashboardLayout>} />
-      <Route path="/payments" component={() => <DashboardLayout><Payments /></DashboardLayout>} />
-      <Route path="/operations" component={() => <DashboardLayout><Operations /></DashboardLayout>} />
-      <Route path="/analytics" component={() => <DashboardLayout><Analytics /></DashboardLayout>} />
-      <Route path="/ai-assistant" component={() => <DashboardLayout><AIAssistant /></DashboardLayout>} />
-      <Route path="/profile" component={() => <DashboardLayout><Profile /></DashboardLayout>} />
-      <Route path="/expos" component={() => <DashboardLayout><BrowseExpos /></DashboardLayout>} />
-      <Route path="/messages" component={() => <DashboardLayout><Messages /></DashboardLayout>} />
-      <Route path="/reviews" component={() => <DashboardLayout><Reviews /></DashboardLayout>} />
-      <Route path="/notifications" component={() => <DashboardLayout><Notifications /></DashboardLayout>} />
-      <Route path="/kyc" component={() => <DashboardLayout><KYC /></DashboardLayout>} />
-      <Route path="/help" component={() => <DashboardLayout><HelpCenter /></DashboardLayout>} />
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={() => <Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+        <Route path="/dashboard" component={() => <DashPage><Dashboard /></DashPage>} />
+        <Route path="/map" component={() => <DashPage><ExpoMap /></DashPage>} />
+        <Route path="/bookings" component={() => <DashPage><Bookings /></DashPage>} />
+        <Route path="/contracts" component={() => <DashPage><Contracts /></DashPage>} />
+        <Route path="/payments" component={() => <DashPage><Payments /></DashPage>} />
+        <Route path="/operations" component={() => <DashPage><Operations /></DashPage>} />
+        <Route path="/analytics" component={() => <DashPage><Analytics /></DashPage>} />
+        <Route path="/ai-assistant" component={() => <DashPage><AIAssistant /></DashPage>} />
+        <Route path="/profile" component={() => <DashPage><Profile /></DashPage>} />
+        <Route path="/expos" component={() => <DashPage><BrowseExpos /></DashPage>} />
+        <Route path="/messages" component={() => <DashPage><Messages /></DashPage>} />
+        <Route path="/reviews" component={() => <DashPage><Reviews /></DashPage>} />
+        <Route path="/notifications" component={() => <DashPage><Notifications /></DashPage>} />
+        <Route path="/kyc" component={() => <DashPage><KYC /></DashPage>} />
+        <Route path="/help" component={() => <DashPage><HelpCenter /></DashPage>} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="dark" switchable={true}>
         <TooltipProvider>
           <Toaster />
           <Router />

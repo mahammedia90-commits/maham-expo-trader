@@ -1,6 +1,6 @@
 /**
  * Dashboard — Main overview with stats, recent activity, quick actions
- * Design: Obsidian Glass bento grid with gold accents
+ * Theme-aware: uses CSS variables for Light/Dark mode
  */
 import { motion } from "framer-motion";
 import { Link } from "wouter";
@@ -10,10 +10,10 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { icon: CalendarCheck, valueAr: "12", labelAr: "حجز نشط", labelEn: "Active Bookings", color: "#4ADE80" },
-  { icon: FileText, valueAr: "8", labelAr: "عقد موقّع", labelEn: "Signed Contracts", color: "#C5A55A" },
-  { icon: CreditCard, valueAr: "٤٥٠,٠٠٠", labelAr: "ريال مدفوع", labelEn: "SAR Paid", color: "#60A5FA" },
-  { icon: TrendingUp, valueAr: "٩٢%", labelAr: "نسبة الإشغال", labelEn: "Occupancy Rate", color: "#E8D5A3" },
+  { icon: CalendarCheck, valueAr: "12", labelAr: "حجز نشط", labelEn: "Active Bookings", color: "var(--status-green)" },
+  { icon: FileText, valueAr: "8", labelAr: "عقد موقّع", labelEn: "Signed Contracts", color: "var(--gold-accent)" },
+  { icon: CreditCard, valueAr: "٤٥٠,٠٠٠", labelAr: "ريال مدفوع", labelEn: "SAR Paid", color: "var(--status-blue)" },
+  { icon: TrendingUp, valueAr: "٩٢%", labelAr: "نسبة الإشغال", labelEn: "Occupancy Rate", color: "var(--gold-light)" },
 ];
 
 const recentBookings = [
@@ -24,9 +24,9 @@ const recentBookings = [
 ];
 
 const statusIcon = (s: string) => {
-  if (s === "confirmed") return <CheckCircle size={14} className="text-green-400" />;
-  if (s === "pending") return <AlertTriangle size={14} className="text-yellow-400" />;
-  return <XCircle size={14} className="text-red-400" />;
+  if (s === "confirmed") return <CheckCircle size={14} style={{ color: "var(--status-green)" }} />;
+  if (s === "pending") return <AlertTriangle size={14} style={{ color: "var(--status-yellow)" }} />;
+  return <XCircle size={14} style={{ color: "var(--status-red)" }} />;
 };
 
 const quickActions = [
@@ -50,13 +50,13 @@ export default function Dashboard() {
             className="glass-card rounded-2xl p-5"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${s.color}15` }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `color-mix(in srgb, ${s.color} 15%, transparent)` }}>
                 <s.icon size={18} style={{ color: s.color }} />
               </div>
             </div>
-            <p className="text-2xl font-bold text-white/90 font-['Inter']">{s.valueAr}</p>
-            <p className="text-xs text-white/50 mt-1">{s.labelAr}</p>
-            <p className="text-[10px] text-white/25 font-['Inter']">{s.labelEn}</p>
+            <p className="text-2xl font-bold t-primary font-['Inter']">{s.valueAr}</p>
+            <p className="text-xs t-secondary mt-1">{s.labelAr}</p>
+            <p className="text-[10px] t-muted font-['Inter']">{s.labelEn}</p>
           </motion.div>
         ))}
       </div>
@@ -71,28 +71,29 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-base font-bold text-white/90">آخر الحجوزات</h3>
-              <p className="text-[10px] text-[#C5A55A]/50 font-['Inter']">Recent Bookings</p>
+              <h3 className="text-base font-bold t-primary">آخر الحجوزات</h3>
+              <p className="text-[10px] t-gold font-['Inter']" style={{ opacity: 0.6 }}>Recent Bookings</p>
             </div>
             <Link href="/bookings">
-              <span className="text-xs text-[#C5A55A] hover:text-[#E8D5A3] flex items-center gap-1 cursor-pointer">
+              <span className="text-xs t-gold flex items-center gap-1 cursor-pointer">
                 عرض الكل <ArrowLeft size={12} />
               </span>
             </Link>
           </div>
           <div className="space-y-3">
             {recentBookings.map((b, i) => (
-              <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+              <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl transition-colors"
+                style={{ backgroundColor: "var(--glass-bg)" }}>
                 <div className="flex items-center gap-3">
                   {statusIcon(b.status)}
                   <div>
-                    <p className="text-sm text-white/80">{b.zone}</p>
-                    <p className="text-[10px] text-white/30 font-['Inter']">{b.zoneEn}</p>
+                    <p className="text-sm t-primary">{b.zone}</p>
+                    <p className="text-[10px] t-muted font-['Inter']">{b.zoneEn}</p>
                   </div>
                 </div>
                 <div className="text-left">
-                  <p className="text-[11px] text-white/50 font-['Inter']">{b.id}</p>
-                  <p className="text-[10px] text-white/25 font-['Inter']">{b.date}</p>
+                  <p className="text-[11px] t-secondary font-['Inter']">{b.id}</p>
+                  <p className="text-[10px] t-muted font-['Inter']">{b.date}</p>
                 </div>
               </div>
             ))}
@@ -106,18 +107,19 @@ export default function Dashboard() {
           transition={{ delay: 0.4 }}
           className="glass-card rounded-2xl p-6"
         >
-          <h3 className="text-base font-bold text-white/90 mb-1">إجراءات سريعة</h3>
-          <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-5">Quick Actions</p>
+          <h3 className="text-base font-bold t-primary mb-1">إجراءات سريعة</h3>
+          <p className="text-[10px] t-gold font-['Inter'] mb-5" style={{ opacity: 0.6 }}>Quick Actions</p>
           <div className="space-y-3">
             {quickActions.map((a, i) => (
               <Link key={i} href={a.path}>
-                <div className="flex items-center gap-3 py-3 px-4 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] hover:border-[rgba(197,165,90,0.15)] border border-transparent transition-all cursor-pointer">
-                  <div className="w-9 h-9 rounded-lg bg-[#C5A55A]/10 flex items-center justify-center">
-                    <a.icon size={16} className="text-[#C5A55A]" />
+                <div className="flex items-center gap-3 py-3 px-4 rounded-xl border border-transparent transition-all cursor-pointer"
+                  style={{ backgroundColor: "var(--glass-bg)" }}>
+                  <div className="w-9 h-9 rounded-lg bg-gold-subtle flex items-center justify-center">
+                    <a.icon size={16} className="t-gold" />
                   </div>
                   <div>
-                    <p className="text-sm text-white/70">{a.labelAr}</p>
-                    <p className="text-[10px] text-white/25 font-['Inter']">{a.labelEn}</p>
+                    <p className="text-sm t-secondary">{a.labelAr}</p>
+                    <p className="text-[10px] t-muted font-['Inter']">{a.labelEn}</p>
                   </div>
                 </div>
               </Link>
@@ -133,22 +135,24 @@ export default function Dashboard() {
         transition={{ delay: 0.5 }}
         className="glass-card rounded-2xl p-6"
       >
-        <h3 className="text-base font-bold text-white/90 mb-1">الفعاليات القادمة</h3>
-        <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-5">Upcoming Events</p>
+        <h3 className="text-base font-bold t-primary mb-1">الفعاليات القادمة</h3>
+        <p className="text-[10px] t-gold font-['Inter'] mb-5" style={{ opacity: 0.6 }}>Upcoming Events</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { nameAr: "معرض الرياض الدولي للتقنية", nameEn: "Riyadh International Tech Expo", date: "أبريل 2025", spots: "23 وحدة متاحة" },
             { nameAr: "مؤتمر الذكاء الاصطناعي السعودي", nameEn: "Saudi AI Conference", date: "مايو 2025", spots: "15 وحدة متاحة" },
             { nameAr: "معرض الأغذية والمشروبات", nameEn: "Food & Beverage Exhibition", date: "يونيو 2025", spots: "42 وحدة متاحة" },
           ].map((e, i) => (
-            <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
-              <p className="text-sm font-semibold text-white/80">{e.nameAr}</p>
-              <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-2">{e.nameEn}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-white/40">{e.date}</span>
-                <span className="text-[10px] text-green-400/70">{e.spots}</span>
+            <Link key={i} href="/expos">
+              <div className="p-4 rounded-xl cursor-pointer transition-colors" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+                <p className="text-sm font-semibold t-primary">{e.nameAr}</p>
+                <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{e.nameEn}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs t-tertiary">{e.date}</span>
+                  <span className="text-[10px]" style={{ color: "var(--status-green)", opacity: 0.8 }}>{e.spots}</span>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </motion.div>

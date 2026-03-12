@@ -84,7 +84,7 @@ function StarRating({ value, onChange, size = 20 }: { value: number; onChange: (
         >
           <Star
             size={size}
-            className={`${(hover || value) >= star ? "text-[#FBBF24] fill-[#FBBF24]" : "text-white/15"} transition-colors`}
+            className={`${(hover || value) >= star ? "text-[#FBBF24] fill-[#FBBF24]" : "t-muted"} transition-colors`}
           />
         </button>
       ))}
@@ -117,25 +117,25 @@ export default function Reviews() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-white/90">التقييمات والمراجعات</h2>
-        <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Ratings & Reviews — Post-Exhibition Feedback</p>
+        <h2 className="text-xl font-bold t-primary">التقييمات والمراجعات</h2>
+        <p className="text-xs t-gold/50 font-['Inter']">Ratings & Reviews — Post-Exhibition Feedback</p>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "تقييمات مطلوبة", labelEn: "Pending", value: pendingReviews.length, icon: Clock, color: "text-yellow-400" },
-          { label: "تقييمات مقدمة", labelEn: "Submitted", value: pastReviews.length, icon: CheckCircle2, color: "text-green-400" },
+          { label: "تقييمات مطلوبة", labelEn: "Pending", value: pendingReviews.length, icon: Clock, color: "text-[var(--status-yellow)]" },
+          { label: "تقييمات مقدمة", labelEn: "Submitted", value: pastReviews.length, icon: CheckCircle2, color: "text-[var(--status-green)]" },
           { label: "متوسط تقييمك", labelEn: "Your Average", value: "4.5", icon: Star, color: "text-[#FBBF24]" },
-          { label: "شارة الجودة", labelEn: "Quality Badge", value: "ذهبية", icon: Award, color: "text-[#C5A55A]" },
+          { label: "شارة الجودة", labelEn: "Quality Badge", value: "ذهبية", icon: Award, color: "t-gold" },
         ].map((s, i) => (
           <div key={i} className="glass-card rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <s.icon size={14} className={`${s.color} opacity-60`} />
-              <span className="text-[10px] text-white/40">{s.label}</span>
+              <span className="text-[10px] t-tertiary">{s.label}</span>
             </div>
             <p className={`text-lg font-bold font-['Inter'] ${s.color}`}>{s.value}</p>
-            <p className="text-[8px] text-white/20 font-['Inter']">{s.labelEn}</p>
+            <p className="text-[8px] t-muted font-['Inter']">{s.labelEn}</p>
           </div>
         ))}
       </div>
@@ -145,27 +145,27 @@ export default function Reviews() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-2xl p-6 border-[rgba(197,165,90,0.15)]"
+          className="glass-card rounded-2xl p-6 border-[var(--gold-border)]"
         >
           <div className="flex items-center gap-2 mb-5">
-            <MessageSquare size={16} className="text-[#C5A55A]" />
-            <h3 className="text-sm font-bold text-white/80">تقييم معرض جديد</h3>
-            <span className="text-[9px] text-white/20 font-['Inter']">New Review Required</span>
+            <MessageSquare size={16} className="t-gold" />
+            <h3 className="text-sm font-bold t-primary">تقييم معرض جديد</h3>
+            <span className="text-[9px] t-muted font-['Inter']">New Review Required</span>
           </div>
 
           {/* Expo Info */}
           <div className="glass-card rounded-xl p-4 mb-5">
-            <p className="text-sm font-bold text-white/70">{pendingReviews[0].expoNameAr}</p>
-            <p className="text-[10px] text-[#C5A55A]/50 font-['Inter']">{pendingReviews[0].expoNameEn}</p>
+            <p className="text-sm font-bold t-secondary">{pendingReviews[0].expoNameAr}</p>
+            <p className="text-[10px] t-gold/50 font-['Inter']">{pendingReviews[0].expoNameEn}</p>
             <div className="flex items-center gap-4 mt-2">
-              <span className="text-[10px] text-white/30">الوحدة: {pendingReviews[0].boothCode}</span>
-              <span className="text-[10px] text-white/30 font-['Inter']">{pendingReviews[0].date}</span>
+              <span className="text-[10px] t-tertiary">الوحدة: {pendingReviews[0].boothCode}</span>
+              <span className="text-[10px] t-tertiary font-['Inter']">{pendingReviews[0].date}</span>
             </div>
           </div>
 
           {/* Overall Rating */}
           <div className="mb-6 text-center">
-            <p className="text-xs text-white/50 mb-2">التقييم العام | Overall Rating</p>
+            <p className="text-xs t-secondary mb-2">التقييم العام | Overall Rating</p>
             <div className="flex justify-center">
               <StarRating value={overallRating} onChange={setOverallRating} size={32} />
             </div>
@@ -177,12 +177,12 @@ export default function Reviews() {
           {/* Category Ratings */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {ratingCategories.map((cat) => (
-              <div key={cat.key} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
+              <div key={cat.key} className="flex items-center justify-between p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                 <div className="flex items-center gap-2">
-                  <cat.icon size={14} className="text-white/30" />
+                  <cat.icon size={14} className="t-tertiary" />
                   <div>
-                    <p className="text-xs text-white/60">{cat.labelAr}</p>
-                    <p className="text-[8px] text-white/20 font-['Inter']">{cat.labelEn}</p>
+                    <p className="text-xs t-secondary">{cat.labelAr}</p>
+                    <p className="text-[8px] t-muted font-['Inter']">{cat.labelEn}</p>
                   </div>
                 </div>
                 <StarRating
@@ -198,7 +198,7 @@ export default function Reviews() {
           <div className="mb-6">
             <button
               onClick={() => setShowROIForm(!showROIForm)}
-              className="flex items-center gap-2 text-xs text-[#C5A55A]/70 hover:text-[#C5A55A] transition-colors"
+              className="flex items-center gap-2 text-xs t-gold/70 hover:t-gold transition-colors"
             >
               <TrendingUp size={14} />
               <span>تسجيل العائد على الاستثمار (اختياري)</span>
@@ -211,33 +211,33 @@ export default function Reviews() {
                 className="grid grid-cols-3 gap-3 mt-3"
               >
                 <div>
-                  <label className="text-[9px] text-white/30 block mb-1">الإيرادات (SAR)</label>
+                  <label className="text-[9px] t-tertiary block mb-1">الإيرادات (SAR)</label>
                   <input
                     type="number"
                     value={roiData.revenue}
                     onChange={(e) => setRoiData(prev => ({ ...prev, revenue: e.target.value }))}
                     placeholder="0"
-                    className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]"
+                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none focus:border-[var(--gold-border)]"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] text-white/30 block mb-1">العملاء المحتملين</label>
+                  <label className="text-[9px] t-tertiary block mb-1">العملاء المحتملين</label>
                   <input
                     type="number"
                     value={roiData.leads}
                     onChange={(e) => setRoiData(prev => ({ ...prev, leads: e.target.value }))}
                     placeholder="0"
-                    className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]"
+                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none focus:border-[var(--gold-border)]"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] text-white/30 block mb-1">الصفقات المغلقة</label>
+                  <label className="text-[9px] t-tertiary block mb-1">الصفقات المغلقة</label>
                   <input
                     type="number"
                     value={roiData.deals}
                     onChange={(e) => setRoiData(prev => ({ ...prev, deals: e.target.value }))}
                     placeholder="0"
-                    className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]"
+                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none focus:border-[var(--gold-border)]"
                   />
                 </div>
               </motion.div>
@@ -246,19 +246,19 @@ export default function Reviews() {
 
           {/* Comment */}
           <div className="mb-5">
-            <label className="text-xs text-white/40 block mb-2">تعليقك | Your Comment</label>
+            <label className="text-xs t-tertiary block mb-2">تعليقك | Your Comment</label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="شاركنا تجربتك في المعرض... | Share your expo experience..."
               rows={4}
-              className="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3 text-xs text-white/70 placeholder:text-white/20 focus:outline-none focus:border-[rgba(197,165,90,0.3)] resize-none"
+              className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-xs t-secondary placeholder:t-muted focus:outline-none focus:border-[var(--gold-border)] resize-none"
             />
           </div>
 
           {/* Photo Upload */}
           <div className="mb-5">
-            <button className="flex items-center gap-2 text-xs text-white/40 hover:text-white/60 transition-colors">
+            <button className="flex items-center gap-2 text-xs t-tertiary hover:t-secondary transition-colors">
               <Camera size={14} />
               <span>إرفاق صور (اختياري) | Attach photos</span>
             </button>
@@ -282,41 +282,41 @@ export default function Reviews() {
           animate={{ opacity: 1, scale: 1 }}
           className="glass-card rounded-2xl p-8 text-center border-green-400/15"
         >
-          <CheckCircle2 size={48} className="mx-auto text-green-400 mb-4" />
-          <h3 className="text-lg font-bold text-white/80 mb-2">شكراً لتقييمك!</h3>
-          <p className="text-xs text-white/40 mb-1">تم إرسال تقييمك بنجاح وسيتم مراجعته</p>
-          <p className="text-[10px] text-white/20 font-['Inter']">Your review has been submitted and will be verified</p>
+          <CheckCircle2 size={48} className="mx-auto text-[var(--status-green)] mb-4" />
+          <h3 className="text-lg font-bold t-primary mb-2">شكراً لتقييمك!</h3>
+          <p className="text-xs t-tertiary mb-1">تم إرسال تقييمك بنجاح وسيتم مراجعته</p>
+          <p className="text-[10px] t-muted font-['Inter']">Your review has been submitted and will be verified</p>
         </motion.div>
       )}
 
       {/* Past Reviews */}
       <div>
-        <h3 className="text-sm font-bold text-white/70 mb-4">
+        <h3 className="text-sm font-bold t-secondary mb-4">
           تقييماتك السابقة
-          <span className="text-[10px] text-white/20 font-['Inter'] mr-2">Your Past Reviews</span>
+          <span className="text-[10px] t-muted font-['Inter'] mr-2">Your Past Reviews</span>
         </h3>
         <div className="space-y-4">
           {pastReviews.map((review) => (
             <div key={review.id} className="glass-card rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-bold text-white/70">{review.expoNameAr}</p>
-                  <p className="text-[10px] text-white/30 font-['Inter']">{review.date}</p>
+                  <p className="text-sm font-bold t-secondary">{review.expoNameAr}</p>
+                  <p className="text-[10px] t-tertiary font-['Inter']">{review.date}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} size={14} className={s <= review.rating ? "text-[#FBBF24] fill-[#FBBF24]" : "text-white/10"} />
+                    <Star key={s} size={14} className={s <= review.rating ? "text-[#FBBF24] fill-[#FBBF24]" : "t-muted"} />
                   ))}
                 </div>
               </div>
-              <p className="text-xs text-white/50 leading-relaxed mb-3">{review.comment}</p>
+              <p className="text-xs t-secondary leading-relaxed mb-3">{review.comment}</p>
               {review.response && (
-                <div className="p-3 rounded-xl bg-[#C5A55A]/5 border border-[rgba(197,165,90,0.1)]">
+                <div className="p-3 rounded-xl bg-gold-subtle border border-[rgba(197,165,90,0.1)]">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <MessageSquare size={10} className="text-[#C5A55A]" />
-                    <span className="text-[9px] text-[#C5A55A]/70">رد المنظم</span>
+                    <MessageSquare size={10} className="t-gold" />
+                    <span className="text-[9px] t-gold/70">رد المنظم</span>
                   </div>
-                  <p className="text-[11px] text-white/40">{review.response}</p>
+                  <p className="text-[11px] t-tertiary">{review.response}</p>
                 </div>
               )}
             </div>

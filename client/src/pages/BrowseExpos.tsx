@@ -1,15 +1,14 @@
 /**
  * BrowseExpos — Explore available exhibitions and events
- * Design: Obsidian Glass cards with filtering, search, and booking flow
- * Features: Expo catalog, filters, unit availability, quick book
+ * Theme-aware: uses CSS variables for Light/Dark mode
+ * All buttons, modals, and filters are fully functional
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Building2, Search, Filter, MapPin, Calendar, Users, Star,
-  ChevronDown, Eye, Zap, Clock, CheckCircle, X, ArrowLeft,
-  Grid3X3, List, Tag, Shield, Sparkles, CreditCard, Map
+  Building2, Search, MapPin, Calendar, Star,
+  Clock, X, Grid3X3, List, Sparkles, CreditCard, Map
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -89,13 +88,6 @@ const expos: Expo[] = [
   },
 ];
 
-const statusConfig: Record<string, { ar: string; en: string; color: string }> = {
-  open: { ar: "متاح للحجز", en: "Open", color: "#4ADE80" },
-  closing_soon: { ar: "يغلق قريباً", en: "Closing Soon", color: "#FBBF24" },
-  full: { ar: "مكتمل", en: "Full", color: "#F87171" },
-  upcoming: { ar: "قريباً", en: "Upcoming", color: "#60A5FA" },
-};
-
 const categories = ["الكل", "تقنية", "أغذية", "ترفيه", "عقارات"];
 
 export default function BrowseExpos() {
@@ -110,24 +102,34 @@ export default function BrowseExpos() {
     return matchSearch && matchCategory;
   });
 
+  const getStatusStyle = (status: string) => {
+    const map: Record<string, { ar: string; color: string }> = {
+      open: { ar: "متاح للحجز", color: "var(--status-green)" },
+      closing_soon: { ar: "يغلق قريباً", color: "var(--status-yellow)" },
+      full: { ar: "مكتمل", color: "var(--status-red)" },
+      upcoming: { ar: "قريباً", color: "var(--status-blue)" },
+    };
+    return map[status] || { ar: status, color: "var(--text-tertiary)" };
+  };
+
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-white/90">تصفح المعارض والفعاليات</h2>
-          <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Browse Exhibitions & Events — {expos.length} Available</p>
+          <h2 className="text-xl font-bold t-primary">تصفح المعارض والفعاليات</h2>
+          <p className="text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {expos.length} Available</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setViewMode("grid")}
-            className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-[#C5A55A]/15 text-[#C5A55A]" : "glass-card text-white/30"}`}
+            className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}
           >
             <Grid3X3 size={16} />
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-[#C5A55A]/15 text-[#C5A55A]" : "glass-card text-white/30"}`}
+            className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}
           >
             <List size={16} />
           </button>
@@ -137,13 +139,14 @@ export default function BrowseExpos() {
       {/* Search & Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
           <input
             type="text"
             placeholder="ابحث عن معرض أو فعالية..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full glass-card rounded-xl pr-10 pl-4 py-2.5 text-sm text-white/80 placeholder:text-white/25 gold-focus bg-transparent"
+            className="w-full glass-card rounded-xl pr-10 pl-4 py-2.5 text-sm t-primary placeholder:t-muted gold-focus"
+            style={{ backgroundColor: "var(--input-bg)" }}
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -152,7 +155,7 @@ export default function BrowseExpos() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-3 py-2 rounded-lg text-[11px] transition-all ${
-                activeCategory === cat ? "btn-gold" : "glass-card text-white/50"
+                activeCategory === cat ? "btn-gold" : "glass-card t-secondary"
               }`}
             >
               {cat}
@@ -164,14 +167,14 @@ export default function BrowseExpos() {
       {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "معارض متاحة", value: expos.filter(e => e.status === "open").length, color: "#4ADE80" },
-          { label: "يغلق قريباً", value: expos.filter(e => e.status === "closing_soon").length, color: "#FBBF24" },
-          { label: "إجمالي الوحدات", value: expos.reduce((a, e) => a + e.totalUnits, 0), color: "#C5A55A" },
-          { label: "وحدات متاحة", value: expos.reduce((a, e) => a + e.availableUnits, 0), color: "#60A5FA" },
+          { label: "معارض متاحة", value: expos.filter(e => e.status === "open").length, color: "var(--status-green)" },
+          { label: "يغلق قريباً", value: expos.filter(e => e.status === "closing_soon").length, color: "var(--status-yellow)" },
+          { label: "إجمالي الوحدات", value: expos.reduce((a, e) => a + e.totalUnits, 0), color: "var(--gold-accent)" },
+          { label: "وحدات متاحة", value: expos.reduce((a, e) => a + e.availableUnits, 0), color: "var(--status-blue)" },
         ].map((s, i) => (
           <div key={i} className="glass-card rounded-xl p-3 text-center">
             <p className="text-lg font-bold font-['Inter']" style={{ color: s.color }}>{s.value}</p>
-            <p className="text-[10px] text-white/35">{s.label}</p>
+            <p className="text-[10px] t-tertiary">{s.label}</p>
           </div>
         ))}
       </div>
@@ -179,51 +182,49 @@ export default function BrowseExpos() {
       {/* Expo Grid */}
       <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
         {filtered.map((expo, i) => {
-          const sc = statusConfig[expo.status];
+          const sc = getStatusStyle(expo.status);
           return (
             <motion.div
               key={expo.id}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card rounded-2xl overflow-hidden hover:bg-white/[0.03] transition-colors group cursor-pointer"
+              className="glass-card rounded-2xl overflow-hidden group cursor-pointer"
               onClick={() => setSelectedExpo(expo)}
             >
-              {/* Image */}
               <div className="relative h-40 overflow-hidden">
                 <img
                   src={expo.image}
                   alt={expo.nameAr}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A12] via-transparent to-transparent" />
-                {/* Status Badge */}
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
                 <span
                   className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
-                  style={{ backgroundColor: `${sc.color}20`, color: sc.color, border: `1px solid ${sc.color}30` }}
+                  style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}
                 >
                   {sc.ar}
                 </span>
                 {expo.featured && (
-                  <span className="absolute top-3 right-3 px-2 py-1 rounded-full text-[10px] bg-[#C5A55A]/20 text-[#E8D5A3] border border-[rgba(197,165,90,0.3)] flex items-center gap-1">
+                  <span className="absolute top-3 right-3 px-2 py-1 rounded-full text-[10px] bg-gold-subtle border-gold flex items-center gap-1"
+                    style={{ color: "var(--gold-light)", border: "1px solid var(--gold-border)" }}>
                     <Sparkles size={10} />
                     مميز
                   </span>
                 )}
-                {/* Rating */}
-                <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-full px-2 py-0.5">
-                  <Star size={10} className="text-[#C5A55A] fill-[#C5A55A]" />
-                  <span className="text-[10px] text-white/80 font-['Inter']">{expo.rating}</span>
+                <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                  <Star size={10} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
+                  <span className="text-[10px] text-white font-['Inter']">{expo.rating}</span>
                 </div>
               </div>
 
-              {/* Content */}
               <div className="p-4">
-                <h3 className="text-sm font-bold text-white/80 mb-0.5">{expo.nameAr}</h3>
-                <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-2">{expo.nameEn}</p>
-                <p className="text-[11px] text-white/35 line-clamp-2 mb-3">{expo.descAr}</p>
+                <h3 className="text-sm font-bold t-primary mb-0.5">{expo.nameAr}</h3>
+                <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
+                <p className="text-[11px] t-tertiary line-clamp-2 mb-3">{expo.descAr}</p>
 
-                <div className="flex items-center gap-4 text-[10px] text-white/30 mb-3">
+                <div className="flex items-center gap-4 text-[10px] t-muted mb-3">
                   <span className="flex items-center gap-1">
                     <MapPin size={10} />
                     {expo.location.split("—")[0]}
@@ -236,15 +237,15 @@ export default function BrowseExpos() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[9px] text-white/20">الوحدات المتاحة</p>
+                    <p className="text-[9px] t-muted">الوحدات المتاحة</p>
                     <p className="text-sm font-bold font-['Inter']">
-                      <span className={expo.availableUnits > 0 ? "text-green-400" : "text-red-400"}>{expo.availableUnits}</span>
-                      <span className="text-white/20 text-[10px]"> / {expo.totalUnits}</span>
+                      <span style={{ color: expo.availableUnits > 0 ? "var(--status-green)" : "var(--status-red)" }}>{expo.availableUnits}</span>
+                      <span className="t-muted text-[10px]"> / {expo.totalUnits}</span>
                     </p>
                   </div>
                   <div className="text-left">
-                    <p className="text-[9px] text-white/20">نطاق الأسعار (SAR)</p>
-                    <p className="text-xs text-[#C5A55A] font-['Inter']">{expo.priceRange}</p>
+                    <p className="text-[9px] t-muted">نطاق الأسعار (SAR)</p>
+                    <p className="text-xs t-gold font-['Inter']">{expo.priceRange}</p>
                   </div>
                 </div>
               </div>
@@ -261,7 +262,8 @@ export default function BrowseExpos() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-50"
+              className="fixed inset-0 z-50"
+              style={{ backgroundColor: "var(--modal-overlay)" }}
               onClick={() => setSelectedExpo(null)}
             />
             <motion.div
@@ -271,63 +273,60 @@ export default function BrowseExpos() {
               className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[650px] md:max-h-[85vh] glass-card rounded-2xl z-50 overflow-y-auto"
               dir="rtl"
             >
-              {/* Header Image */}
               <div className="relative h-48">
                 <img src={selectedExpo.image} alt={selectedExpo.nameAr} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/50 to-transparent" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), color-mix(in srgb, var(--surface-dark) 50%, transparent), transparent)" }} />
                 <button
                   onClick={() => setSelectedExpo(null)}
-                  className="absolute top-4 left-4 p-2 rounded-full bg-black/40 backdrop-blur-md text-white/60 hover:text-white"
+                  className="absolute top-4 left-4 p-2 rounded-full t-secondary"
+                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}
                 >
                   <X size={16} />
                 </button>
                 <div className="absolute bottom-4 right-6">
-                  <h3 className="text-lg font-bold text-white/90">{selectedExpo.nameAr}</h3>
-                  <p className="text-xs text-[#C5A55A]/70 font-['Inter']">{selectedExpo.nameEn}</p>
+                  <h3 className="text-lg font-bold t-primary">{selectedExpo.nameAr}</h3>
+                  <p className="text-xs t-gold font-['Inter']" style={{ opacity: 0.7 }}>{selectedExpo.nameEn}</p>
                 </div>
               </div>
 
               <div className="p-6 space-y-5">
-                <p className="text-xs text-white/45 leading-relaxed">{selectedExpo.descAr}</p>
+                <p className="text-xs t-tertiary leading-relaxed">{selectedExpo.descAr}</p>
 
-                {/* Details Grid */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { icon: MapPin, label: "الموقع", value: selectedExpo.location },
                     { icon: Calendar, label: "الفترة", value: `${selectedExpo.dateStart} — ${selectedExpo.dateEnd}` },
                     { icon: Building2, label: "المنظم", value: selectedExpo.organizer },
-                    { icon: Tag, label: "التصنيف", value: selectedExpo.category },
-                    { icon: Users, label: "الوحدات المتاحة", value: `${selectedExpo.availableUnits} / ${selectedExpo.totalUnits}` },
+                    { icon: Star, label: "التصنيف", value: selectedExpo.category },
+                    { icon: Building2, label: "الوحدات المتاحة", value: `${selectedExpo.availableUnits} / ${selectedExpo.totalUnits}` },
                     { icon: CreditCard, label: "نطاق الأسعار", value: `${selectedExpo.priceRange} SAR` },
                   ].map((d, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-white/[0.02]">
+                    <div key={i} className="p-3 rounded-xl" style={{ backgroundColor: "var(--glass-bg)" }}>
                       <div className="flex items-center gap-1.5 mb-1">
-                        <d.icon size={12} className="text-[#C5A55A]/50" />
-                        <span className="text-[9px] text-white/25">{d.label}</span>
+                        <d.icon size={12} className="t-gold" style={{ opacity: 0.6 }} />
+                        <span className="text-[9px] t-muted">{d.label}</span>
                       </div>
-                      <p className="text-xs text-white/60">{d.value}</p>
+                      <p className="text-xs t-secondary">{d.value}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* Availability Bar */}
                 <div>
-                  <div className="flex justify-between text-[10px] text-white/30 mb-1.5">
+                  <div className="flex justify-between text-[10px] t-muted mb-1.5">
                     <span>نسبة الإشغال</span>
                     <span className="font-['Inter']">{Math.round(((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100)}%</span>
                   </div>
-                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--glass-bg)" }}>
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100}%`,
-                        backgroundColor: selectedExpo.availableUnits === 0 ? "#F87171" : "#C5A55A",
+                        backgroundColor: selectedExpo.availableUnits === 0 ? "var(--status-red)" : "var(--gold-accent)",
                       }}
                     />
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3">
                   {selectedExpo.availableUnits > 0 ? (
                     <>
@@ -338,15 +337,15 @@ export default function BrowseExpos() {
                         </button>
                       </Link>
                       <Link href="/messages">
-                        <button className="glass-card px-4 py-3 rounded-xl text-xs text-white/50 hover:text-[#C5A55A] transition-colors">
+                        <button className="glass-card px-4 py-3 rounded-xl text-xs t-secondary transition-colors">
                           استفسار
                         </button>
                       </Link>
                     </>
                   ) : (
                     <button
-                      onClick={() => toast.info("سيتم إشعارك عند توفر وحدات | You'll be notified")}
-                      className="w-full glass-card py-3 rounded-xl text-sm text-white/40 flex items-center justify-center gap-2"
+                      onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات | You'll be notified"); setSelectedExpo(null); }}
+                      className="w-full glass-card py-3 rounded-xl text-sm t-tertiary flex items-center justify-center gap-2"
                     >
                       <Clock size={16} />
                       انضم لقائمة الانتظار

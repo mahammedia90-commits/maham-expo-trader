@@ -106,15 +106,15 @@ export default function AIAssistant() {
     <div className="flex flex-col" style={{ height: "calc(100vh - 140px)" }}>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C5A55A] to-[#E8D5A3] flex items-center justify-center">
-          <Bot size={20} className="text-[#0A0A12]" />
+          <Bot size={20} className="text-[var(--btn-gold-text)]" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white/90">المساعد الذكي</h2>
-          <p className="text-[10px] text-[#C5A55A]/50 font-['Inter']">AI Smart Assistant — Powered by MAHAM AI</p>
+          <h2 className="text-lg font-bold t-primary">المساعد الذكي</h2>
+          <p className="text-[10px] t-gold/50 font-['Inter']">AI Smart Assistant — Powered by MAHAM AI</p>
         </div>
         <div className="mr-auto flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-[10px] text-green-400/70">متصل | Online</span>
+          <div className="w-2 h-2 rounded-full bg-[var(--status-green)] animate-pulse" />
+          <span className="text-[10px] text-[var(--status-green)]/70">متصل | Online</span>
         </div>
       </div>
 
@@ -130,20 +130,20 @@ export default function AIAssistant() {
             >
               <div className={`max-w-[80%] rounded-2xl p-4 ${
                 m.role === "user"
-                  ? "bg-[#C5A55A]/10 border border-[#C5A55A]/15"
-                  : "bg-white/[0.04] border border-white/8"
+                  ? "bg-gold-subtle border border-[#C5A55A]/15"
+                  : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
               }`}>
                 {m.role === "assistant" && (
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Sparkles size={12} className="text-[#C5A55A]" />
-                    <span className="text-[10px] text-[#C5A55A]/70 font-['Inter']">MAHAM AI</span>
+                    <Sparkles size={12} className="t-gold" />
+                    <span className="text-[10px] t-gold/70 font-['Inter']">MAHAM AI</span>
                   </div>
                 )}
-                <p className="text-sm text-white/80 whitespace-pre-line leading-relaxed">{m.contentAr}</p>
+                <p className="text-sm t-primary whitespace-pre-line leading-relaxed">{m.contentAr}</p>
                 {m.role === "assistant" && (
-                  <p className="text-[11px] text-white/25 font-['Inter'] mt-2 whitespace-pre-line">{m.contentEn}</p>
+                  <p className="text-[11px] t-muted font-['Inter'] mt-2 whitespace-pre-line">{m.contentEn}</p>
                 )}
-                <p className="text-[9px] text-white/20 font-['Inter'] mt-2 text-left">{m.time}</p>
+                <p className="text-[9px] t-muted font-['Inter'] mt-2 text-left">{m.time}</p>
               </div>
             </motion.div>
           ))}
@@ -151,10 +151,10 @@ export default function AIAssistant() {
 
         {isTyping && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-end">
-            <div className="bg-white/[0.04] rounded-2xl px-4 py-3 border border-white/8">
+            <div className="bg-[var(--glass-bg)] rounded-2xl px-4 py-3 border border-[var(--glass-border)]">
               <div className="flex items-center gap-1.5">
-                <Sparkles size={12} className="text-[#C5A55A] animate-pulse" />
-                <span className="text-xs text-white/40">جاري التفكير...</span>
+                <Sparkles size={12} className="t-gold animate-pulse" />
+                <span className="text-xs t-tertiary">جاري التفكير...</span>
                 <div className="flex gap-1">
                   {[0, 1, 2].map(i => (
                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#C5A55A]/40 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
@@ -174,11 +174,11 @@ export default function AIAssistant() {
             <button
               key={i}
               onClick={() => handleSend(s.textAr)}
-              className="glass-card rounded-xl p-3 text-right hover:bg-white/[0.04] hover:border-[rgba(197,165,90,0.15)] transition-all"
+              className="glass-card rounded-xl p-3 text-right hover:bg-[var(--glass-bg)] hover:border-[var(--gold-border)] transition-all"
             >
-              <s.icon size={14} className="text-[#C5A55A] mb-1.5" />
-              <p className="text-[11px] text-white/60">{s.textAr}</p>
-              <p className="text-[9px] text-white/25 font-['Inter']">{s.textEn}</p>
+              <s.icon size={14} className="t-gold mb-1.5" />
+              <p className="text-[11px] t-secondary">{s.textAr}</p>
+              <p className="text-[9px] t-muted font-['Inter']">{s.textEn}</p>
             </button>
           ))}
         </div>
@@ -192,7 +192,7 @@ export default function AIAssistant() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="اكتب سؤالك هنا... | Type your question..."
-          className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/25 outline-none"
+          className="flex-1 bg-transparent text-sm t-primary placeholder:t-muted outline-none"
           dir="rtl"
         />
         <button

@@ -1,17 +1,17 @@
 /**
- * DashboardLayout — Obsidian Glass sidebar + main content area
- * Design: Apple Vision Pro dark glassmorphism with gold accents
- * Sidebar: Persistent left sidebar with sections (collapsed on mobile → bottom nav)
- * Updated: All new pages added (Expos, Messages, Reviews, Notifications, KYC, Help)
+ * DashboardLayout — Sidebar + main content area
+ * Supports: Light Mode / Dark Mode with theme toggle
+ * All nav items, badges, and buttons are fully functional
  */
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   LayoutDashboard, Map, CalendarCheck, FileText, CreditCard,
   Settings2, BarChart3, Bot, User, ChevronLeft, ChevronRight,
-  Menu, X, LogOut, Building2, MessageSquare, Star, Bell,
-  Shield, HelpCircle
+  Menu, X, Building2, MessageSquare, Star, Bell,
+  Shield, HelpCircle, Sun, Moon
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/mahamexpologo_4057b50b.webp";
@@ -26,8 +26,7 @@ interface NavItem {
 
 const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
   {
-    titleAr: "الرئيسية",
-    titleEn: "Main",
+    titleAr: "الرئيسية", titleEn: "MAIN",
     items: [
       { path: "/dashboard", icon: LayoutDashboard, labelAr: "لوحة التحكم", labelEn: "Dashboard" },
       { path: "/expos", icon: Building2, labelAr: "تصفح المعارض", labelEn: "Browse Expos" },
@@ -35,8 +34,7 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
     ],
   },
   {
-    titleAr: "الحجوزات والعقود",
-    titleEn: "Bookings",
+    titleAr: "الحجوزات والعقود", titleEn: "BOOKINGS",
     items: [
       { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings" },
       { path: "/contracts", icon: FileText, labelAr: "العقود", labelEn: "Contracts" },
@@ -44,8 +42,7 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
     ],
   },
   {
-    titleAr: "التشغيل والتحليل",
-    titleEn: "Operations",
+    titleAr: "التشغيل والتحليل", titleEn: "OPERATIONS",
     items: [
       { path: "/operations", icon: Settings2, labelAr: "العمليات", labelEn: "Operations" },
       { path: "/analytics", icon: BarChart3, labelAr: "التحليلات", labelEn: "Analytics" },
@@ -53,8 +50,7 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
     ],
   },
   {
-    titleAr: "التواصل والتقييم",
-    titleEn: "Communication",
+    titleAr: "التواصل والتقييم", titleEn: "COMMUNICATION",
     items: [
       { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badge: 3 },
       { path: "/notifications", icon: Bell, labelAr: "الإشعارات", labelEn: "Notifications", badge: 4 },
@@ -62,8 +58,7 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
     ],
   },
   {
-    titleAr: "الحساب",
-    titleEn: "Account",
+    titleAr: "الحساب", titleEn: "ACCOUNT",
     items: [
       { path: "/profile", icon: User, labelAr: "الملف الشخصي", labelEn: "Profile" },
       { path: "/kyc", icon: Shield, labelAr: "التحقق (KYC)", labelEn: "Verification" },
@@ -86,8 +81,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [location] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const currentItem = allNavItems.find(n => n.path === location) || allNavItems.find(n => location.startsWith(n.path));
+
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   return (
     <div className="min-h-screen flex" dir="rtl">
@@ -98,16 +96,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-center py-5 px-4 border-b border-white/5">
+        <div className="flex items-center justify-center py-5 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
           <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-7" : "h-9"}`} />
         </div>
 
-        {/* Nav Items with Sections */}
-        <nav className="flex-1 py-3 overflow-y-auto scrollbar-hide">
+        {/* Nav Items */}
+        <nav className="flex-1 py-3 overflow-y-auto">
           {navSections.map((section, si) => (
             <div key={si} className="mb-2">
               {!collapsed && (
-                <p className="px-5 py-1.5 text-[9px] text-white/20 uppercase tracking-wider font-['Inter']">
+                <p className="px-5 py-1.5 text-[9px] t-muted uppercase tracking-wider font-['Inter']">
                   {section.titleEn}
                 </p>
               )}
@@ -118,27 +116,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div
                       className={`flex items-center gap-3 mx-3 my-0.5 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
                         isActive
-                          ? "bg-white/8 border border-[rgba(197,165,90,0.25)] shadow-[0_0_20px_rgba(197,165,90,0.08)]"
-                          : "hover:bg-white/4 border border-transparent"
+                          ? "bg-gold-subtle border-gold shadow-sm"
+                          : "hover:bg-[var(--glass-bg-hover)] border border-transparent"
                       }`}
+                      style={isActive ? { border: `1px solid var(--gold-border)` } : undefined}
                     >
                       <div className="relative">
                         <item.icon
                           size={18}
-                          className={`shrink-0 ${isActive ? "text-[#C5A55A]" : "text-white/40"}`}
+                          className="shrink-0"
+                          style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}
                         />
                         {item.badge && (
-                          <span className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full bg-[#C5A55A] flex items-center justify-center text-[7px] text-[#0A0A12] font-bold">
+                          <span className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-bold"
+                            style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
                             {item.badge}
                           </span>
                         )}
                       </div>
                       {!collapsed && (
                         <div className="flex flex-col leading-tight flex-1">
-                          <span className={`text-[13px] font-medium ${isActive ? "text-[#E8D5A3]" : "text-white/60"}`}>
+                          <span className="text-[13px] font-medium"
+                            style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>
                             {item.labelAr}
                           </span>
-                          <span className={`text-[9px] ${isActive ? "text-[#C5A55A]/60" : "text-white/20"} font-['Inter']`}>
+                          <span className="text-[9px] font-['Inter']"
+                            style={{ color: isActive ? "var(--gold-accent)" : "var(--text-muted)" }}>
                             {item.labelEn}
                           </span>
                         </div>
@@ -151,29 +154,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* Collapse Toggle */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center py-3 border-t border-white/5 text-white/25 hover:text-[#C5A55A] transition-colors"
-        >
-          {collapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-        </button>
+        {/* Bottom: Theme Toggle + Collapse */}
+        <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
+          {!collapsed && (
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center gap-3 px-5 py-3 transition-colors"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+            </button>
+          )}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="flex items-center justify-center w-full py-3 transition-colors"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {collapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
+        </div>
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 sidebar-glass border-t border-white/8">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 sidebar-glass" style={{ borderTop: "1px solid var(--glass-border)" }}>
         <div className="flex items-center justify-around py-2 px-1">
           {mobileNavItems.map((item) => {
             const isActive = location === item.path;
             return (
               <Link key={item.path} href={item.path}>
-                <div className={`flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-lg transition-all relative ${
-                  isActive ? "text-[#C5A55A]" : "text-white/35"
-                }`}>
+                <div className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-lg transition-all relative"
+                  style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}>
                   <item.icon size={17} />
                   <span className="text-[8px]">{item.labelAr}</span>
                   {item.badge && (
-                    <span className="absolute -top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#C5A55A] flex items-center justify-center text-[6px] text-[#0A0A12] font-bold">
+                    <span className="absolute -top-0.5 right-0.5 w-3 h-3 rounded-full flex items-center justify-center text-[6px] font-bold"
+                      style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
                       {item.badge}
                     </span>
                   )}
@@ -183,7 +199,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
           <button
             onClick={() => setMobileOpen(true)}
-            className="flex flex-col items-center gap-0.5 py-1.5 px-2 text-white/35"
+            className="flex flex-col items-center gap-0.5 py-1.5 px-2"
+            style={{ color: "var(--text-tertiary)" }}
           >
             <Menu size={17} />
             <span className="text-[8px]">المزيد</span>
@@ -199,8 +216,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 bg-black/60 z-50"
-              onClick={() => setMobileOpen(false)}
+              className="lg:hidden fixed inset-0 z-50"
+              style={{ backgroundColor: "var(--modal-overlay)" }}
+              onClick={closeMobile}
             />
             <motion.div
               initial={{ x: "100%" }}
@@ -211,14 +229,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <div className="flex items-center justify-between mb-6">
                 <img src={LOGO_URL} alt="Maham Expo" className="h-7 object-contain" />
-                <button onClick={() => setMobileOpen(false)} className="text-white/40">
+                <button onClick={closeMobile} style={{ color: "var(--text-tertiary)" }}>
                   <X size={18} />
                 </button>
               </div>
               <nav>
                 {navSections.map((section, si) => (
                   <div key={si} className="mb-4">
-                    <p className="px-2 py-1 text-[9px] text-white/20 uppercase tracking-wider font-['Inter']">
+                    <p className="px-2 py-1 text-[9px] t-muted uppercase tracking-wider font-['Inter']">
                       {section.titleAr} · {section.titleEn}
                     </p>
                     {section.items.map((item) => {
@@ -226,24 +244,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       return (
                         <Link key={item.path} href={item.path}>
                           <div
-                            onClick={() => setMobileOpen(false)}
+                            onClick={closeMobile}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all my-0.5 ${
-                              isActive
-                                ? "bg-white/8 border border-[rgba(197,165,90,0.25)]"
-                                : "hover:bg-white/4 border border-transparent"
+                              isActive ? "bg-gold-subtle" : ""
                             }`}
+                            style={isActive ? { border: "1px solid var(--gold-border)" } : { border: "1px solid transparent" }}
                           >
                             <div className="relative">
-                              <item.icon size={16} className={isActive ? "text-[#C5A55A]" : "text-white/40"} />
+                              <item.icon size={16} style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }} />
                               {item.badge && (
-                                <span className="absolute -top-1 -left-1 w-3 h-3 rounded-full bg-[#C5A55A] flex items-center justify-center text-[6px] text-[#0A0A12] font-bold">
+                                <span className="absolute -top-1 -left-1 w-3 h-3 rounded-full flex items-center justify-center text-[6px] font-bold"
+                                  style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
                                   {item.badge}
                                 </span>
                               )}
                             </div>
                             <div className="flex flex-col leading-tight">
-                              <span className={`text-[13px] ${isActive ? "text-[#E8D5A3]" : "text-white/60"}`}>{item.labelAr}</span>
-                              <span className={`text-[9px] ${isActive ? "text-[#C5A55A]/60" : "text-white/20"} font-['Inter']`}>{item.labelEn}</span>
+                              <span className="text-[13px]" style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>{item.labelAr}</span>
+                              <span className="text-[9px] font-['Inter']" style={{ color: isActive ? "var(--gold-accent)" : "var(--text-muted)" }}>{item.labelEn}</span>
                             </div>
                           </div>
                         </Link>
@@ -252,6 +270,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 ))}
               </nav>
+              {/* Theme toggle in mobile */}
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-3 py-3 mt-4 rounded-xl glass-card"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+              </button>
             </motion.div>
           </>
         )}
@@ -264,36 +291,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 glass-card border-b border-white/5 px-6 py-3">
+        <header className="sticky top-0 z-30 glass-card px-6 py-3" style={{ borderBottom: "1px solid var(--glass-border)" }}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-base font-bold text-gold-gradient font-['Inter']">
                 {currentItem?.labelEn || "Dashboard"}
               </h1>
-              <p className="text-[10px] text-white/35">
+              <p className="text-[10px] t-tertiary">
                 {currentItem?.labelAr || "لوحة التحكم"}
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Theme Toggle (desktop top bar) */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: "var(--text-tertiary)" }}
+                title={theme === "dark" ? "Light Mode" : "Dark Mode"}
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
               <Link href="/notifications">
-                <button className="relative p-2 rounded-lg hover:bg-white/5 transition-colors">
-                  <Bell size={16} className="text-white/40" />
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#C5A55A]" />
+                <button className="relative p-2 rounded-lg transition-colors" style={{ color: "var(--text-tertiary)" }}>
+                  <Bell size={16} />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
                 </button>
               </Link>
               <Link href="/messages">
-                <button className="relative p-2 rounded-lg hover:bg-white/5 transition-colors">
-                  <MessageSquare size={16} className="text-white/40" />
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-400" />
+                <button className="relative p-2 rounded-lg transition-colors" style={{ color: "var(--text-tertiary)" }}>
+                  <MessageSquare size={16} />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ backgroundColor: "var(--status-blue)" }} />
                 </button>
               </Link>
               <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs text-white/70">مرحباً، التاجر</span>
-                <span className="text-[9px] text-[#C5A55A]/50">Welcome, Trader</span>
+                <span className="text-xs t-secondary">مرحباً، التاجر</span>
+                <span className="text-[9px]" style={{ color: "var(--gold-accent)", opacity: 0.6 }}>Welcome, Trader</span>
               </div>
               <Link href="/profile">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C5A55A] to-[#E8D5A3] flex items-center justify-center cursor-pointer">
-                  <User size={14} className="text-[#0A0A12]" />
+                <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                  style={{ background: `linear-gradient(135deg, var(--gold-accent), var(--gold-light))` }}>
+                  <User size={14} style={{ color: "var(--btn-gold-text)" }} />
                 </div>
               </Link>
             </div>
@@ -306,7 +343,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             key={location}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           >
             {children}
           </motion.div>

@@ -42,9 +42,9 @@ const kpis = [
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-card rounded-lg px-3 py-2 border border-white/10">
-        <p className="text-[11px] text-white/70">{label}</p>
-        <p className="text-sm font-bold text-[#C5A55A]">{payload[0].value?.toLocaleString()} SAR</p>
+      <div className="glass-card rounded-lg px-3 py-2 border border-[var(--glass-border)]">
+        <p className="text-[11px] t-secondary">{label}</p>
+        <p className="text-sm font-bold t-gold">{payload[0].value?.toLocaleString()} SAR</p>
       </div>
     );
   }
@@ -55,8 +55,8 @@ export default function Analytics() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold text-white/90">التحليلات والتقارير</h2>
-        <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Analytics & Reports — Powered by AI</p>
+        <h2 className="text-xl font-bold t-primary">التحليلات والتقارير</h2>
+        <p className="text-xs t-gold/50 font-['Inter']">Analytics & Reports — Powered by AI</p>
       </div>
 
       {/* KPIs */}
@@ -73,15 +73,15 @@ export default function Analytics() {
               <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${k.color}12` }}>
                 <k.icon size={16} style={{ color: k.color }} />
               </div>
-              <span className={`text-[11px] font-medium flex items-center gap-0.5 ${k.up ? "text-green-400" : "text-red-400"}`}>
+              <span className={`text-[11px] font-medium flex items-center gap-0.5 ${k.up ? "text-[var(--status-green)]" : "text-[var(--status-red)]"}`}>
                 {k.up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                 {k.change}
               </span>
             </div>
-            <p className="text-xl font-bold text-white/90 font-['Inter']">{k.value}</p>
-            <p className="text-[10px] text-white/30">{k.unit}</p>
-            <p className="text-xs text-white/50 mt-1">{k.labelAr}</p>
-            <p className="text-[9px] text-white/25 font-['Inter']">{k.labelEn}</p>
+            <p className="text-xl font-bold t-primary font-['Inter']">{k.value}</p>
+            <p className="text-[10px] t-tertiary">{k.unit}</p>
+            <p className="text-xs t-secondary mt-1">{k.labelAr}</p>
+            <p className="text-[9px] t-muted font-['Inter']">{k.labelEn}</p>
           </motion.div>
         ))}
       </div>
@@ -94,8 +94,8 @@ export default function Analytics() {
           transition={{ delay: 0.3 }}
           className="lg:col-span-2 glass-card rounded-2xl p-6"
         >
-          <h3 className="text-sm font-bold text-white/80 mb-1">الإيرادات الشهرية</h3>
-          <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-4">Monthly Revenue (SAR)</p>
+          <h3 className="text-sm font-bold t-primary mb-1">الإيرادات الشهرية</h3>
+          <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Monthly Revenue (SAR)</p>
           <div style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyRevenue}>
@@ -116,8 +116,8 @@ export default function Analytics() {
           transition={{ delay: 0.4 }}
           className="glass-card rounded-2xl p-6"
         >
-          <h3 className="text-sm font-bold text-white/80 mb-1">توزيع الحجوزات</h3>
-          <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-4">Bookings by Zone</p>
+          <h3 className="text-sm font-bold t-primary mb-1">توزيع الحجوزات</h3>
+          <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Bookings by Zone</p>
           <div style={{ height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -134,10 +134,10 @@ export default function Analytics() {
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: z.color }} />
-                  <span className="text-[11px] text-white/60">{z.name}</span>
-                  <span className="text-[9px] text-white/25 font-['Inter']">{z.nameEn}</span>
+                  <span className="text-[11px] t-secondary">{z.name}</span>
+                  <span className="text-[9px] t-muted font-['Inter']">{z.nameEn}</span>
                 </div>
-                <span className="text-[11px] text-white/50 font-['Inter']">{z.value}%</span>
+                <span className="text-[11px] t-secondary font-['Inter']">{z.value}%</span>
               </div>
             ))}
           </div>
@@ -151,8 +151,8 @@ export default function Analytics() {
         transition={{ delay: 0.5 }}
         className="glass-card rounded-2xl p-6"
       >
-        <h3 className="text-sm font-bold text-white/80 mb-1">حركة الزوار الأسبوعية</h3>
-        <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-4">Weekly Visitor Trend</p>
+        <h3 className="text-sm font-bold t-primary mb-1">حركة الزوار الأسبوعية</h3>
+        <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Weekly Visitor Trend</p>
         <div style={{ height: 250 }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={visitorTrend}>

@@ -236,7 +236,7 @@ export default function ExpoList() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-white/90">تصفح المعارض والفعاليات</h2>
+        <h2 className="text-xl font-bold t-primary">تصفح المعارض والفعاليات</h2>
         <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Browse Exhibitions, Conferences & Events</p>
       </div>
 
@@ -249,20 +249,20 @@ export default function ExpoList() {
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={16} className="text-[#C5A55A]" />
           <h3 className="text-sm font-bold text-[#C5A55A]">توصيات الذكاء الاصطناعي</h3>
-          <span className="text-[9px] text-white/20 font-['Inter']">AI Recommendations — Based on your sector & budget</span>
+          <span className="text-[9px] t-muted font-['Inter']">AI Recommendations — Based on your sector & budget</span>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {aiRecommended.map((e) => (
             <Link key={e.id} href={`/expo/${e.id}`}>
-              <div className="min-w-[220px] p-3 rounded-xl bg-white/[0.03] border border-[rgba(197,165,90,0.1)] hover:border-[rgba(197,165,90,0.25)] transition-all cursor-pointer">
+              <div className="min-w-[220px] p-3 rounded-xl bg-[var(--glass-bg)] border border-[rgba(197,165,90,0.1)] hover:border-[rgba(197,165,90,0.25)] transition-all cursor-pointer">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles size={10} className="text-[#C5A55A]" />
                   <span className="text-[10px] text-[#C5A55A]">موصى به لك</span>
                 </div>
-                <p className="text-xs font-bold text-white/80 mb-1 line-clamp-1">{e.nameAr}</p>
-                <p className="text-[9px] text-white/30 font-['Inter'] line-clamp-1">{e.nameEn}</p>
+                <p className="text-xs font-bold t-primary mb-1 line-clamp-1">{e.nameAr}</p>
+                <p className="text-[9px] t-tertiary font-['Inter'] line-clamp-1">{e.nameEn}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-[10px] text-white/40">{e.cityAr}</span>
+                  <span className="text-[10px] t-tertiary">{e.cityAr}</span>
                   <span className="text-[10px] text-green-400/70">{e.availableBooths} وحدة متاحة</span>
                 </div>
               </div>
@@ -275,18 +275,18 @@ export default function ExpoList() {
       <div className="space-y-4">
         <div className="flex gap-3">
           <div className="flex-1 relative">
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-tertiary" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث عن معرض، مؤتمر، فعالية... | Search exhibitions..."
-              className="w-full bg-white/[0.04] border border-white/8 rounded-xl pr-10 pl-4 py-3 text-sm text-white/80 placeholder:text-white/25 focus:outline-none focus:border-[rgba(197,165,90,0.3)] transition-colors"
+              className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl pr-10 pl-4 py-3 text-sm t-primary placeholder:t-muted focus:outline-none gold-focus transition-colors"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`glass-card px-4 rounded-xl flex items-center gap-2 text-sm transition-colors ${showFilters ? "text-[#C5A55A] border-[rgba(197,165,90,0.25)]" : "text-white/50"}`}
+            className={`glass-card px-4 rounded-xl flex items-center gap-2 text-sm transition-colors ${showFilters ? "text-[#C5A55A] border-[rgba(197,165,90,0.25)]" : "t-secondary"}`}
           >
             <Filter size={16} />
             <span className="hidden sm:inline">فلترة</span>
@@ -302,7 +302,7 @@ export default function ExpoList() {
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all ${
                 category === c.value
                   ? "bg-[#C5A55A]/15 border border-[rgba(197,165,90,0.3)] text-[#E8D5A3]"
-                  : "glass-card text-white/50 hover:text-white/70"
+                  : "glass-card t-secondary hover:t-secondary"
               }`}
             >
               <c.icon size={14} />
@@ -323,26 +323,26 @@ export default function ExpoList() {
             >
               <div className="glass-card rounded-2xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-[10px] text-white/40 mb-1.5 block">المدينة | City</label>
+                  <label className="text-[10px] t-tertiary mb-1.5 block">المدينة | City</label>
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]"
+                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
                   >
                     {cities.map(c => <option key={c} value={c} className="bg-[#0A0A12]">{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] text-white/40 mb-1.5 block">السعر من | Price From</label>
-                  <input type="number" placeholder="0 SAR" className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]" />
+                  <label className="text-[10px] t-tertiary mb-1.5 block">السعر من | Price From</label>
+                  <input type="number" placeholder="0 SAR" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
                 <div>
-                  <label className="text-[10px] text-white/40 mb-1.5 block">السعر إلى | Price To</label>
-                  <input type="number" placeholder="200,000 SAR" className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]" />
+                  <label className="text-[10px] t-tertiary mb-1.5 block">السعر إلى | Price To</label>
+                  <input type="number" placeholder="200,000 SAR" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
                 <div>
-                  <label className="text-[10px] text-white/40 mb-1.5 block">التاريخ | Date</label>
-                  <input type="date" className="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-[rgba(197,165,90,0.3)]" />
+                  <label className="text-[10px] t-tertiary mb-1.5 block">التاريخ | Date</label>
+                  <input type="date" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
               </div>
             </motion.div>
@@ -352,9 +352,9 @@ export default function ExpoList() {
 
       {/* Results Count */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-white/40">
+        <p className="text-xs t-tertiary">
           عرض <span className="text-[#C5A55A] font-['Inter']">{filtered.length}</span> نتيجة
-          <span className="text-white/20 font-['Inter'] mr-2">Showing {filtered.length} results</span>
+          <span className="t-muted font-['Inter'] mr-2">Showing {filtered.length} results</span>
         </p>
       </div>
 
@@ -395,13 +395,13 @@ export default function ExpoList() {
                 {savedExpos.includes(expo.id) ? (
                   <BookmarkCheck size={14} className="text-[#C5A55A]" />
                 ) : (
-                  <Bookmark size={14} className="text-white/50" />
+                  <Bookmark size={14} className="t-secondary" />
                 )}
               </button>
 
               {/* Category Badge */}
               <div className="absolute bottom-3 right-3">
-                <span className="px-2.5 py-1 rounded-lg bg-[#0A0A12]/80 text-[10px] text-white/70">
+                <span className="px-2.5 py-1 rounded-lg bg-[#0A0A12]/80 text-[10px] t-secondary">
                   {expo.categoryAr}
                 </span>
               </div>
@@ -409,50 +409,50 @@ export default function ExpoList() {
 
             {/* Content */}
             <div className="p-5">
-              <h3 className="text-base font-bold text-white/90 mb-1 line-clamp-1">{expo.nameAr}</h3>
+              <h3 className="text-base font-bold t-primary mb-1 line-clamp-1">{expo.nameAr}</h3>
               <p className="text-[11px] text-[#C5A55A]/50 font-['Inter'] mb-3 line-clamp-1">{expo.nameEn}</p>
-              <p className="text-xs text-white/40 mb-4 line-clamp-2 leading-relaxed">{expo.descAr}</p>
+              <p className="text-xs t-tertiary mb-4 line-clamp-2 leading-relaxed">{expo.descAr}</p>
 
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin size={12} className="text-[#C5A55A]/60" />
-                  <span className="text-[11px] text-white/50">{expo.cityAr}</span>
+                  <span className="text-[11px] t-secondary">{expo.cityAr}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={12} className="text-[#C5A55A]/60" />
-                  <span className="text-[11px] text-white/50 font-['Inter']">{expo.dateStart}</span>
+                  <span className="text-[11px] t-secondary font-['Inter']">{expo.dateStart}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users size={12} className="text-[#C5A55A]/60" />
-                  <span className="text-[11px] text-white/50">{expo.visitors} زائر</span>
+                  <span className="text-[11px] t-secondary">{expo.visitors} زائر</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star size={12} className="text-[#FBBF24]" />
-                  <span className="text-[11px] text-white/50 font-['Inter']">{expo.rating}</span>
+                  <span className="text-[11px] t-secondary font-['Inter']">{expo.rating}</span>
                 </div>
               </div>
 
               {/* Tags */}
               <div className="flex gap-1.5 mb-4 flex-wrap">
                 {expo.tags.map((tag, ti) => (
-                  <span key={ti} className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[9px] text-white/40 flex items-center gap-1">
+                  <span key={ti} className="px-2 py-0.5 rounded-md bg-[var(--glass-bg)] text-[9px] t-tertiary flex items-center gap-1">
                     <Tag size={8} /> {tag}
                   </span>
                 ))}
               </div>
 
               {/* Price & Availability */}
-              <div className="flex items-center justify-between pt-4 border-t border-white/5">
+              <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
                 <div>
-                  <p className="text-[10px] text-white/30">يبدأ من | Starting from</p>
+                  <p className="text-[10px] t-tertiary">يبدأ من | Starting from</p>
                   <p className="text-base font-bold text-[#C5A55A] font-['Inter']">
-                    {expo.priceFrom.toLocaleString()} <span className="text-xs text-white/30">SAR</span>
+                    {expo.priceFrom.toLocaleString()} <span className="text-xs t-tertiary">SAR</span>
                   </p>
                 </div>
                 <div className="text-left">
                   <p className="text-[10px] text-green-400/70">{expo.availableBooths} وحدة متاحة</p>
-                  <p className="text-[9px] text-white/20 font-['Inter']">{expo.availableBooths} units available</p>
+                  <p className="text-[9px] t-muted font-['Inter']">{expo.availableBooths} units available</p>
                 </div>
               </div>
 
@@ -465,7 +465,7 @@ export default function ExpoList() {
                   </button>
                 </Link>
                 <Link href={`/expo/${expo.id}`}>
-                  <button className="glass-card px-4 py-2.5 rounded-xl text-xs text-white/50 hover:text-[#C5A55A] flex items-center gap-1.5 transition-colors">
+                  <button className="glass-card px-4 py-2.5 rounded-xl text-xs t-secondary hover:text-[#C5A55A] flex items-center gap-1.5 transition-colors">
                     <Eye size={14} />
                     الخريطة
                   </button>
@@ -479,9 +479,9 @@ export default function ExpoList() {
       {/* Empty State */}
       {filtered.length === 0 && (
         <div className="text-center py-16">
-          <Search size={40} className="mx-auto text-white/10 mb-4" />
-          <p className="text-sm text-white/40">لا توجد نتائج مطابقة</p>
-          <p className="text-xs text-white/20 font-['Inter']">No matching results found</p>
+          <Search size={40} className="mx-auto t-muted mb-4" />
+          <p className="text-sm t-tertiary">لا توجد نتائج مطابقة</p>
+          <p className="text-xs t-muted font-['Inter']">No matching results found</p>
         </div>
       )}
     </div>

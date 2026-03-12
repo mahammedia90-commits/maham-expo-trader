@@ -40,8 +40,8 @@ export default function Profile() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold text-white/90">الملف الشخصي والتوثيق</h2>
-        <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Profile & KYC Verification</p>
+        <h2 className="text-xl font-bold t-primary">الملف الشخصي والتوثيق</h2>
+        <p className="text-xs t-gold/50 font-['Inter']">Profile & KYC Verification</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -53,10 +53,10 @@ export default function Profile() {
         >
           <div className="flex flex-col items-center text-center mb-6">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#C5A55A] to-[#E8D5A3] flex items-center justify-center mb-4">
-              <Building2 size={32} className="text-[#0A0A12]" />
+              <Building2 size={32} className="text-[var(--btn-gold-text)]" />
             </div>
-            <h3 className="text-base font-bold text-white/90">{profileData.nameAr}</h3>
-            <p className="text-xs text-[#C5A55A]/60 font-['Inter']">{profileData.nameEn}</p>
+            <h3 className="text-base font-bold t-primary">{profileData.nameAr}</h3>
+            <p className="text-xs t-gold/60 font-['Inter']">{profileData.nameEn}</p>
             <div className="flex items-center gap-1.5 mt-2">
               <Shield size={12} className="text-[#FBBF24]" />
               <span className="text-[10px] text-[#FBBF24]">توثيق جزئي | Partial KYC</span>
@@ -66,10 +66,10 @@ export default function Profile() {
           {/* KYC Progress */}
           <div className="mb-5">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] text-white/50">مستوى التوثيق</span>
-              <span className="text-[11px] text-[#C5A55A] font-['Inter']">{profileData.kycLevel}/{profileData.kycMax}</span>
+              <span className="text-[11px] t-secondary">مستوى التوثيق</span>
+              <span className="text-[11px] t-gold font-['Inter']">{profileData.kycLevel}/{profileData.kycMax}</span>
             </div>
-            <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+            <div className="h-2 rounded-full bg-[var(--glass-bg)] overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${kycPercent}%` }}
@@ -87,17 +87,17 @@ export default function Profile() {
               { icon: Mail, labelAr: showSensitive ? profileData.email : "••••@••••.sa", labelEn: "" },
               { icon: Globe, labelAr: profileData.website, labelEn: "" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-white/5">
-                <item.icon size={14} className="text-[#C5A55A]/60 shrink-0" />
-                <span className="text-xs text-white/60">{item.labelAr}</span>
-                {item.labelEn && <span className="text-[9px] text-white/25 font-['Inter']">{item.labelEn}</span>}
+              <div key={i} className="flex items-center gap-3 py-2 border-b border-[var(--glass-border)]">
+                <item.icon size={14} className="t-gold/60 shrink-0" />
+                <span className="text-xs t-secondary">{item.labelAr}</span>
+                {item.labelEn && <span className="text-[9px] t-muted font-['Inter']">{item.labelEn}</span>}
               </div>
             ))}
           </div>
 
           <button
             onClick={() => setShowSensitive(!showSensitive)}
-            className="w-full mt-4 glass-card py-2.5 rounded-xl text-xs text-white/50 hover:text-[#C5A55A] flex items-center justify-center gap-2"
+            className="w-full mt-4 glass-card py-2.5 rounded-xl text-xs t-secondary hover:t-gold flex items-center justify-center gap-2"
           >
             {showSensitive ? <EyeOff size={14} /> : <Eye size={14} />}
             {showSensitive ? "إخفاء البيانات الحساسة" : "إظهار البيانات الحساسة"}
@@ -113,8 +113,8 @@ export default function Profile() {
             transition={{ delay: 0.1 }}
             className="glass-card rounded-2xl p-6"
           >
-            <h3 className="text-sm font-bold text-white/80 mb-1">خطوات التوثيق (KYC)</h3>
-            <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-5">Verification Steps</p>
+            <h3 className="text-sm font-bold t-primary mb-1">خطوات التوثيق (KYC)</h3>
+            <p className="text-[10px] t-gold/50 font-['Inter'] mb-5">Verification Steps</p>
             <div className="space-y-4">
               {verificationSteps.map((step, i) => {
                 const isCompleted = step.status === "completed";
@@ -123,22 +123,22 @@ export default function Profile() {
                   <div key={step.id} className="flex items-center gap-4">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                       isCompleted ? "bg-[#4ADE80]/15 border border-[#4ADE80]/30" :
-                      isActive ? "bg-[#C5A55A]/15 border border-[#C5A55A]/30 animate-pulse" :
-                      "bg-white/5 border border-white/10"
+                      isActive ? "bg-gold-subtle border border-[#C5A55A]/30 animate-pulse" :
+                      "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
                     }`}>
                       {isCompleted ? (
                         <CheckCircle size={16} className="text-[#4ADE80]" />
                       ) : isActive ? (
-                        <span className="text-xs text-[#C5A55A] font-bold">{step.id}</span>
+                        <span className="text-xs t-gold font-bold">{step.id}</span>
                       ) : (
-                        <span className="text-xs text-white/30">{step.id}</span>
+                        <span className="text-xs t-tertiary">{step.id}</span>
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className={`text-sm ${isCompleted ? "text-white/70" : isActive ? "text-[#C5A55A]" : "text-white/30"}`}>
+                      <p className={`text-sm ${isCompleted ? "t-secondary" : isActive ? "t-gold" : "t-tertiary"}`}>
                         {step.nameAr}
                       </p>
-                      <p className="text-[9px] text-white/20 font-['Inter']">{step.nameEn}</p>
+                      <p className="text-[9px] t-muted font-['Inter']">{step.nameEn}</p>
                     </div>
                     {isActive && (
                       <button
@@ -163,8 +163,8 @@ export default function Profile() {
             transition={{ delay: 0.2 }}
             className="glass-card rounded-2xl p-6"
           >
-            <h3 className="text-sm font-bold text-white/80 mb-1">بيانات المنشأة</h3>
-            <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-5">Business Details</p>
+            <h3 className="text-sm font-bold t-primary mb-1">بيانات المنشأة</h3>
+            <p className="text-[10px] t-gold/50 font-['Inter'] mb-5">Business Details</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { labelAr: "اسم المنشأة", labelEn: "Business Name", value: profileData.nameAr },
@@ -174,25 +174,25 @@ export default function Profile() {
                 { labelAr: "القطاع", labelEn: "Sector", value: profileData.sector },
                 { labelAr: "تاريخ الانضمام", labelEn: "Joined", value: profileData.joined },
               ].map((d, i) => (
-                <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                  <p className="text-[10px] text-white/35 mb-1">{d.labelAr} <span className="text-white/15 font-['Inter']">({d.labelEn})</span></p>
-                  <p className="text-sm text-white/75 font-medium">{d.value}</p>
+                <div key={i} className="p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+                  <p className="text-[10px] t-tertiary mb-1">{d.labelAr} <span className="t-muted font-['Inter']">({d.labelEn})</span></p>
+                  <p className="text-sm t-secondary font-medium">{d.value}</p>
                 </div>
               ))}
             </div>
           </motion.div>
 
           {/* Security Notice */}
-          <div className="glass-card rounded-2xl p-5 border-[rgba(197,165,90,0.15)]">
+          <div className="glass-card rounded-2xl p-5 border-[var(--gold-border)]">
             <div className="flex items-center gap-2 mb-3">
-              <Lock size={16} className="text-[#C5A55A]" />
-              <h4 className="text-xs font-bold text-[#C5A55A]">حماية البيانات</h4>
-              <span className="text-[9px] text-white/20 font-['Inter']">Data Protection</span>
+              <Lock size={16} className="t-gold" />
+              <h4 className="text-xs font-bold t-gold">حماية البيانات</h4>
+              <span className="text-[9px] t-muted font-['Inter']">Data Protection</span>
             </div>
-            <p className="text-[11px] text-white/40 leading-relaxed">
+            <p className="text-[11px] t-tertiary leading-relaxed">
               بياناتك محمية بتشفير AES-256 ولا يتم مشاركتها مع أي طرف ثالث. هوية التاجر محجوبة عن المستثمر والعكس صحيح حتى يتم توقيع العقد الإلكتروني رسمياً.
             </p>
-            <p className="text-[9px] text-white/20 font-['Inter'] mt-2">
+            <p className="text-[9px] t-muted font-['Inter'] mt-2">
               Your data is protected with AES-256 encryption and is never shared with third parties. Trader identity is hidden from investors and vice versa until the e-contract is officially signed.
             </p>
           </div>

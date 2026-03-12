@@ -71,12 +71,12 @@ export default function Payments() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white/90">المدفوعات والفواتير</h2>
-          <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Payments, Invoices & Revenue Split</p>
+          <h2 className="text-xl font-bold t-primary">المدفوعات والفواتير</h2>
+          <p className="text-xs t-gold/50 font-['Inter']">Payments, Invoices & Revenue Split</p>
         </div>
         <button
           onClick={() => toast.success("جاري تحميل كشف الحساب...")}
-          className="glass-card px-4 py-2 rounded-xl text-xs text-white/60 hover:text-[#C5A55A] flex items-center gap-2 transition-colors"
+          className="glass-card px-4 py-2 rounded-xl text-xs t-secondary hover:t-gold flex items-center gap-2 transition-colors"
         >
           <Download size={14} />
           كشف الحساب
@@ -103,11 +103,11 @@ export default function Payments() {
                 <s.icon size={16} style={{ color: s.color }} />
               </div>
             </div>
-            <p className="text-xl font-bold text-white/90 font-['Inter']">
+            <p className="text-xl font-bold t-primary font-['Inter']">
               {typeof s.value === "number" ? s.value.toLocaleString() : s.value}
             </p>
-            <p className="text-xs text-white/50 mt-1">{s.labelAr}</p>
-            <p className="text-[9px] text-white/25 font-['Inter']">{s.labelEn}</p>
+            <p className="text-xs t-secondary mt-1">{s.labelAr}</p>
+            <p className="text-[9px] t-muted font-['Inter']">{s.labelEn}</p>
           </motion.div>
         ))}
       </div>
@@ -116,28 +116,28 @@ export default function Payments() {
       {pendingPayments.length > 0 && (
         <div className="glass-card rounded-2xl p-5 border-[rgba(251,191,36,0.15)]">
           <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle size={16} className="text-yellow-400" />
-            <h3 className="text-sm font-bold text-yellow-400/80">مدفوعات مطلوبة</h3>
-            <span className="text-[9px] text-white/20 font-['Inter']">Action Required — Pending Payments</span>
+            <AlertTriangle size={16} className="text-[var(--status-yellow)]" />
+            <h3 className="text-sm font-bold text-[var(--status-yellow)]/80">مدفوعات مطلوبة</h3>
+            <span className="text-[9px] t-muted font-['Inter']">Action Required — Pending Payments</span>
           </div>
           <div className="space-y-3">
             {pendingPayments.map((pp) => (
-              <div key={pp.id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5">
+              <div key={pp.id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center">
-                    <CreditCard size={16} className="text-yellow-400" />
+                    <CreditCard size={16} className="text-[var(--status-yellow)]" />
                   </div>
                   <div>
-                    <p className="text-xs text-white/70">{pp.descAr}</p>
-                    <p className="text-[9px] text-white/25 font-['Inter']">{pp.descEn}</p>
-                    <p className="text-[9px] text-white/20 mt-0.5">
+                    <p className="text-xs t-secondary">{pp.descAr}</p>
+                    <p className="text-[9px] t-muted font-['Inter']">{pp.descEn}</p>
+                    <p className="text-[9px] t-muted mt-0.5">
                       الاستحقاق: <span className="font-['Inter']">{pp.dueDate}</span>
-                      {pp.overdue && <span className="text-red-400 mr-2">متأخر!</span>}
+                      {pp.overdue && <span className="text-[var(--status-red)] mr-2">متأخر!</span>}
                     </p>
                   </div>
                 </div>
                 <div className="text-left">
-                  <p className="text-base font-bold text-[#C5A55A] font-['Inter']">{pp.amount.toLocaleString()} <span className="text-xs text-white/30">SAR</span></p>
+                  <p className="text-base font-bold t-gold font-['Inter']">{pp.amount.toLocaleString()} <span className="text-xs t-tertiary">SAR</span></p>
                   <button
                     onClick={() => handlePay(pp)}
                     className="btn-gold px-4 py-1.5 rounded-lg text-[10px] mt-1"
@@ -154,44 +154,44 @@ export default function Payments() {
       {/* Revenue Split Transparency */}
       <div className="glass-card rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles size={16} className="text-[#C5A55A]" />
-          <h3 className="text-sm font-bold text-white/70">شفافية توزيع الإيرادات</h3>
-          <span className="text-[9px] text-white/20 font-['Inter']">Revenue Split Transparency</span>
+          <Sparkles size={16} className="t-gold" />
+          <h3 className="text-sm font-bold t-secondary">شفافية توزيع الإيرادات</h3>
+          <span className="text-[9px] t-muted font-['Inter']">Revenue Split Transparency</span>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl bg-white/[0.02] text-center">
-            <p className="text-[10px] text-white/30 mb-1">المستثمر (المنظم)</p>
-            <p className="text-lg font-bold text-blue-400 font-['Inter']">70%</p>
-            <p className="text-[8px] text-white/15 font-['Inter']">Investor / Organizer</p>
+          <div className="p-4 rounded-xl bg-[var(--glass-bg)] text-center">
+            <p className="text-[10px] t-tertiary mb-1">المستثمر (المنظم)</p>
+            <p className="text-lg font-bold text-[var(--status-blue)] font-['Inter']">70%</p>
+            <p className="text-[8px] t-muted font-['Inter']">Investor / Organizer</p>
           </div>
-          <div className="p-4 rounded-xl bg-[#C5A55A]/5 text-center border border-[rgba(197,165,90,0.1)]">
-            <p className="text-[10px] text-[#C5A55A]/70 mb-1">مهام إكسبو (المشرف)</p>
-            <p className="text-lg font-bold text-[#C5A55A] font-['Inter']">20%</p>
-            <p className="text-[8px] text-white/15 font-['Inter']">Maham Expo / Supervisor</p>
+          <div className="p-4 rounded-xl bg-gold-subtle text-center border border-[rgba(197,165,90,0.1)]">
+            <p className="text-[10px] t-gold/70 mb-1">مهام إكسبو (المشرف)</p>
+            <p className="text-lg font-bold t-gold font-['Inter']">20%</p>
+            <p className="text-[8px] t-muted font-['Inter']">Maham Expo / Supervisor</p>
           </div>
-          <div className="p-4 rounded-xl bg-white/[0.02] text-center">
-            <p className="text-[10px] text-white/30 mb-1">رسوم تشغيلية</p>
+          <div className="p-4 rounded-xl bg-[var(--glass-bg)] text-center">
+            <p className="text-[10px] t-tertiary mb-1">رسوم تشغيلية</p>
             <p className="text-lg font-bold text-purple-400 font-['Inter']">10%</p>
-            <p className="text-[8px] text-white/15 font-['Inter']">Operational Fees</p>
+            <p className="text-[8px] t-muted font-['Inter']">Operational Fees</p>
           </div>
         </div>
-        <p className="text-[9px] text-white/15 mt-3 text-center">
+        <p className="text-[9px] t-muted mt-3 text-center">
           يتم تقسيم المبالغ تلقائياً عبر نظام الدفع الذكي — لا يمكن التلاعب بالنسب
         </p>
       </div>
 
       {/* Transactions Table */}
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/5">
-          <h3 className="text-sm font-bold text-white/80">سجل المعاملات</h3>
-          <p className="text-[10px] text-[#C5A55A]/50 font-['Inter']">Transaction History</p>
+        <div className="px-5 py-4 border-b border-[var(--glass-border)]">
+          <h3 className="text-sm font-bold t-primary">سجل المعاملات</h3>
+          <p className="text-[10px] t-gold/50 font-['Inter']">Transaction History</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-[var(--glass-border)]">
                 {["رقم المعاملة", "الوصف", "المبلغ (SAR)", "طريقة الدفع", "الحجز", "الحالة", "التاريخ", ""].map((h, i) => (
-                  <th key={i} className="text-right px-4 py-3 text-[11px] text-white/35 font-medium">{h}</th>
+                  <th key={i} className="text-right px-4 py-3 text-[11px] t-tertiary font-medium">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -204,26 +204,26 @@ export default function Payments() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.05 }}
-                    className="border-b border-white/[0.03] hover:bg-white/[0.02]"
+                    className="border-b border-white/[0.03] hover:bg-[var(--glass-bg)]"
                   >
-                    <td className="px-4 py-3 text-xs text-[#C5A55A]/70 font-['Inter']">{t.id}</td>
+                    <td className="px-4 py-3 text-xs t-gold/70 font-['Inter']">{t.id}</td>
                     <td className="px-4 py-3">
-                      <p className="text-xs text-white/75">{t.descAr}</p>
-                      <p className="text-[9px] text-white/25 font-['Inter']">{t.descEn}</p>
+                      <p className="text-xs t-secondary">{t.descAr}</p>
+                      <p className="text-[9px] t-muted font-['Inter']">{t.descEn}</p>
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold font-['Inter'] text-green-400">
+                    <td className="px-4 py-3 text-sm font-semibold font-['Inter'] text-[var(--status-green)]">
                       {t.amount.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-[11px] text-white/45">{t.method}</td>
-                    <td className="px-4 py-3 text-[11px] text-[#C5A55A]/50 font-['Inter']">{t.booking}</td>
+                    <td className="px-4 py-3 text-[11px] t-tertiary">{t.method}</td>
+                    <td className="px-4 py-3 text-[11px] t-gold/50 font-['Inter']">{t.booking}</td>
                     <td className="px-4 py-3">
                       <span className="inline-block px-2 py-0.5 rounded-full text-[10px]" style={{ backgroundColor: `${ss.color}12`, color: ss.color }}>
                         {ss.ar}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[11px] text-white/35 font-['Inter']">{t.date}</td>
+                    <td className="px-4 py-3 text-[11px] t-tertiary font-['Inter']">{t.date}</td>
                     <td className="px-4 py-3">
-                      <button onClick={() => toast.info(`عرض فاتورة ${t.id}`)} className="p-1.5 rounded-lg hover:bg-white/5 text-white/25 hover:text-[#C5A55A]">
+                      <button onClick={() => toast.info(`عرض فاتورة ${t.id}`)} className="p-1.5 rounded-lg hover:bg-[var(--glass-bg)] t-muted hover:t-gold">
                         <Receipt size={13} />
                       </button>
                     </td>
@@ -237,8 +237,8 @@ export default function Payments() {
 
       {/* Payment Methods */}
       <div className="glass-card rounded-2xl p-6">
-        <h3 className="text-sm font-bold text-white/80 mb-1">طرق الدفع المعتمدة</h3>
-        <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-4">Accepted Payment Methods</p>
+        <h3 className="text-sm font-bold t-primary mb-1">طرق الدفع المعتمدة</h3>
+        <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Accepted Payment Methods</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { nameAr: "مدى", nameEn: "Mada", icon: CreditCard },
@@ -246,10 +246,10 @@ export default function Payments() {
             { nameAr: "Apple Pay", nameEn: "Apple Pay", icon: Smartphone },
             { nameAr: "تحويل بنكي", nameEn: "Bank Transfer", icon: Building2 },
           ].map((m, i) => (
-            <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-              <m.icon size={20} className="text-[#C5A55A]/50 mx-auto mb-2" />
-              <p className="text-xs text-white/60">{m.nameAr}</p>
-              <p className="text-[9px] text-white/20 font-['Inter']">{m.nameEn}</p>
+            <div key={i} className="p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
+              <m.icon size={20} className="t-gold/50 mx-auto mb-2" />
+              <p className="text-xs t-secondary">{m.nameAr}</p>
+              <p className="text-[9px] t-muted font-['Inter']">{m.nameEn}</p>
             </div>
           ))}
         </div>
@@ -275,11 +275,11 @@ export default function Payments() {
             >
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
-                  <Lock size={16} className="text-green-400" />
-                  <h3 className="text-base font-bold text-white/80">بوابة الدفع الآمنة</h3>
+                  <Lock size={16} className="text-[var(--status-green)]" />
+                  <h3 className="text-base font-bold t-primary">بوابة الدفع الآمنة</h3>
                 </div>
                 {!processing && (
-                  <button onClick={() => setShowPayModal(false)} className="text-white/30 hover:text-white/60">
+                  <button onClick={() => setShowPayModal(false)} className="t-tertiary hover:t-secondary">
                     <X size={18} />
                   </button>
                 )}
@@ -287,16 +287,16 @@ export default function Payments() {
 
               {/* Payment Details */}
               <div className="glass-card rounded-xl p-4 mb-5">
-                <p className="text-xs text-white/50">{selectedPayment.descAr}</p>
-                <p className="text-2xl font-bold text-[#C5A55A] font-['Inter'] mt-2">
-                  {selectedPayment.amount.toLocaleString()} <span className="text-sm text-white/30">SAR</span>
+                <p className="text-xs t-secondary">{selectedPayment.descAr}</p>
+                <p className="text-2xl font-bold t-gold font-['Inter'] mt-2">
+                  {selectedPayment.amount.toLocaleString()} <span className="text-sm t-tertiary">SAR</span>
                 </p>
-                <p className="text-[9px] text-white/20 font-['Inter'] mt-1">Ref: {selectedPayment.bookingId}</p>
+                <p className="text-[9px] t-muted font-['Inter'] mt-1">Ref: {selectedPayment.bookingId}</p>
               </div>
 
               {/* Payment Method Selection */}
               <div className="space-y-2 mb-5">
-                <p className="text-[10px] text-white/40">اختر طريقة الدفع | Select Payment Method</p>
+                <p className="text-[10px] t-tertiary">اختر طريقة الدفع | Select Payment Method</p>
                 {[
                   { id: "mada", label: "مدى | Mada" },
                   { id: "credit", label: "بطاقة ائتمان | Credit Card" },
@@ -304,7 +304,7 @@ export default function Payments() {
                   { id: "bank", label: "تحويل بنكي | Bank Transfer" },
                 ].map((m) => (
                   <label key={m.id} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                    paymentMethod === m.id ? "bg-[#C5A55A]/10 border border-[rgba(197,165,90,0.3)]" : "bg-white/[0.02] border border-white/5 hover:bg-white/[0.04]"
+                    paymentMethod === m.id ? "bg-gold-subtle border border-[var(--gold-border)]" : "bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-[var(--glass-bg)]"
                   }`}>
                     <input
                       type="radio"
@@ -314,7 +314,7 @@ export default function Payments() {
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="accent-[#C5A55A]"
                     />
-                    <span className="text-xs text-white/60">{m.label}</span>
+                    <span className="text-xs t-secondary">{m.label}</span>
                   </label>
                 ))}
               </div>
@@ -322,18 +322,18 @@ export default function Payments() {
               {/* Card Input (for credit/mada) */}
               {(paymentMethod === "mada" || paymentMethod === "credit") && (
                 <div className="space-y-3 mb-5">
-                  <input placeholder="رقم البطاقة | Card Number" className="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2.5 text-xs text-white/70 placeholder:text-white/20 focus:outline-none focus:border-[rgba(197,165,90,0.3)]" />
+                  <input placeholder="رقم البطاقة | Card Number" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2.5 text-xs t-secondary placeholder:t-muted focus:outline-none focus:border-[var(--gold-border)]" />
                   <div className="grid grid-cols-2 gap-3">
-                    <input placeholder="MM/YY" className="bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2.5 text-xs text-white/70 placeholder:text-white/20 focus:outline-none focus:border-[rgba(197,165,90,0.3)]" />
-                    <input placeholder="CVV" className="bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2.5 text-xs text-white/70 placeholder:text-white/20 focus:outline-none focus:border-[rgba(197,165,90,0.3)]" />
+                    <input placeholder="MM/YY" className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2.5 text-xs t-secondary placeholder:t-muted focus:outline-none focus:border-[var(--gold-border)]" />
+                    <input placeholder="CVV" className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2.5 text-xs t-secondary placeholder:t-muted focus:outline-none focus:border-[var(--gold-border)]" />
                   </div>
                 </div>
               )}
 
               {/* Security Notice */}
-              <div className="flex items-center gap-2 mb-5 p-2 rounded-lg bg-green-400/5">
-                <Shield size={12} className="text-green-400/60" />
-                <span className="text-[9px] text-green-400/60">الدفع مشفر ومحمي بتقنية SSL — متوافق مع PCI DSS</span>
+              <div className="flex items-center gap-2 mb-5 p-2 rounded-lg bg-[var(--status-green)]/5">
+                <Shield size={12} className="text-[var(--status-green)]/60" />
+                <span className="text-[9px] text-[var(--status-green)]/60">الدفع مشفر ومحمي بتقنية SSL — متوافق مع PCI DSS</span>
               </div>
 
               {/* Pay Button */}
@@ -344,7 +344,7 @@ export default function Payments() {
               >
                 {processing ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-[#0A0A12] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-[var(--surface-dark)] border-t-transparent rounded-full animate-spin" />
                     جاري المعالجة...
                   </>
                 ) : (

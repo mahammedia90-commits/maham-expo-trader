@@ -72,13 +72,13 @@ export default function ExpoMap() {
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-tertiary" />
           <input
             type="text"
             placeholder="ابحث عن وحدة... | Search units..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full glass-card rounded-xl pr-10 pl-4 py-3 text-sm text-white/80 placeholder:text-white/25 gold-focus bg-transparent"
+            className="w-full glass-card rounded-xl pr-10 pl-4 py-3 text-sm t-primary placeholder:t-muted gold-focus bg-transparent"
           />
         </div>
         <div className="flex gap-2">
@@ -89,7 +89,7 @@ export default function ExpoMap() {
               className={`px-4 py-2 rounded-xl text-xs transition-all ${
                 filter === f
                   ? "btn-gold"
-                  : "glass-card text-white/50 hover:text-white/70"
+                  : "glass-card t-secondary hover:t-secondary"
               }`}
             >
               {f === "all" ? "الكل" : statusLabels[f].ar}
@@ -127,7 +127,7 @@ export default function ExpoMap() {
               </div>
               <div className="absolute top-full mt-1 right-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 <div className="glass-card rounded-lg px-2 py-1 whitespace-nowrap">
-                  <p className="text-[10px] text-white/80">{b.id}</p>
+                  <p className="text-[10px] t-primary">{b.id}</p>
                 </div>
               </div>
             </motion.button>
@@ -135,13 +135,13 @@ export default function ExpoMap() {
 
           {/* Legend */}
           <div className="absolute bottom-4 right-4 glass-card rounded-xl p-3">
-            <p className="text-[10px] text-white/50 mb-2">دليل الألوان | Legend</p>
+            <p className="text-[10px] t-secondary mb-2">دليل الألوان | Legend</p>
             <div className="space-y-1.5">
               {(Object.entries(statusLabels) as [BoothStatus, { ar: string; en: string }][]).map(([key, val]) => (
                 <div key={key} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: statusColors[key] }} />
-                  <span className="text-[10px] text-white/60">{val.ar}</span>
-                  <span className="text-[9px] text-white/30 font-['Inter']">{val.en}</span>
+                  <span className="text-[10px] t-secondary">{val.ar}</span>
+                  <span className="text-[9px] t-tertiary font-['Inter']">{val.en}</span>
                 </div>
               ))}
             </div>
@@ -159,8 +159,8 @@ export default function ExpoMap() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-white/90">{selected.nameAr}</h3>
-                  <p className="text-xs text-[#C5A55A]/60 font-['Inter']">{selected.nameEn}</p>
+                  <h3 className="text-lg font-bold t-primary">{selected.nameAr}</h3>
+                  <p className="text-xs t-gold/60 font-['Inter']">{selected.nameEn}</p>
                 </div>
                 <div
                   className="px-3 py-1 rounded-full text-[10px] font-medium"
@@ -181,12 +181,12 @@ export default function ExpoMap() {
                   { labelAr: "المساحة", labelEn: "Size", value: selected.size },
                   { labelAr: "السعر", labelEn: "Price", value: `${selected.price} ريال` },
                 ].map((d, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-white/5">
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
                     <div>
-                      <span className="text-xs text-white/50">{d.labelAr}</span>
-                      <span className="text-[9px] text-white/20 font-['Inter'] mr-2">{d.labelEn}</span>
+                      <span className="text-xs t-secondary">{d.labelAr}</span>
+                      <span className="text-[9px] t-muted font-['Inter'] mr-2">{d.labelEn}</span>
                     </div>
-                    <span className="text-sm text-white/80 font-medium">{d.value}</span>
+                    <span className="text-sm t-primary font-medium">{d.value}</span>
                   </div>
                 ))}
               </div>
@@ -200,37 +200,37 @@ export default function ExpoMap() {
                   احجز هذه الوحدة | Book This Unit
                 </button>
               ) : (
-                <div className="w-full py-3 rounded-xl text-sm text-center text-white/30 bg-white/[0.02] border border-white/5">
+                <div className="w-full py-3 rounded-xl text-sm text-center t-tertiary bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                   هذه الوحدة غير متاحة حالياً
                 </div>
               )}
             </motion.div>
           ) : (
             <div className="glass-card rounded-2xl p-6 text-center">
-              <Info size={32} className="mx-auto text-white/15 mb-3" />
-              <p className="text-sm text-white/40">اختر وحدة من الخريطة لعرض التفاصيل</p>
-              <p className="text-[10px] text-white/20 font-['Inter'] mt-1">Select a unit from the map to view details</p>
+              <Info size={32} className="mx-auto t-muted mb-3" />
+              <p className="text-sm t-tertiary">اختر وحدة من الخريطة لعرض التفاصيل</p>
+              <p className="text-[10px] t-muted font-['Inter'] mt-1">Select a unit from the map to view details</p>
             </div>
           )}
 
           {/* Available Units List */}
           <div className="glass-card rounded-2xl p-5">
-            <h4 className="text-sm font-bold text-white/80 mb-1">الوحدات المتاحة</h4>
-            <p className="text-[10px] text-[#C5A55A]/50 font-['Inter'] mb-3">Available Units ({filtered.filter(b => b.status === "available").length})</p>
+            <h4 className="text-sm font-bold t-primary mb-1">الوحدات المتاحة</h4>
+            <p className="text-[10px] t-gold/50 font-['Inter'] mb-3">Available Units ({filtered.filter(b => b.status === "available").length})</p>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {filtered.filter(b => b.status === "available").map((b) => (
                 <button
                   key={b.id}
                   onClick={() => setSelected(b)}
                   className={`w-full text-right flex items-center justify-between p-3 rounded-xl transition-all ${
-                    selected?.id === b.id ? "bg-[#C5A55A]/10 border border-[#C5A55A]/20" : "bg-white/[0.02] hover:bg-white/[0.04] border border-transparent"
+                    selected?.id === b.id ? "bg-gold-subtle border border-[#C5A55A]/20" : "bg-[var(--glass-bg)] hover:bg-[var(--glass-bg)] border border-transparent"
                   }`}
                 >
                   <div>
-                    <p className="text-xs text-white/70">{b.nameAr}</p>
-                    <p className="text-[9px] text-white/30 font-['Inter']">{b.size}</p>
+                    <p className="text-xs t-secondary">{b.nameAr}</p>
+                    <p className="text-[9px] t-tertiary font-['Inter']">{b.size}</p>
                   </div>
-                  <span className="text-xs text-[#C5A55A] font-['Inter']">{b.price} SAR</span>
+                  <span className="text-xs t-gold font-['Inter']">{b.price} SAR</span>
                 </button>
               ))}
             </div>
