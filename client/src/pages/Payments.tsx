@@ -10,6 +10,8 @@ import {
   Sparkles, Receipt, X, Building2, Smartphone, CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { generatePaymentsPDF } from "@/lib/pdfGenerator";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Transaction {
   id: string;
@@ -52,6 +54,7 @@ const statusStyle: Record<string, { ar: string; color: string }> = {
 };
 
 export default function Payments() {
+  const { trader } = useAuth();
   const [showPayModal, setShowPayModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PendingPayment | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("mada");
@@ -244,7 +247,26 @@ export default function Payments() {
                     </td>
                     <td className="px-4 py-3 text-[11px] t-tertiary font-['Inter']">{t.date}</td>
                     <td className="px-4 py-3">
-                      <button onClick={() => toast.info(`عرض فاتورة ${t.id}`)} className="p-1.5 rounded-lg hover:bg-[var(--glass-bg)] t-muted hover:t-gold">
+                      <button onClick={async () => {
+                        toast.info("جاري إنشاء الفاتورة...");
+                        try {
+                          await generatePaymentsPDF({
+                            payments: [{
+                              id: t.id,
+                              date: t.date,
+                              amount: t.amount,
+                              method: t.method,
+                              status: t.status === "completed" ? "Completed" : t.status === "pending" ? "Pending" : t.status,
+                              description: t.descEn || t.descAr,
+                            }],
+                            traderName: trader?.name || "Trader",
+                            traderCompany: trader?.companyName || "Trader Company",
+                            totalPaid: t.status === "completed" ? t.amount : 0,
+                            totalPending: t.status === "pending" ? t.amount : 0,
+                          });
+                          toast.success("تم تحميل الفاتورة بنجاح!");
+                        } catch { toast.error("حدث خطأ في إنشاء الفاتورة"); }
+                      }} className="p-1.5 rounded-lg hover:bg-[var(--glass-bg)] t-muted hover:t-gold">
                         <Receipt size={13} />
                       </button>
                     </td>

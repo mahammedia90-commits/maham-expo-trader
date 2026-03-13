@@ -23,6 +23,7 @@ interface NavItem {
   labelAr: string;
   labelEn: string;
   badge?: number;
+  badgeKey?: "bookings" | "notifications" | "messages";
 }
 
 const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
@@ -37,7 +38,7 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
   {
     titleAr: "الحجوزات والعقود", titleEn: "BOOKINGS",
     items: [
-      { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings" },
+      { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings", badgeKey: "bookings" as const },
       { path: "/contracts", icon: FileText, labelAr: "العقود", labelEn: "Contracts" },
       { path: "/payments", icon: CreditCard, labelAr: "المدفوعات", labelEn: "Payments" },
     ],
@@ -53,8 +54,8 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
   {
     titleAr: "التواصل والتقييم", titleEn: "COMMUNICATION",
     items: [
-      { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badge: 3 },
-      { path: "/notifications", icon: Bell, labelAr: "الإشعارات", labelEn: "Notifications", badge: 4 },
+      { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badgeKey: "messages" as const },
+      { path: "/notifications", icon: Bell, labelAr: "الإشعارات", labelEn: "Notifications", badgeKey: "notifications" as const },
       { path: "/reviews", icon: Star, labelAr: "التقييمات", labelEn: "Reviews" },
     ],
   },
@@ -72,9 +73,9 @@ const allNavItems = navSections.flatMap(s => s.items);
 
 const mobileNavItems: NavItem[] = [
   { path: "/expos", icon: Building2, labelAr: "المعارض", labelEn: "Expos" },
-  { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings" },
+  { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings", badgeKey: "bookings" },
   { path: "/dashboard", icon: LayoutDashboard, labelAr: "الرئيسية", labelEn: "Home" },
-  { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badge: 3 },
+  { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badgeKey: "messages" },
   { path: "/profile", icon: User, labelAr: "حسابي", labelEn: "Account" },
 ];
 
@@ -83,7 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { trader, logout } = useAuth();
+  const { trader, logout, unreadCount, pendingBookingsCount } = useAuth();
   const traderName = trader?.name || "التاجر";
   const traderCompany = trader?.companyName || "";
 
@@ -153,12 +154,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           className="shrink-0"
                           style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}
                         />
-                        {item.badge && (
-                          <span className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-bold"
-                            style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
-                            {item.badge}
-                          </span>
-                        )}
+                        {(() => {
+                          const count = item.badgeKey === "bookings" ? pendingBookingsCount
+                            : item.badgeKey === "notifications" ? unreadCount
+                            : item.badgeKey === "messages" ? 3
+                            : item.badge || 0;
+                          return count > 0 ? (
+                            <span className="absolute -top-1.5 -left-1.5 min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold animate-pulse"
+                              style={{ backgroundColor: item.badgeKey === "bookings" ? "var(--status-yellow)" : "var(--badge-bg)", color: item.badgeKey === "bookings" ? "#000" : "var(--badge-text)" }}>
+                              {count}
+                            </span>
+                          ) : null;
+                        })()}
                       </div>
                       {!collapsed && (
                         <div className="flex flex-col leading-tight flex-1">
@@ -249,12 +256,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   style={{ color: isExactActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}>
                   <div className="relative">
                     <item.icon size={20} strokeWidth={isExactActive ? 2.5 : 1.8} />
-                    {item.badge && (
-                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold"
-                        style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
-                        {item.badge}
-                      </span>
-                    )}
+                    {(() => {
+                      const count = item.badgeKey === "bookings" ? pendingBookingsCount
+                        : item.badgeKey === "notifications" ? unreadCount
+                        : item.badgeKey === "messages" ? 3
+                        : item.badge || 0;
+                      return count > 0 ? (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center text-[7px] font-bold animate-pulse"
+                          style={{ backgroundColor: item.badgeKey === "bookings" ? "var(--status-yellow)" : "var(--badge-bg)", color: item.badgeKey === "bookings" ? "#000" : "var(--badge-text)" }}>
+                          {count}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                   <span className="text-[10px] font-medium leading-tight">{item.labelAr}</span>
                   {isExactActive && (
@@ -343,12 +356,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           >
                             <div className="relative">
                               <item.icon size={16} style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }} />
-                              {item.badge && (
-                                <span className="absolute -top-1 -left-1 w-3 h-3 rounded-full flex items-center justify-center text-[6px] font-bold"
-                                  style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
-                                  {item.badge}
-                                </span>
-                              )}
+                              {(() => {
+                                const count = item.badgeKey === "bookings" ? pendingBookingsCount
+                                  : item.badgeKey === "notifications" ? unreadCount
+                                  : item.badgeKey === "messages" ? 3
+                                  : item.badge || 0;
+                                return count > 0 ? (
+                                  <span className="absolute -top-1 -left-1 min-w-[14px] h-3.5 px-0.5 rounded-full flex items-center justify-center text-[6px] font-bold"
+                                    style={{ backgroundColor: item.badgeKey === "bookings" ? "var(--status-yellow)" : "var(--badge-bg)", color: item.badgeKey === "bookings" ? "#000" : "var(--badge-text)" }}>
+                                    {count}
+                                  </span>
+                                ) : null;
+                              })()}
                             </div>
                             <div className="flex flex-col leading-tight">
                               <span className="text-[13px]" style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>{item.labelAr}</span>
@@ -434,7 +453,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link href="/notifications">
                 <button className="relative p-2 rounded-lg transition-colors" style={{ color: "var(--text-tertiary)" }}>
                   <Bell size={16} />
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center text-[8px] font-bold animate-pulse"
+                      style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
               </Link>
               <Link href="/messages">

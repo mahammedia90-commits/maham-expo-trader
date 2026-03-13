@@ -39,7 +39,7 @@ export default function Operations() {
           <p className="text-[10px] t-gold/50 font-['Inter']">Operational Services</p>
         </div>
         <button
-          onClick={() => toast.info("طلب خدمة جديدة — سيتم التواصل معك خلال ٢٤ ساعة")}
+          onClick={() => toast.success("✅ تم إرسال طلب الخدمة بنجاح — سيتم التواصل معك خلال 24 ساعة")}
           className="btn-gold px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs flex items-center gap-1.5"
         >
           <Plus size={13} />

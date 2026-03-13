@@ -98,7 +98,7 @@ export default function BrowseExpos() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedExpo, setSelectedExpo] = useState<Expo | null>(null);
   const [showGuard, setShowGuard] = useState(false);
-  const { canBook } = useAuth();
+  const { canBook, addNotification, addPendingBooking } = useAuth();
 
   const filtered = expos.filter(e => {
     const matchSearch = search === "" || e.nameAr.includes(search) || e.nameEn.toLowerCase().includes(search.toLowerCase()) || e.descAr.includes(search);
@@ -347,7 +347,18 @@ export default function BrowseExpos() {
                         </button>
                       </Link>
                       {canBook ? (
-                        <button onClick={() => { setSelectedExpo(null); toast.success("يمكنك الحجز مباشرة من الخريطة"); }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-gold transition-colors flex items-center justify-center gap-1.5">
+                        <button onClick={() => {
+                          addPendingBooking();
+                          addNotification({
+                            type: "booking",
+                            titleAr: `حجز جديد — ${selectedExpo?.nameAr}`,
+                            titleEn: `New Booking — ${selectedExpo?.nameEn}`,
+                            message: `تم إنشاء حجز جديد في ${selectedExpo?.nameAr}. يرجى إكمال الدفع لتأكيد الحجز.`,
+                            link: "/bookings",
+                          });
+                          setSelectedExpo(null);
+                          toast.success("تم إنشاء الحجز بنجاح! انتقل للحجوزات لإكمال الدفع");
+                        }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-gold transition-colors flex items-center justify-center gap-1.5">
                           <CreditCard size={14} />
                           احجز الآن
                         </button>

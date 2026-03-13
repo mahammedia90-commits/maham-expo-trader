@@ -20,6 +20,17 @@ export interface TraderProfile {
   registeredAt: string;
 }
 
+export interface Notification {
+  id: string;
+  type: "booking" | "payment" | "contract" | "system";
+  titleAr: string;
+  titleEn: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  link?: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -30,6 +41,14 @@ interface AuthContextType {
   otpVerified: boolean;
   phoneNumber: string;
   canBook: boolean;
+  // Notifications
+  notifications: Notification[];
+  unreadCount: number;
+  pendingBookingsCount: number;
+  addNotification: (n: Omit<Notification, "id" | "read" | "createdAt">) => void;
+  markNotificationRead: (id: string) => void;
+  markAllRead: () => void;
+  addPendingBooking: () => void;
   // Actions
   setPhoneNumber: (phone: string) => void;
   sendOTP: (phone?: string) => Promise<boolean>;
@@ -44,6 +63,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = "maham_trader_auth";
 
+const NOTIF_STORAGE_KEY = "maham_notifications";
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [trader, setTrader] = useState<TraderProfile | null>(null);
@@ -51,12 +72,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
   const [otpCode] = useState(() => {
     // Generate a random 4-digit OTP for demo
     return String(Math.floor(1000 + Math.random() * 9000));
   });
 
-  // Load saved auth state
+  // Load saved auth state + notifications
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -67,6 +90,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuthStep("complete");
         setOtpVerified(true);
       }
+      const savedNotifs = localStorage.getItem(NOTIF_STORAGE_KEY);
+      if (savedNotifs) {
+        setNotifications(JSON.parse(savedNotifs));
+      }
+      const savedPending = localStorage.getItem("maham_pending_bookings");
+      if (savedPending) setPendingBookingsCount(parseInt(savedPending) || 0);
     } catch {
       // ignore
     }
@@ -135,13 +164,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [trader]);
 
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const addNotification = useCallback((n: Omit<Notification, "id" | "read" | "createdAt">) => {
+    const newNotif: Notification = {
+      ...n,
+      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+    setNotifications(prev => {
+      const updated = [newNotif, ...prev];
+      localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const markNotificationRead = useCallback((id: string) => {
+    setNotifications(prev => {
+      const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
+      localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const markAllRead = useCallback(() => {
+    setNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, read: true }));
+      localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const addPendingBooking = useCallback(() => {
+    setPendingBookingsCount(prev => {
+      const next = prev + 1;
+      localStorage.setItem("maham_pending_bookings", String(next));
+      return next;
+    });
+  }, []);
+
   const logout = useCallback(() => {
     setTrader(null);
     setAuthStep("phone");
     setPhoneNumber("");
     setOtpSent(false);
     setOtpVerified(false);
+    setNotifications([]);
+    setPendingBookingsCount(0);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(NOTIF_STORAGE_KEY);
+    localStorage.removeItem("maham_pending_bookings");
   }, []);
 
   return (
@@ -155,6 +228,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       otpVerified,
       phoneNumber,
       canBook,
+      notifications,
+      unreadCount,
+      pendingBookingsCount,
+      addNotification,
+      markNotificationRead,
+      markAllRead,
+      addPendingBooking,
       setPhoneNumber,
       sendOTP,
       verifyOTP,

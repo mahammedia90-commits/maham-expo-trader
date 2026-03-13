@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import BookingGuard from "@/components/BookingGuard";
+import { generateBookingPDF } from "@/lib/pdfGenerator";
 
 interface Booking {
   id: string;
@@ -99,7 +100,7 @@ export default function Bookings() {
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showGuard, setShowGuard] = useState(false);
-  const { canBook } = useAuth();
+  const { canBook, trader } = useAuth();
 
   const filtered = bookings.filter(b => {
     if (filterStatus !== "all" && b.status !== filterStatus) return false;
@@ -430,7 +431,31 @@ export default function Bookings() {
                       </Link>
                     )}
                     <button
-                      onClick={() => { toast.success("تم تحميل تفاصيل الحجز"); setSelectedBooking(null); }}
+                      onClick={async () => {
+                        toast.info("جاري إنشاء التقرير...");
+                        try {
+                          await generateBookingPDF({
+                            bookingId: selectedBooking.id,
+                            expoName: selectedBooking.eventEn || selectedBooking.event,
+                            boothNumber: selectedBooking.unitEn.match(/[A-Z]\d+/)?.[0] || selectedBooking.unitEn,
+                            boothType: selectedBooking.boothType.split("—")[1]?.trim() || selectedBooking.boothType.split(" — ")[1] || selectedBooking.boothType,
+                            boothSize: selectedBooking.boothSize.replace("م²", "sqm"),
+                            status: statusConfig[selectedBooking.status]?.en || selectedBooking.status,
+                            startDate: selectedBooking.date,
+                            endDate: selectedBooking.nextPaymentDate,
+                            totalCost: selectedBooking.price,
+                            paidAmount: selectedBooking.paidAmount,
+                            remaining: selectedBooking.remainingAmount,
+                            services: selectedBooking.services.map(s => {
+                              const map: Record<string,string> = {'كهرباء 3 فاز':'3-Phase Power','إنترنت فائق':'High-Speed Internet','تكييف مركزي':'Central AC','كهرباء':'Electricity','إنترنت':'Internet','موقع مميز':'Premium Location','شاشة LED':'LED Screen','تنظيف يومي':'Daily Cleaning'};
+                              return map[s] || s;
+                            }),
+                            traderName: trader?.name || "Trader",
+                            traderCompany: trader?.companyName || "Trader Company",
+                          });
+                          toast.success("تم تحميل تقرير الحجز بنجاح!");
+                        } catch { toast.error("حدث خطأ في إنشاء التقرير"); }
+                      }}
                       className="glass-card px-3 py-2.5 rounded-xl text-xs t-secondary flex items-center gap-1.5"
                     >
                       <Download size={13} />

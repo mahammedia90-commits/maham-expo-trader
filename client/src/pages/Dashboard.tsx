@@ -83,20 +83,22 @@ export default function Dashboard() {
           </div>
           <div className="space-y-2 sm:space-y-3">
             {recentBookings.map((b, i) => (
-              <div key={i} className="flex items-center justify-between py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors"
-                style={{ backgroundColor: "var(--glass-bg)" }}>
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                  {statusIcon(b.status)}
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm t-primary truncate">{b.zone}</p>
-                    <p className="text-[9px] sm:text-[10px] t-muted font-['Inter'] truncate">{b.zoneEn}</p>
+              <Link key={i} href="/bookings">
+                <div className="flex items-center justify-between py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors cursor-pointer hover:bg-[var(--glass-bg-hover)]"
+                  style={{ backgroundColor: "var(--glass-bg)" }}>
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    {statusIcon(b.status)}
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm t-primary truncate">{b.zone}</p>
+                      <p className="text-[9px] sm:text-[10px] t-muted font-['Inter'] truncate">{b.zoneEn}</p>
+                    </div>
+                  </div>
+                  <div className="text-left shrink-0 mr-2">
+                    <p className="text-[10px] sm:text-[11px] t-secondary font-['Inter']">{b.id}</p>
+                    <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">{b.date}</p>
                   </div>
                 </div>
-                <div className="text-left shrink-0 mr-2">
-                  <p className="text-[10px] sm:text-[11px] t-secondary font-['Inter']">{b.id}</p>
-                  <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">{b.date}</p>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </motion.div>

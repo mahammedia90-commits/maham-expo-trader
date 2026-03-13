@@ -4,8 +4,11 @@
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Download, PenLine, Shield, CheckCircle, Clock, AlertTriangle, X } from "lucide-react";
+import { FileText, Download, PenLine, Shield, CheckCircle, Clock, AlertTriangle, X, Send } from "lucide-react";
 import { toast } from "sonner";
+import { generateContractPDF } from "@/lib/pdfGenerator";
+import { useAuth } from "@/contexts/AuthContext";
+import ContractShare from "@/components/ContractShare";
 
 const contracts = [
   { id: "CT-2025-001", titleAr: "عقد إيجار بوث A1 — معرض الرياض الدولي", titleEn: "Lease Contract Booth A1 — Riyadh Intl Expo", booking: "BK-2025-001", value: "45,000 ريال", status: "signed", dateCreated: "2025-03-15", dateExpiry: "2025-06-15", parties: "شركة مهام إكسبو ↔ التاجر" },
@@ -22,6 +25,8 @@ const statusMap: Record<string, { ar: string; en: string; color: string; icon: t
 
 export default function Contracts() {
   const [selectedContract, setSelectedContract] = useState<typeof contracts[0] | null>(null);
+  const [shareContract, setShareContract] = useState<typeof contracts[0] | null>(null);
+  const { trader } = useAuth();
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -151,10 +156,21 @@ export default function Contracts() {
                       توقيع العقد
                     </button>
                   )}
-                  <button onClick={() => toast.info("جاري تحميل العقد...")}
+                  <button onClick={async () => {
+                    toast.info("جاري إنشاء العقد...");
+                    try {
+                      await generateContractPDF(getContractData(selectedContract));
+                      toast.success("تم تحميل العقد بنجاح!");
+                    } catch(e) { console.error('PDF ERROR:', e); toast.error("حدث خطأ في إنشاء العقد"); }
+                  }}
                     className="flex-1 glass-card py-2.5 rounded-xl text-xs t-secondary hover:t-gold flex items-center justify-center gap-1.5">
                     <Download size={14} />
                     تحميل PDF
+                  </button>
+                  <button onClick={() => { setShareContract(selectedContract); setSelectedContract(null); }}
+                    className="flex-1 glass-card py-2.5 rounded-xl text-xs t-gold flex items-center justify-center gap-1.5" style={{ border: "1px solid var(--gold-border)" }}>
+                    <Send size={14} />
+                    إرسال العقد
                   </button>
                 </div>
               </div>
@@ -162,6 +178,36 @@ export default function Contracts() {
           </>
         )}
       </AnimatePresence>
+      {/* Contract Share Modal */}
+      {shareContract && (
+        <ContractShare
+          isOpen={!!shareContract}
+          onClose={() => setShareContract(null)}
+          contractData={getContractData(shareContract)}
+        />
+      )}
     </div>
   );
+
+  function getContractData(c: typeof contracts[0]) {
+    return {
+      contractId: c.id,
+      bookingId: c.booking,
+      expoName: c.titleEn.split("—")[1]?.trim() || c.titleEn,
+      boothNumber: c.titleEn.match(/[A-Z]\d+/)?.[0] || "—",
+      boothSize: "9 sqm",
+      traderName: trader?.name || "Trader",
+      traderCompany: trader?.companyName || "Trader Company",
+      traderCR: "4030XXXXXX",
+      traderPhone: trader?.phone || "+966 5X XXX XXXX",
+      traderEmail: "trader@mahamexpo.sa",
+      totalValue: parseInt(c.value.replace(/[^\d]/g, "")) || 0,
+      deposit: Math.round((parseInt(c.value.replace(/[^\d]/g, "")) || 0) * 0.5),
+      remaining: Math.round((parseInt(c.value.replace(/[^\d]/g, "")) || 0) * 0.5),
+      startDate: c.dateCreated,
+      endDate: c.dateExpiry,
+      createdDate: c.dateCreated,
+      status: c.status,
+    };
+  }
 }

@@ -3,7 +3,9 @@
  * Mobile-first: responsive charts, stacked layout on mobile
  */
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, Users, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { BarChart3, TrendingUp, Users, DollarSign, ArrowUpRight, ArrowDownRight, Download } from "lucide-react";
+import { toast } from "sonner";
+import { generateAnalyticsPDF } from "@/lib/pdfGenerator";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
 const monthlyRevenue = [
@@ -54,9 +56,35 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function Analytics() {
   return (
     <div className="space-y-4 sm:space-y-5">
-      <div>
-        <h2 className="text-lg sm:text-xl font-bold t-primary">التحليلات والتقارير</h2>
-        <p className="text-[10px] t-gold/50 font-['Inter']">Analytics & Reports</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">التحليلات والتقارير</h2>
+          <p className="text-[10px] t-gold/50 font-['Inter']">Analytics & Reports</p>
+        </div>
+        <button
+          onClick={() => {
+            toast.info("جاري إنشاء التقرير...");
+            generateAnalyticsPDF({
+              period: "Q1 2025",
+              totalRevenue: 1250000,
+              totalBookings: 47,
+              occupancyRate: "87%",
+              topExpos: [
+                { name: "معرض الرياض الدولي للتقنية", revenue: 520000, bookings: 18 },
+                { name: "معرض الأغذية والمشروبات", revenue: 380000, bookings: 14 },
+                { name: "مؤتمر التقنية والابتكار", revenue: 230000, bookings: 10 },
+                { name: "مؤتمر AI السعودي", revenue: 120000, bookings: 5 },
+              ],
+              traderName: "نور كرم",
+            }).then(() => toast.success("تم تحميل التقرير بنجاح!")).catch(() => toast.error("حدث خطأ في إنشاء التقرير"));
+          }}
+          className="glass-card px-3 py-2 rounded-xl text-[11px] t-gold flex items-center gap-1.5"
+          style={{ border: "1px solid var(--gold-border)" }}
+        >
+          <Download size={13} />
+          <span className="hidden sm:inline">تصدير تقرير</span>
+          <span className="sm:hidden">PDF</span>
+        </button>
       </div>
 
       {/* KPIs — 2 cols on mobile */}
