@@ -4,11 +4,14 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { lazy, Suspense } from "react";
 import DashboardLayout from "./components/DashboardLayout";
 
 // Lazy load pages for performance
 const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ExpoMap = lazy(() => import("./pages/ExpoMap"));
 const Bookings = lazy(() => import("./pages/Bookings"));
@@ -35,9 +38,11 @@ function PageLoader() {
 
 function DashPage({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardLayout>
-      <Suspense fallback={<PageLoader />}>{children}</Suspense>
-    </DashboardLayout>
+    <ProtectedRoute>
+      <DashboardLayout>
+        <Suspense fallback={<PageLoader />}>{children}</Suspense>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }
 
@@ -46,6 +51,7 @@ function Router() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={() => <Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+        <Route path="/login" component={() => <Suspense fallback={<PageLoader />}><Login /></Suspense>} />
         <Route path="/dashboard" component={() => <DashPage><Dashboard /></DashPage>} />
         <Route path="/map" component={() => <DashPage><ExpoMap /></DashPage>} />
         <Route path="/bookings" component={() => <DashPage><Bookings /></DashPage>} />
@@ -72,10 +78,12 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable={true}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -13,6 +13,8 @@ import {
   ArrowLeft, Building2, Zap, Phone, Mail, Lock
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import BookingGuard from "@/components/BookingGuard";
 
 interface Booking {
   id: string;
@@ -97,6 +99,8 @@ export default function Bookings() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showGuard, setShowGuard] = useState(false);
+  const { canBook } = useAuth();
 
   const filtered = bookings.filter(b => {
     if (filterStatus !== "all" && b.status !== filterStatus) return false;
@@ -116,12 +120,19 @@ export default function Bookings() {
           <h2 className="text-xl font-bold t-primary">إدارة الحجوزات</h2>
           <p className="text-xs t-gold/50 font-['Inter']">Booking Management — Full Lifecycle</p>
         </div>
-        <Link href="/expos">
-          <button className="btn-gold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
+        {canBook ? (
+          <Link href="/expos">
+            <button className="btn-gold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
+              <Plus size={16} />
+              حجز جديد | New Booking
+            </button>
+          </Link>
+        ) : (
+          <button onClick={() => setShowGuard(true)} className="btn-gold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
             <Plus size={16} />
             حجز جديد | New Booking
           </button>
-        </Link>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -362,6 +373,9 @@ export default function Bookings() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Booking Guard — blocks booking without KYC */}
+      <BookingGuard isOpen={showGuard} onClose={() => setShowGuard(false)} onProceedToKYC={() => setShowGuard(false)} />
     </div>
   );
 }

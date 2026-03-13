@@ -123,17 +123,17 @@ export default function Home() {
 
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <img src={LOGO_URL} alt="Maham Expo" className="h-14 sm:h-16 mx-auto mb-6 object-contain" />
+            <img src={LOGO_URL} alt="Maham Expo" className="h-16 sm:h-20 mx-auto mb-6 object-contain" style={{ filter: isDark ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-3 leading-tight">
               <span className="text-gold-gradient">بوابة التاجر الذكية</span>
             </h1>
             <p className="text-base sm:text-lg mb-2 font-['Inter'] font-light tracking-wide t-secondary">
               Smart Trader Portal
             </p>
-            <p className="text-sm sm:text-base max-w-3xl mx-auto mb-4 leading-relaxed t-tertiary">
+            <p className="text-sm sm:text-base max-w-3xl mx-auto mb-4 leading-relaxed" style={{ color: isDark ? 'var(--text-tertiary)' : '#2D2D48' }}>
               منصة متكاملة لإدارة حجوزاتك في المعارض والمؤتمرات والفعاليات الكبرى — مدعومة بالذكاء الاصطناعي
             </p>
-            <p className="text-xs max-w-2xl mx-auto mb-8 t-muted font-['Inter']">
+            <p className="text-xs max-w-2xl mx-auto mb-8 font-['Inter']" style={{ color: isDark ? 'var(--text-muted)' : '#4A4A65' }}>
               A comprehensive AI-powered platform for managing your exhibition, conference & event bookings — from browsing to booking to operations
             </p>
           </motion.div>
@@ -141,7 +141,7 @@ export default function Home() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
           >
-            <Link href="/dashboard">
+            <Link href="/login">
               <button className="btn-gold px-8 py-3.5 rounded-xl text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0">
                 دخول لوحة التحكم
                 <ArrowLeft size={18} />
@@ -168,8 +168,8 @@ export default function Home() {
             {stats.map((s, i) => (
               <div key={i} className="text-center">
                 <p className="text-2xl sm:text-3xl font-bold text-gold-gradient font-['Inter']">{s.value}</p>
-                <p className="text-[11px] t-secondary mt-1">{s.labelAr}</p>
-                <p className="text-[9px] t-muted font-['Inter']">{s.labelEn}</p>
+                <p className="text-[11px] mt-1 font-medium" style={{ color: isDark ? 'var(--text-secondary)' : '#1A1A30' }}>{s.labelAr}</p>
+                <p className="text-[9px] font-['Inter']" style={{ color: isDark ? 'var(--text-muted)' : '#5A5A72' }}>{s.labelEn}</p>
               </div>
             ))}
           </motion.div>
@@ -202,7 +202,7 @@ export default function Home() {
                   <s.icon size={24} className="t-gold" />
                 </div>
                 <h3 className="text-sm font-bold t-primary mb-0.5">{s.nameAr}</h3>
-                <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{s.nameEn}</p>
+                <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: isDark ? 0.6 : 0.8 }}>{s.nameEn}</p>
                 <p className="text-[11px] t-tertiary leading-relaxed">{s.descAr}</p>
               </motion.div>
             ))}
@@ -259,7 +259,7 @@ export default function Home() {
                   <f.icon size={20} className="t-gold" />
                 </div>
                 <h3 className="text-[13px] font-bold t-primary mb-0.5">{f.titleAr}</h3>
-                <p className="text-[9px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.5 }}>{f.titleEn}</p>
+                <p className="text-[9px] t-gold font-['Inter'] mb-2" style={{ opacity: isDark ? 0.5 : 0.8 }}>{f.titleEn}</p>
                 <p className="text-[11px] t-tertiary leading-relaxed">{f.descAr}</p>
               </motion.div>
             ))}
@@ -294,7 +294,7 @@ export default function Home() {
                 <img src={EXPO_HALL} alt="Exhibition Hall" className="w-full h-44 object-cover" style={{ opacity: isDark ? 0.8 : 0.9 }} />
                 <div className="p-5">
                   <h3 className="text-base font-bold t-primary mb-1">معارض عالمية المستوى</h3>
-                  <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.5 }}>World-Class Exhibitions</p>
+                  <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: isDark ? 0.5 : 0.8 }}>World-Class Exhibitions</p>
                   <p className="text-xs t-tertiary">إدارة احترافية لأكبر المعارض والمؤتمرات في المملكة — معرض الرياض الدولي، مؤتمر LEAP، معارض الأغذية والمشروبات</p>
                 </div>
               </div>
@@ -302,7 +302,7 @@ export default function Home() {
                 <img src={CONFERENCE} alt="Events" className="w-full h-44 object-cover" style={{ opacity: isDark ? 0.8 : 0.9 }} />
                 <div className="p-5">
                   <h3 className="text-base font-bold t-primary mb-1">فعاليات ضخمة وإدارة حشود</h3>
-                  <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.5 }}>Mega Events & Crowd Management</p>
+                  <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: isDark ? 0.5 : 0.8 }}>Mega Events & Crowd Management</p>
                   <p className="text-xs t-tertiary">خبرة تشغيلية في بوليفارد وورلد، بوليفارد سيتي، موسم الرياض — إدارة حشود وتنظيم فعاليات بمعايير عالمية</p>
                 </div>
               </div>
@@ -419,7 +419,7 @@ export default function Home() {
               انضم لأكثر من 500 تاجر ومستثمر يستخدمون منصة مهام إكسبو لإدارة أعمالهم في المعارض والفعاليات
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard">
+              <Link href="/login">
                 <button className="btn-gold px-10 py-4 rounded-xl text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0">
                   <Sparkles size={18} />
                   ابدأ الآن مجاناً
@@ -441,7 +441,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <img src={LOGO_URL} alt="Maham Expo" className="h-10 mb-3 object-contain" />
+              <img src={LOGO_URL} alt="Maham Expo" className="h-10 mb-3 object-contain" style={{ filter: isDark ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
               <p className="text-xs t-tertiary leading-relaxed">
                 منصة مهام إكسبو — الحل المتكامل لإدارة المعارض والمؤتمرات والفعاليات في المملكة العربية السعودية
               </p>
@@ -484,7 +484,7 @@ export default function Home() {
             <p className="text-[10px] t-muted">
               © 2025 Maham Expo — Powered by MAHAM AI | جميع الحقوق محفوظة
             </p>
-            <p className="text-[9px] t-muted font-['Inter'] mt-1" style={{ opacity: 0.5 }}>
+            <p className="text-[9px] t-muted font-['Inter'] mt-1" style={{ opacity: isDark ? 0.5 : 0.7 }}>
               Exhibitions · Conferences · Events · Crowd Management · F&B · Retail · Real Estate · Technology
             </p>
           </div>

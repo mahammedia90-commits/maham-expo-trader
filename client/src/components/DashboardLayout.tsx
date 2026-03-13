@@ -7,11 +7,12 @@ import { useState, useCallback } from "react";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard, Map, CalendarCheck, FileText, CreditCard,
   Settings2, BarChart3, Bot, User, ChevronLeft, ChevronRight,
   Menu, X, Building2, MessageSquare, Star, Bell,
-  Shield, HelpCircle, Sun, Moon
+  Shield, HelpCircle, Sun, Moon, LogOut
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/mahamexpologo_4057b50b.webp";
@@ -82,6 +83,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { trader, logout } = useAuth();
+  const traderName = trader?.name || "التاجر";
+  const traderCompany = trader?.companyName || "";
 
   const currentItem = allNavItems.find(n => n.path === location) || allNavItems.find(n => location.startsWith(n.path));
 
@@ -96,8 +100,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-center py-5 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
-          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-7" : "h-9"}`} />
+        <div className="flex items-center justify-center py-6 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
+          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-8" : "h-11"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
         </div>
 
         {/* Nav Items */}
@@ -154,17 +158,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* Bottom: Theme Toggle + Collapse */}
+        {/* Bottom: Theme Toggle + Logout + Collapse */}
         <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
           {!collapsed && (
-            <button
-              onClick={toggleTheme}
-              className="w-full flex items-center gap-3 px-5 py-3 transition-colors"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
-            </button>
+            <>
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-5 py-2.5 transition-colors"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+              </button>
+              <button
+                onClick={() => { logout(); window.location.href = "/"; }}
+                className="w-full flex items-center gap-3 px-5 py-2.5 transition-colors"
+                style={{ color: "var(--status-red)" }}
+              >
+                <LogOut size={16} />
+                <span className="text-xs">تسجيل الخروج</span>
+              </button>
+            </>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
@@ -228,7 +242,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className="lg:hidden fixed top-0 right-0 h-full w-72 sidebar-glass z-50 p-5 overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-6">
-                <img src={LOGO_URL} alt="Maham Expo" className="h-7 object-contain" />
+                <img src={LOGO_URL} alt="Maham Expo" className="h-9 object-contain" style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
                 <button onClick={closeMobile} style={{ color: "var(--text-tertiary)" }}>
                   <X size={18} />
                 </button>
@@ -324,8 +338,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               </Link>
               <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs t-secondary">مرحباً، التاجر</span>
-                <span className="text-[9px]" style={{ color: "var(--gold-accent)", opacity: 0.6 }}>Welcome, Trader</span>
+                <span className="text-xs t-secondary">مرحباً، {traderName}</span>
+                <span className="text-[9px]" style={{ color: "var(--gold-accent)", opacity: 0.6 }}>{traderCompany}</span>
               </div>
               <Link href="/profile">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"

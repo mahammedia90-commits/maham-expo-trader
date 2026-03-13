@@ -11,6 +11,8 @@ import {
   Clock, X, Grid3X3, List, Sparkles, CreditCard, Map
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import BookingGuard from "@/components/BookingGuard";
 
 interface Expo {
   id: string;
@@ -95,6 +97,8 @@ export default function BrowseExpos() {
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedExpo, setSelectedExpo] = useState<Expo | null>(null);
+  const [showGuard, setShowGuard] = useState(false);
+  const { canBook } = useAuth();
 
   const filtered = expos.filter(e => {
     const matchSearch = search === "" || e.nameAr.includes(search) || e.nameEn.toLowerCase().includes(search.toLowerCase()) || e.descAr.includes(search);
@@ -330,12 +334,19 @@ export default function BrowseExpos() {
                 <div className="flex gap-3">
                   {selectedExpo.availableUnits > 0 ? (
                     <>
-                      <Link href="/map" className="flex-1">
-                        <button className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                      {canBook ? (
+                        <Link href="/map" className="flex-1">
+                          <button className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <Map size={16} />
+                            عرض الخريطة والحجز
+                          </button>
+                        </Link>
+                      ) : (
+                        <button onClick={() => { setSelectedExpo(null); setShowGuard(true); }} className="flex-1 btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
                           <Map size={16} />
                           عرض الخريطة والحجز
                         </button>
-                      </Link>
+                      )}
                       <Link href="/messages">
                         <button className="glass-card px-4 py-3 rounded-xl text-xs t-secondary transition-colors">
                           استفسار
@@ -357,6 +368,9 @@ export default function BrowseExpos() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Booking Guard — blocks booking without KYC */}
+      <BookingGuard isOpen={showGuard} onClose={() => setShowGuard(false)} onProceedToKYC={() => setShowGuard(false)} />
     </div>
   );
 }
