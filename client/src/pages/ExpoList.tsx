@@ -2,14 +2,15 @@
  * ExpoList — Browse Exhibitions, Conferences & Events
  * Design: Obsidian Glass with filterable cards, AI recommendations
  * Features: Search, filter by category/date/city, AI-recommended expos
+ * Fully localized via useLanguage()
  */
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Search, Filter, MapPin, Calendar, Users, Star, ArrowLeft,
-  Building2, Mic2, ShoppingBag, Cpu, Heart, Utensils, Sparkles,
-  ChevronDown, Eye, Bookmark, BookmarkCheck, Tag
+  Search, Filter, MapPin, Calendar, Users, Star, ArrowLeft, ArrowRight,
+  Building2, Mic2, ShoppingBag, Cpu, Heart, Sparkles,
+  Eye, Bookmark, BookmarkCheck, Tag
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -26,7 +27,6 @@ interface Expo {
   descAr: string;
   descEn: string;
   category: ExpoCategory;
-  categoryAr: string;
   cityAr: string;
   cityEn: string;
   venue: string;
@@ -53,7 +53,6 @@ const expos: Expo[] = [
     descAr: "أكبر معرض تقني في المنطقة يجمع أكثر من 500 شركة عالمية ومحلية في مجالات التقنية والذكاء الاصطناعي والأمن السيبراني",
     descEn: "The largest tech expo in the region bringing together 500+ global and local companies",
     category: "exhibition",
-    categoryAr: "معرض",
     cityAr: "الرياض",
     cityEn: "Riyadh",
     venue: "مركز الرياض الدولي للمؤتمرات والمعارض",
@@ -78,7 +77,6 @@ const expos: Expo[] = [
     descAr: "مؤتمر متخصص في تطبيقات الذكاء الاصطناعي في القطاعات الحكومية والخاصة مع ورش عمل تفاعلية",
     descEn: "Specialized conference on AI applications in government and private sectors",
     category: "conference",
-    categoryAr: "مؤتمر",
     cityAr: "الرياض",
     cityEn: "Riyadh",
     venue: "فندق الفيصلية",
@@ -103,7 +101,6 @@ const expos: Expo[] = [
     descAr: "معرض متخصص في صناعة الأغذية والمشروبات يضم أكثر من 200 علامة تجارية محلية ودولية",
     descEn: "Specialized F&B exhibition featuring 200+ local and international brands",
     category: "exhibition",
-    categoryAr: "معرض",
     cityAr: "جدة",
     cityEn: "Jeddah",
     venue: "مركز جدة للمعارض",
@@ -128,7 +125,6 @@ const expos: Expo[] = [
     descAr: "أكبر فعالية ترفيهية في الشرق الأوسط تضم مناطق ترفيهية ومطاعم ومحلات تجارية من جميع أنحاء العالم",
     descEn: "The largest entertainment event in the Middle East with global dining and retail",
     category: "festival",
-    categoryAr: "فعالية",
     cityAr: "الرياض",
     cityEn: "Riyadh",
     venue: "بوليفارد وورلد",
@@ -153,7 +149,6 @@ const expos: Expo[] = [
     descAr: "معرض متخصص في منتجات العناية الشخصية والصحة والجمال مع عروض حصرية",
     descEn: "Specialized expo for personal care, health and beauty products",
     category: "exhibition",
-    categoryAr: "معرض",
     cityAr: "الدمام",
     cityEn: "Dammam",
     venue: "مركز الظهران للمعارض",
@@ -178,7 +173,6 @@ const expos: Expo[] = [
     descAr: "مؤتمر يجمع رواد الأعمال والمستثمرين وصناديق رأس المال الجريء لبناء شراكات استراتيجية",
     descEn: "Conference bringing together entrepreneurs, investors and VCs for strategic partnerships",
     category: "conference",
-    categoryAr: "مؤتمر",
     cityAr: "الرياض",
     cityEn: "Riyadh",
     venue: "مركز الملك عبدالعزيز الدولي",
@@ -198,29 +192,49 @@ const expos: Expo[] = [
   },
 ];
 
-const categories: { value: ExpoCategory; labelAr: string; labelEn: string; icon: any }[] = [
-  { value: "all", labelAr: "الكل", labelEn: "All", icon: Building2 },
-  { value: "exhibition", labelAr: "معارض", labelEn: "Exhibitions", icon: ShoppingBag },
-  { value: "conference", labelAr: "مؤتمرات", labelEn: "Conferences", icon: Mic2 },
-  { value: "event", labelAr: "فعاليات", labelEn: "Events", icon: Cpu },
-  { value: "festival", labelAr: "مهرجانات", labelEn: "Festivals", icon: Heart },
-];
-
-const cities = ["الكل", "الرياض", "جدة", "الدمام", "مكة", "المدينة"];
-
 export default function ExpoList() {
   const { t, lang, isRTL } = useLanguage();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<ExpoCategory>("all");
-  const [city, setCity] = useState("الكل");
+  const [city, setCity] = useState("all");
   const [savedExpos, setSavedExpos] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
+  const isArabicLike = lang === "ar" || lang === "fa";
+
+  const getExpoName = (e: Expo) => isArabicLike ? e.nameAr : e.nameEn;
+  const getExpoDesc = (e: Expo) => isArabicLike ? e.descAr : e.descEn;
+  const getExpoCity = (e: Expo) => isArabicLike ? e.cityAr : e.cityEn;
+
+  const getCategoryLabel = (cat: ExpoCategory): string => {
+    const map: Record<ExpoCategory, string> = {
+      all: t("common.all"),
+      exhibition: t("expoList.exhibitions"),
+      conference: t("expoList.conferences"),
+      event: t("expoList.events"),
+      festival: t("expoList.festivals"),
+    };
+    return map[cat];
+  };
+
+  const categories: { value: ExpoCategory; icon: any }[] = [
+    { value: "all", icon: Building2 },
+    { value: "exhibition", icon: ShoppingBag },
+    { value: "conference", icon: Mic2 },
+    { value: "event", icon: Cpu },
+    { value: "festival", icon: Heart },
+  ];
+
   const filtered = useMemo(() => {
     return expos.filter((e) => {
-      const matchSearch = search === "" || e.nameAr.includes(search) || e.nameEn.toLowerCase().includes(search.toLowerCase()) || e.tags.some(t => t.includes(search));
+      const matchSearch = search === "" ||
+        e.nameAr.includes(search) ||
+        e.nameEn.toLowerCase().includes(search.toLowerCase()) ||
+        e.tags.some(tg => tg.includes(search));
       const matchCategory = category === "all" || e.category === category;
-      const matchCity = city === "الكل" || e.cityAr === city;
+      const matchCity = city === "all" ||
+        e.cityAr === city ||
+        e.cityEn.toLowerCase() === city.toLowerCase();
       return matchSearch && matchCategory && matchCity;
     });
   }, [search, category, city]);
@@ -231,15 +245,16 @@ export default function ExpoList() {
     setSavedExpos(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
-    toast.success(savedExpos.includes(id) ? "تم إزالة المعرض من المحفوظات" : "تم حفظ المعرض");
+    toast.success(savedExpos.includes(id) ? t("expoList.removed") : t("expoList.saved"));
   };
+
+  const DetailArrow = isRTL ? ArrowRight : ArrowLeft;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold t-primary">تصفح المعارض والفعاليات</h2>
-        <p className="text-xs text-[#C5A55A]/50 font-['Inter']">Browse Exhibitions, Conferences & Events</p>
+        <h2 className="text-xl font-bold t-primary">{t("expoList.browseTitle")}</h2>
       </div>
 
       {/* AI Recommendations Banner */}
@@ -250,8 +265,7 @@ export default function ExpoList() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={16} className="text-[#C5A55A]" />
-          <h3 className="text-sm font-bold text-[#C5A55A]">توصيات الذكاء الاصطناعي</h3>
-          <span className="text-[9px] t-muted font-['Inter']">AI Recommendations — Based on your sector & budget</span>
+          <h3 className="text-sm font-bold text-[#C5A55A]">{t("expoList.aiRecommendations")}</h3>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {aiRecommended.map((e) => (
@@ -259,13 +273,12 @@ export default function ExpoList() {
               <div className="min-w-[220px] p-3 rounded-xl bg-[var(--glass-bg)] border border-[rgba(197,165,90,0.1)] hover:border-[rgba(197,165,90,0.25)] transition-all cursor-pointer">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles size={10} className="text-[#C5A55A]" />
-                  <span className="text-[10px] text-[#C5A55A]">موصى به لك</span>
+                  <span className="text-[10px] text-[#C5A55A]">{t("expoList.aiRecommendedForYou")}</span>
                 </div>
-                <p className="text-xs font-bold t-primary mb-1 line-clamp-1">{e.nameAr}</p>
-                <p className="text-[9px] t-tertiary font-['Inter'] line-clamp-1">{e.nameEn}</p>
+                <p className="text-xs font-bold t-primary mb-1 line-clamp-1">{getExpoName(e)}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-[10px] t-tertiary">{e.cityAr}</span>
-                  <span className="text-[10px] text-green-400/70">{e.availableBooths} وحدة متاحة</span>
+                  <span className="text-[10px] t-tertiary">{getExpoCity(e)}</span>
+                  <span className="text-[10px] text-green-400/70">{e.availableBooths} {t("expoList.unitsAvailable")}</span>
                 </div>
               </div>
             </Link>
@@ -277,13 +290,13 @@ export default function ExpoList() {
       <div className="space-y-4">
         <div className="flex gap-3">
           <div className="flex-1 relative">
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-tertiary" />
+            <Search size={16} className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 t-tertiary`} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="ابحث عن معرض، مؤتمر، فعالية... | Search exhibitions..."
-              className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl pr-10 pl-4 py-3 text-sm t-primary placeholder:t-muted focus:outline-none gold-focus transition-colors"
+              placeholder={t("expoList.searchPlaceholder")}
+              className={`w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 text-sm t-secondary placeholder:t-muted focus:outline-none gold-focus`}
             />
           </div>
           <button
@@ -291,7 +304,7 @@ export default function ExpoList() {
             className={`glass-card px-4 rounded-xl flex items-center gap-2 text-sm transition-colors ${showFilters ? "text-[#C5A55A] border-[rgba(197,165,90,0.25)]" : "t-secondary"}`}
           >
             <Filter size={16} />
-            <span className="hidden sm:inline">فلترة</span>
+            <span className="hidden sm:inline">{t("expoList.filter")}</span>
           </button>
         </div>
 
@@ -308,8 +321,7 @@ export default function ExpoList() {
               }`}
             >
               <c.icon size={14} />
-              <span>{c.labelAr}</span>
-              <span className="text-[9px] opacity-50 font-['Inter']">{c.labelEn}</span>
+              <span>{getCategoryLabel(c.value)}</span>
             </button>
           ))}
         </div>
@@ -325,25 +337,28 @@ export default function ExpoList() {
             >
               <div className="glass-card rounded-2xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-[10px] t-tertiary mb-1.5 block">المدينة | City</label>
+                  <label className="text-[10px] t-tertiary mb-1.5 block">{t("expoList.cityFilter")}</label>
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
                   >
-                    {cities.map(c => <option key={c} value={c} className="bg-[#0A0A12]">{c}</option>)}
+                    <option value="all" className="bg-[#0A0A12]">{t("common.all")}</option>
+                    <option value="الرياض" className="bg-[#0A0A12]">{isArabicLike ? "الرياض" : "Riyadh"}</option>
+                    <option value="جدة" className="bg-[#0A0A12]">{isArabicLike ? "جدة" : "Jeddah"}</option>
+                    <option value="الدمام" className="bg-[#0A0A12]">{isArabicLike ? "الدمام" : "Dammam"}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] t-tertiary mb-1.5 block">السعر من | Price From</label>
-                  <input type="number" placeholder="0 ر.س" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
+                  <label className="text-[10px] t-tertiary mb-1.5 block">{t("expoList.priceFrom")}</label>
+                  <input type="number" placeholder={`0 ${t("common.sar")}`} className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
                 <div>
-                  <label className="text-[10px] t-tertiary mb-1.5 block">السعر إلى | Price To</label>
-                  <input type="number" placeholder="200,000 ر.س" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
+                  <label className="text-[10px] t-tertiary mb-1.5 block">{t("expoList.priceTo")}</label>
+                  <input type="number" placeholder={`200,000 ${t("common.sar")}`} className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
                 <div>
-                  <label className="text-[10px] t-tertiary mb-1.5 block">التاريخ | Date</label>
+                  <label className="text-[10px] t-tertiary mb-1.5 block">{t("expoList.dateFilter")}</label>
                   <input type="date" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
               </div>
@@ -355,8 +370,7 @@ export default function ExpoList() {
       {/* Results Count */}
       <div className="flex items-center justify-between">
         <p className="text-xs t-tertiary">
-          عرض <span className="text-[#C5A55A] font-['Inter']">{filtered.length}</span> نتيجة
-          <span className="t-muted font-['Inter'] mr-2">Showing {filtered.length} results</span>
+          {t("expoList.showingResults")} <span className="text-[#C5A55A] font-['Inter']">{filtered.length}</span>
         </p>
       </div>
 
@@ -376,10 +390,10 @@ export default function ExpoList() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A12] via-transparent to-transparent" />
               
               {/* Badges */}
-              <div className="absolute top-3 right-3 flex gap-2">
+              <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} flex gap-2`}>
                 {expo.featured && (
                   <span className="px-2 py-1 rounded-lg bg-[#C5A55A]/20 border border-[rgba(197,165,90,0.3)] text-[9px] text-[#E8D5A3] flex items-center gap-1">
-                    <Star size={10} /> مميز
+                    <Star size={10} /> {t("expoList.featured")}
                   </span>
                 )}
                 {expo.aiRecommended && (
@@ -392,7 +406,7 @@ export default function ExpoList() {
               {/* Save Button */}
               <button
                 onClick={(e) => { e.preventDefault(); toggleSave(expo.id); }}
-                className="absolute top-3 left-3 w-8 h-8 rounded-full glass-card flex items-center justify-center hover:bg-white/10 transition-colors"
+                className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} w-8 h-8 rounded-full glass-card flex items-center justify-center hover:bg-white/10 transition-colors`}
               >
                 {savedExpos.includes(expo.id) ? (
                   <BookmarkCheck size={14} className="text-[#C5A55A]" />
@@ -402,24 +416,23 @@ export default function ExpoList() {
               </button>
 
               {/* Category Badge */}
-              <div className="absolute bottom-3 right-3">
+              <div className={`absolute bottom-3 ${isRTL ? 'right-3' : 'left-3'}`}>
                 <span className="px-2.5 py-1 rounded-lg bg-[#0A0A12]/80 text-[10px] t-secondary">
-                  {expo.categoryAr}
+                  {getCategoryLabel(expo.category)}
                 </span>
               </div>
             </div>
 
             {/* Content */}
             <div className="p-5">
-              <h3 className="text-base font-bold t-primary mb-1 line-clamp-1">{expo.nameAr}</h3>
-              <p className="text-[11px] text-[#C5A55A]/50 font-['Inter'] mb-3 line-clamp-1">{expo.nameEn}</p>
-              <p className="text-xs t-tertiary mb-4 line-clamp-2 leading-relaxed">{expo.descAr}</p>
+              <h3 className="text-base font-bold t-primary mb-1 line-clamp-1">{getExpoName(expo)}</h3>
+              <p className="text-xs t-tertiary mb-4 line-clamp-2 leading-relaxed">{getExpoDesc(expo)}</p>
 
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin size={12} className="text-[#C5A55A]/60" />
-                  <span className="text-[11px] t-secondary">{expo.cityAr}</span>
+                  <span className="text-[11px] t-secondary">{getExpoCity(expo)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={12} className="text-[#C5A55A]/60" />
@@ -427,7 +440,7 @@ export default function ExpoList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Users size={12} className="text-[#C5A55A]/60" />
-                  <span className="text-[11px] t-secondary">{expo.visitors} زائر</span>
+                  <span className="text-[11px] t-secondary">{expo.visitors} {t("expoList.visitor")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star size={12} className="text-[#FBBF24]" />
@@ -447,14 +460,13 @@ export default function ExpoList() {
               {/* Price & Availability */}
               <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
                 <div>
-                  <p className="text-[10px] t-tertiary">يبدأ من | Starting from</p>
+                  <p className="text-[10px] t-tertiary">{t("expoList.startingFrom")}</p>
                   <p className="text-base font-bold text-[#C5A55A] font-['Inter']">
-                    {expo.priceFrom.toLocaleString()} <span className="text-xs t-tertiary">ر.س</span>
+                    {expo.priceFrom.toLocaleString()} <span className="text-xs t-tertiary">{t("common.sar")}</span>
                   </p>
                 </div>
-                <div className="text-left">
-                  <p className="text-[10px] text-green-400/70">{expo.availableBooths} وحدة متاحة</p>
-                  <p className="text-[9px] t-muted font-['Inter']">{expo.availableBooths} units available</p>
+                <div className={isRTL ? "text-left" : "text-right"}>
+                  <p className="text-[10px] text-green-400/70">{expo.availableBooths} {t("expoList.unitsAvailable")}</p>
                 </div>
               </div>
 
@@ -462,14 +474,14 @@ export default function ExpoList() {
               <div className="flex gap-3 mt-4">
                 <Link href={`/expo/${expo.id}`} className="flex-1">
                   <button className="w-full btn-gold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2">
-                    عرض التفاصيل
-                    <ArrowLeft size={14} />
+                    {t("expoList.viewDetails")}
+                    <DetailArrow size={14} />
                   </button>
                 </Link>
                 <Link href={`/expo/${expo.id}`}>
                   <button className="glass-card px-4 py-2.5 rounded-xl text-xs t-secondary hover:text-[#C5A55A] flex items-center gap-1.5 transition-colors">
                     <Eye size={14} />
-                    الخريطة
+                    {t("expoList.viewMap")}
                   </button>
                 </Link>
               </div>
@@ -482,8 +494,7 @@ export default function ExpoList() {
       {filtered.length === 0 && (
         <div className="text-center py-16">
           <Search size={40} className="mx-auto t-muted mb-4" />
-          <p className="text-sm t-tertiary">لا توجد نتائج مطابقة</p>
-          <p className="text-xs t-muted font-['Inter']">No matching results found</p>
+          <p className="text-sm t-tertiary">{t("expoList.noResults")}</p>
         </div>
       )}
     </div>

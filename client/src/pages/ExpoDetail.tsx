@@ -2,15 +2,15 @@
  * ExpoDetail — Exhibition Detail Page with Interactive Booth Map
  * Design: Obsidian Glass with interactive SVG booth map, countdown timer, booking flow
  * Features: Booth selection, temporary hold (30min), pricing, AI suggestions
+ * Fully localized via useLanguage()
  */
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowRight, MapPin, Calendar, Users, Star, Clock, Shield,
-  CheckCircle2, AlertTriangle, Lock, Sparkles, ChevronDown,
-  ChevronUp, Building2, Ruler, Zap, Eye, Phone, Mail,
-  FileText, CreditCard, Timer, XCircle, Info
+  ArrowRight, ArrowLeft, MapPin, Calendar, Users, Star, Clock, Shield,
+  CheckCircle2, Lock, Sparkles, Building2, Ruler, Zap, Eye,
+  CreditCard, Timer, Info
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -22,7 +22,6 @@ interface Booth {
   id: string;
   code: string;
   type: BoothType;
-  typeAr: string;
   size: string;
   sizeM2: number;
   price: number;
@@ -32,8 +31,7 @@ interface Booth {
   w: number;
   h: number;
   zone: string;
-  zoneAr: string;
-  features: string[];
+  featureKeys: string[];
 }
 
 const boothColors: Record<BoothStatus, string> = {
@@ -50,21 +48,20 @@ const boothBorders: Record<BoothStatus, string> = {
   "my-hold": "rgba(197, 165, 90, 0.8)",
 };
 
-// Generate booth grid
 const generateBooths = (): Booth[] => {
   const booths: Booth[] = [];
   const zones = [
-    { name: "A", nameAr: "المنطقة أ — الرئيسية", startX: 40, startY: 60 },
-    { name: "B", nameAr: "المنطقة ب — التقنية", startX: 40, startY: 260 },
-    { name: "C", nameAr: "المنطقة ج — الخدمات", startX: 440, startY: 60 },
-    { name: "D", nameAr: "المنطقة د — VIP", startX: 440, startY: 260 },
+    { name: "A", startX: 40, startY: 60 },
+    { name: "B", startX: 40, startY: 260 },
+    { name: "C", startX: 440, startY: 60 },
+    { name: "D", startX: 440, startY: 260 },
   ];
 
-  const types: { type: BoothType; typeAr: string; w: number; h: number; price: number; size: string; sizeM2: number }[] = [
-    { type: "standard", typeAr: "قياسي", w: 55, h: 45, price: 8000, size: "3×3", sizeM2: 9 },
-    { type: "premium", typeAr: "مميز", w: 70, h: 45, price: 15000, size: "4×3", sizeM2: 12 },
-    { type: "corner", typeAr: "زاوية", w: 70, h: 55, price: 20000, size: "4×4", sizeM2: 16 },
-    { type: "island", typeAr: "جزيرة", w: 85, h: 65, price: 45000, size: "6×4", sizeM2: 24 },
+  const types: { type: BoothType; w: number; h: number; price: number; size: string; sizeM2: number; featureKeys: string[] }[] = [
+    { type: "standard", w: 55, h: 45, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"] },
+    { type: "premium", w: 70, h: 45, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"] },
+    { type: "corner", w: 70, h: 55, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"] },
+    { type: "island", w: 85, h: 65, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"] },
   ];
 
   const statuses: BoothStatus[] = ["available", "available", "available", "reserved", "sold", "available"];
@@ -73,30 +70,22 @@ const generateBooths = (): Booth[] => {
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 5; col++) {
         const idx = row * 5 + col;
-        const t = types[idx % types.length];
+        const tp = types[idx % types.length];
         const s = statuses[(idx + zone.name.charCodeAt(0)) % statuses.length];
         booths.push({
           id: `${zone.name}-${row + 1}${col + 1}`,
           code: `${zone.name}${(row + 1) * 10 + col + 1}`,
-          type: t.type,
-          typeAr: t.typeAr,
-          size: t.size,
-          sizeM2: t.sizeM2,
-          price: t.price,
+          type: tp.type,
+          size: tp.size,
+          sizeM2: tp.sizeM2,
+          price: tp.price,
           status: s,
           x: zone.startX + col * 75,
           y: zone.startY + row * 60,
-          w: t.w,
-          h: t.h,
+          w: tp.w,
+          h: tp.h,
           zone: zone.name,
-          zoneAr: zone.nameAr,
-          features: t.type === "island"
-            ? ["كهرباء 3 فاز", "إنترنت فائق", "تكييف مركزي", "شاشة LED"]
-            : t.type === "corner"
-            ? ["كهرباء", "إنترنت", "واجهتين"]
-            : t.type === "premium"
-            ? ["كهرباء", "إنترنت", "موقع مميز"]
-            : ["كهرباء", "إنترنت"],
+          featureKeys: tp.featureKeys,
         });
       }
     }
@@ -114,10 +103,39 @@ export default function ExpoDetail() {
   const [countdown, setCountdown] = useState(0);
   const [zoneFilter, setZoneFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [showDetails, setShowDetails] = useState(true);
   const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "payment">("select");
 
-  // Countdown timer for held booth
+  const boothTypeLabel = (type: BoothType): string => {
+    const map: Record<BoothType, string> = {
+      standard: t("expoDetail.standard"),
+      premium: t("expoDetail.premium"),
+      corner: t("expoDetail.corner"),
+      island: t("expoDetail.island"),
+      kiosk: t("expoDetail.standard"),
+    };
+    return map[type];
+  };
+
+  const zoneLabel = (zone: string): string => {
+    const map: Record<string, string> = {
+      A: t("expoDetail.mainZone"),
+      B: t("expoDetail.techZone"),
+      C: t("expoDetail.servicesZone"),
+      D: t("expoDetail.vipZone"),
+    };
+    return map[zone] || zone;
+  };
+
+  const statusLabel = (status: BoothStatus): string => {
+    const map: Record<BoothStatus, string> = {
+      available: t("expoDetail.available"),
+      reserved: t("expoDetail.reserved"),
+      sold: t("expoDetail.sold"),
+      "my-hold": t("expoDetail.myHold"),
+    };
+    return map[status];
+  };
+
   useEffect(() => {
     if (!holdBooth || countdown <= 0) return;
     const timer = setInterval(() => {
@@ -126,15 +144,15 @@ export default function ExpoDetail() {
           clearInterval(timer);
           setHoldBooth(null);
           setBookingStep("select");
-          toast.error("انتهى وقت الحجز المؤقت! | Temporary hold expired!");
-          setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "available" } : b));
+          toast.error(t("expoDetail.holdExpired"));
+          setBooths(prev2 => prev2.map(b => b.id === holdBooth.id ? { ...b, status: "available" as BoothStatus } : b));
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [holdBooth, countdown]);
+  }, [holdBooth, countdown, t]);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -143,8 +161,12 @@ export default function ExpoDetail() {
   };
 
   const handleBoothClick = (booth: Booth) => {
-    if (booth.status === "sold" || booth.status === "reserved") {
-      toast.error(booth.status === "sold" ? "هذه الوحدة مباعة | This unit is sold" : "هذه الوحدة محجوزة | This unit is reserved");
+    if (booth.status === "sold") {
+      toast.error(t("expoDetail.unitSold"));
+      return;
+    }
+    if (booth.status === "reserved") {
+      toast.error(t("expoDetail.unitReserved"));
       return;
     }
     setSelectedBooth(booth);
@@ -153,11 +175,11 @@ export default function ExpoDetail() {
 
   const handleHoldBooth = () => {
     if (!selectedBooth) return;
-    setBooths(prev => prev.map(b => b.id === selectedBooth.id ? { ...b, status: "my-hold" } : b));
+    setBooths(prev => prev.map(b => b.id === selectedBooth.id ? { ...b, status: "my-hold" as BoothStatus } : b));
     setHoldBooth(selectedBooth);
-    setCountdown(30 * 60); // 30 minutes
+    setCountdown(30 * 60);
     setBookingStep("confirm");
-    toast.success("تم تثبيت الوحدة لمدة 30 دقيقة | Unit held for 30 minutes");
+    toast.success(t("expoDetail.unitHeld"));
   };
 
   const handleProceedToPayment = () => {
@@ -166,23 +188,23 @@ export default function ExpoDetail() {
 
   const handleConfirmPayment = () => {
     if (!holdBooth) return;
-    setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "sold" } : b));
+    setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "sold" as BoothStatus } : b));
     setHoldBooth(null);
     setSelectedBooth(null);
     setCountdown(0);
     setBookingStep("select");
-    toast.success("تم الحجز بنجاح! سيتم إنشاء العقد الإلكتروني | Booking confirmed! E-contract will be generated");
+    toast.success(t("expoDetail.bookingConfirmed"));
     setTimeout(() => navigate("/contracts"), 2000);
   };
 
   const handleCancelHold = () => {
     if (!holdBooth) return;
-    setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "available" } : b));
+    setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "available" as BoothStatus } : b));
     setHoldBooth(null);
     setSelectedBooth(null);
     setCountdown(0);
     setBookingStep("select");
-    toast.info("تم إلغاء الحجز المؤقت | Temporary hold cancelled");
+    toast.info(t("expoDetail.holdCancelled"));
   };
 
   const filteredBooths = useMemo(() => {
@@ -200,18 +222,19 @@ export default function ExpoDetail() {
     sold: booths.filter(b => b.status === "sold").length,
   }), [booths]);
 
+  const BackArrow = isRTL ? ArrowRight : ArrowLeft;
+
   return (
     <div className="space-y-6">
       {/* Back Navigation */}
       <div className="flex items-center gap-3">
         <Link href="/expos">
           <button className="glass-card p-2 rounded-lg t-secondary hover:text-[#C5A55A] transition-colors">
-            <ArrowRight size={18} />
+            <BackArrow size={18} />
           </button>
         </Link>
         <div>
-          <h2 className="text-lg font-bold t-primary">معرض الرياض الدولي للتقنية والابتكار</h2>
-          <p className="text-[10px] text-[#C5A55A]/50 font-['Inter']">Riyadh International Tech & Innovation Expo</p>
+          <h2 className="text-lg font-bold t-primary">{t("expoDetail.floorPlan")}</h2>
         </div>
       </div>
 
@@ -231,10 +254,10 @@ export default function ExpoDetail() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-[#E8D5A3]">
-                    الوحدة {holdBooth.code} محجوزة مؤقتاً
+                    {t("expoDetail.temporaryHold")} — {holdBooth.code}
                   </p>
-                  <p className="text-[10px] t-tertiary font-['Inter']">
-                    Unit {holdBooth.code} temporarily held — Complete payment before timer expires
+                  <p className="text-[10px] t-tertiary">
+                    {t("expoDetail.completePayment")}
                   </p>
                 </div>
               </div>
@@ -246,7 +269,7 @@ export default function ExpoDetail() {
                   onClick={handleCancelHold}
                   className="glass-card px-3 py-1.5 rounded-lg text-xs text-red-400/70 hover:text-red-400 transition-colors"
                 >
-                  إلغاء
+                  {t("expoDetail.cancel")}
                 </button>
               </div>
             </div>
@@ -259,38 +282,23 @@ export default function ExpoDetail() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="flex items-center gap-2">
             <MapPin size={14} className="text-[#C5A55A]/60" />
-            <div>
-              <p className="text-xs t-secondary">الرياض</p>
-              <p className="text-[9px] t-tertiary font-['Inter']">Riyadh</p>
-            </div>
+            <p className="text-xs t-secondary">{t("expoDetail.city")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Calendar size={14} className="text-[#C5A55A]/60" />
-            <div>
-              <p className="text-xs t-secondary font-['Inter']">15-19 Apr 2025</p>
-              <p className="text-[9px] t-tertiary">5 أيام</p>
-            </div>
+            <p className="text-xs t-secondary font-['Inter']">15-19 Apr 2025</p>
           </div>
           <div className="flex items-center gap-2">
             <Users size={14} className="text-[#C5A55A]/60" />
-            <div>
-              <p className="text-xs t-secondary">45,000+ زائر</p>
-              <p className="text-[9px] t-tertiary font-['Inter']">Expected visitors</p>
-            </div>
+            <p className="text-xs t-secondary">45,000+ {t("expoDetail.expectedVisitors")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Star size={14} className="text-[#FBBF24]" />
-            <div>
-              <p className="text-xs t-secondary font-['Inter']">4.8/5</p>
-              <p className="text-[9px] t-tertiary">التقييم</p>
-            </div>
+            <p className="text-xs t-secondary font-['Inter']">4.8/5 {t("expoDetail.rating")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Shield size={14} className="text-green-400/60" />
-            <div>
-              <p className="text-xs text-green-400/70">معتمد رسمياً</p>
-              <p className="text-[9px] t-tertiary font-['Inter']">Officially Licensed</p>
-            </div>
+            <p className="text-xs text-green-400/70">{t("expoDetail.officiallyLicensed")}</p>
           </div>
         </div>
       </div>
@@ -298,15 +306,14 @@ export default function ExpoDetail() {
       {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "إجمالي الوحدات", labelEn: "Total Units", value: stats.total, color: "t-secondary" },
-          { label: "متاحة", labelEn: "Available", value: stats.available, color: "text-green-400" },
-          { label: "محجوزة", labelEn: "Reserved", value: stats.reserved, color: "text-yellow-400" },
-          { label: "مباعة", labelEn: "Sold", value: stats.sold, color: "text-red-400" },
+          { label: t("expoDetail.totalUnits"), value: stats.total, color: "t-secondary" },
+          { label: t("expoDetail.available"), value: stats.available, color: "text-green-400" },
+          { label: t("expoDetail.reserved"), value: stats.reserved, color: "text-yellow-400" },
+          { label: t("expoDetail.sold"), value: stats.sold, color: "text-red-400" },
         ].map((s, i) => (
           <div key={i} className="glass-card rounded-xl p-3 text-center">
             <p className={`text-xl font-bold font-['Inter'] ${s.color}`}>{s.value}</p>
             <p className="text-[10px] t-tertiary mt-0.5">{s.label}</p>
-            <p className="text-[8px] t-muted font-['Inter']">{s.labelEn}</p>
           </div>
         ))}
       </div>
@@ -318,34 +325,29 @@ export default function ExpoDetail() {
           onChange={(e) => setZoneFilter(e.target.value)}
           className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
         >
-          <option value="all" className="bg-[#0A0A12]">كل المناطق | All Zones</option>
-          <option value="A" className="bg-[#0A0A12]">المنطقة أ — الرئيسية</option>
-          <option value="B" className="bg-[#0A0A12]">المنطقة ب — التقنية</option>
-          <option value="C" className="bg-[#0A0A12]">المنطقة ج — الخدمات</option>
-          <option value="D" className="bg-[#0A0A12]">المنطقة د — VIP</option>
+          <option value="all" className="bg-[#0A0A12]">{t("expoDetail.filterAllZones")}</option>
+          <option value="A" className="bg-[#0A0A12]">{t("expoDetail.mainZone")}</option>
+          <option value="B" className="bg-[#0A0A12]">{t("expoDetail.techZone")}</option>
+          <option value="C" className="bg-[#0A0A12]">{t("expoDetail.servicesZone")}</option>
+          <option value="D" className="bg-[#0A0A12]">{t("expoDetail.vipZone")}</option>
         </select>
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
           className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
         >
-          <option value="all" className="bg-[#0A0A12]">كل الأنواع | All Types</option>
-          <option value="standard" className="bg-[#0A0A12]">قياسي — Standard</option>
-          <option value="premium" className="bg-[#0A0A12]">مميز — Premium</option>
-          <option value="corner" className="bg-[#0A0A12]">زاوية — Corner</option>
-          <option value="island" className="bg-[#0A0A12]">جزيرة — Island</option>
+          <option value="all" className="bg-[#0A0A12]">{t("expoDetail.filterAllTypes")}</option>
+          <option value="standard" className="bg-[#0A0A12]">{t("expoDetail.standard")}</option>
+          <option value="premium" className="bg-[#0A0A12]">{t("expoDetail.premium")}</option>
+          <option value="corner" className="bg-[#0A0A12]">{t("expoDetail.corner")}</option>
+          <option value="island" className="bg-[#0A0A12]">{t("expoDetail.island")}</option>
         </select>
         {/* Legend */}
-        <div className="flex items-center gap-4 mr-auto">
-          {[
-            { status: "available", label: "متاح" },
-            { status: "reserved", label: "محجوز" },
-            { status: "sold", label: "مباع" },
-            { status: "my-hold", label: "حجزك" },
-          ].map((l) => (
-            <div key={l.status} className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: boothColors[l.status as BoothStatus], border: `1px solid ${boothBorders[l.status as BoothStatus]}` }} />
-              <span className="text-[10px] t-tertiary">{l.label}</span>
+        <div className={`flex items-center gap-4 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
+          {(["available", "reserved", "sold", "my-hold"] as BoothStatus[]).map((s) => (
+            <div key={s} className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: boothColors[s], border: `1px solid ${boothBorders[s]}` }} />
+              <span className="text-[10px] t-tertiary">{statusLabel(s)}</span>
             </div>
           ))}
         </div>
@@ -356,18 +358,17 @@ export default function ExpoDetail() {
         {/* SVG Map */}
         <div className="lg:col-span-2 glass-card rounded-2xl p-4 overflow-auto">
           <svg viewBox="0 0 850 460" className="w-full h-auto" style={{ minHeight: 350 }}>
-            {/* Background */}
             <rect x="0" y="0" width="850" height="460" fill="rgba(10,10,18,0.5)" rx="12" />
             
             {/* Zone Labels */}
-            <text x="200" y="45" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">Zone A — المنطقة أ</text>
-            <text x="200" y="245" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">Zone B — المنطقة ب</text>
-            <text x="600" y="45" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">Zone C — المنطقة ج</text>
-            <text x="600" y="245" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">Zone D — المنطقة د</text>
+            <text x="200" y="45" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.mainZone")}</text>
+            <text x="200" y="245" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.techZone")}</text>
+            <text x="600" y="45" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.servicesZone")}</text>
+            <text x="600" y="245" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.vipZone")}</text>
 
             {/* Entrance */}
             <rect x="370" y="420" width="110" height="30" fill="rgba(197,165,90,0.1)" stroke="rgba(197,165,90,0.3)" strokeWidth="1" rx="6" />
-            <text x="425" y="440" fill="rgba(197,165,90,0.6)" fontSize="10" textAnchor="middle" fontFamily="Inter">ENTRANCE | المدخل</text>
+            <text x="425" y="440" fill="rgba(197,165,90,0.6)" fontSize="10" textAnchor="middle" fontFamily="Inter">{t("expoDetail.entrance")}</text>
 
             {/* Booths */}
             {filteredBooths.map((booth) => (
@@ -414,46 +415,45 @@ export default function ExpoDetail() {
 
         {/* Detail Panel */}
         <div className="space-y-4">
-          {/* Selected Booth Info */}
           {selectedBooth ? (
             <motion.div
-              initial={{ opacity: 0, x: 10 }}
+              initial={{ opacity: 0, x: isRTL ? -10 : 10 }}
               animate={{ opacity: 1, x: 0 }}
               className="glass-card rounded-2xl p-5 border-[rgba(197,165,90,0.15)]"
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-[#E8D5A3]">الوحدة {selectedBooth.code}</h3>
-                  <p className="text-[10px] t-tertiary font-['Inter']">Unit {selectedBooth.code} — {selectedBooth.zoneAr}</p>
+                  <h3 className="text-base font-bold text-[#E8D5A3]">{selectedBooth.code}</h3>
+                  <p className="text-[10px] t-tertiary">{zoneLabel(selectedBooth.zone)}</p>
                 </div>
                 <span className={`px-2.5 py-1 rounded-lg text-[10px] ${
                   selectedBooth.status === "available" ? "bg-green-400/15 text-green-400" :
                   selectedBooth.status === "my-hold" ? "bg-[#C5A55A]/15 text-[#C5A55A]" :
                   "bg-yellow-400/15 text-yellow-400"
                 }`}>
-                  {selectedBooth.status === "available" ? "متاح" : selectedBooth.status === "my-hold" ? "حجزك" : "محجوز"}
+                  {statusLabel(selectedBooth.status)}
                 </span>
               </div>
 
               {/* Booth Details */}
               <div className="space-y-3 mb-5">
                 <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
-                  <span className="text-xs t-tertiary flex items-center gap-2"><Building2 size={12} /> النوع</span>
-                  <span className="text-xs t-secondary">{selectedBooth.typeAr}</span>
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Building2 size={12} /> {t("expoDetail.type")}</span>
+                  <span className="text-xs t-secondary">{boothTypeLabel(selectedBooth.type)}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
-                  <span className="text-xs t-tertiary flex items-center gap-2"><Ruler size={12} /> المساحة</span>
-                  <span className="text-xs t-secondary font-['Inter']">{selectedBooth.sizeM2} م² ({selectedBooth.size})</span>
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Ruler size={12} /> {t("expoDetail.area")}</span>
+                  <span className="text-xs t-secondary font-['Inter']">{selectedBooth.sizeM2} m² ({selectedBooth.size})</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
-                  <span className="text-xs t-tertiary flex items-center gap-2"><MapPin size={12} /> المنطقة</span>
-                  <span className="text-xs t-secondary">{selectedBooth.zoneAr}</span>
+                  <span className="text-xs t-tertiary flex items-center gap-2"><MapPin size={12} /> {t("expoDetail.zone")}</span>
+                  <span className="text-xs t-secondary">{zoneLabel(selectedBooth.zone)}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-xs t-tertiary flex items-center gap-2"><Zap size={12} /> المميزات</span>
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Zap size={12} /> {t("expoDetail.features")}</span>
                   <div className="flex gap-1 flex-wrap justify-end">
-                    {selectedBooth.features.map((f, i) => (
-                      <span key={i} className="px-1.5 py-0.5 rounded bg-[var(--glass-bg)] text-[9px] t-secondary">{f}</span>
+                    {selectedBooth.featureKeys.map((fk, i) => (
+                      <span key={i} className="px-1.5 py-0.5 rounded bg-[var(--glass-bg)] text-[9px] t-secondary">{t(fk)}</span>
                     ))}
                   </div>
                 </div>
@@ -461,11 +461,11 @@ export default function ExpoDetail() {
 
               {/* Price */}
               <div className="glass-card rounded-xl p-4 mb-4 text-center">
-                <p className="text-[10px] t-tertiary mb-1">السعر الإجمالي | Total Price</p>
+                <p className="text-[10px] t-tertiary mb-1">{t("expoDetail.totalPrice")}</p>
                 <p className="text-2xl font-bold text-[#C5A55A] font-['Inter']">
-                  {selectedBooth.price.toLocaleString()} <span className="text-sm t-tertiary">ر.س</span>
+                  {selectedBooth.price.toLocaleString()} <span className="text-sm t-tertiary">{t("common.sar")}</span>
                 </p>
-                <p className="text-[10px] t-muted mt-1">شامل ضريبة القيمة المضافة 15%</p>
+                <p className="text-[10px] t-muted mt-1">{t("expoDetail.vatIncluded")}</p>
               </div>
 
               {/* Booking Actions */}
@@ -476,10 +476,10 @@ export default function ExpoDetail() {
                     className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
                   >
                     <Lock size={14} />
-                    تثبيت الوحدة (30 دقيقة)
+                    {t("expoDetail.holdUnitMinutes")}
                   </button>
                   <p className="text-[9px] t-muted text-center flex items-center justify-center gap-1">
-                    <Info size={10} /> سيتم تثبيت الوحدة مؤقتاً لمدة 30 دقيقة لإتمام الدفع
+                    <Info size={10} /> {t("expoDetail.holdUnitNote")}
                   </p>
                 </div>
               )}
@@ -489,13 +489,10 @@ export default function ExpoDetail() {
                   <div className="glass-card rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <Shield size={14} className="text-green-400/70" />
-                      <p className="text-xs text-green-400/70">الإقرار القانوني</p>
+                      <p className="text-xs text-green-400/70">{t("expoDetail.legalAcknowledgment")}</p>
                     </div>
                     <p className="text-[10px] t-tertiary leading-relaxed">
-                      أقر بأنني أوافق على شروط وأحكام منصة مهام إكسبو، وأن أي محاولة للتواصل المباشر مع المستثمر خارج المنصة ستعرضني لغرامة مالية قدرها 50,000 ريال سعودي.
-                    </p>
-                    <p className="text-[9px] t-muted font-['Inter'] mt-1">
-                      I acknowledge that any attempt to bypass the platform will result in a 50,000 ر.س penalty.
+                      {t("expoDetail.legalText")}
                     </p>
                   </div>
                   <button
@@ -503,13 +500,13 @@ export default function ExpoDetail() {
                     className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
                   >
                     <CreditCard size={14} />
-                    الموافقة والمتابعة للدفع
+                    {t("expoDetail.proceedToPayment")}
                   </button>
                   <button
                     onClick={handleCancelHold}
                     className="w-full glass-card py-2.5 rounded-xl text-xs text-red-400/60 hover:text-red-400 transition-colors"
                   >
-                    إلغاء الحجز المؤقت
+                    {t("expoDetail.cancelHold")}
                   </button>
                 </div>
               )}
@@ -517,27 +514,27 @@ export default function ExpoDetail() {
               {bookingStep === "payment" && (
                 <div className="space-y-4">
                   <div className="glass-card rounded-xl p-4">
-                    <h4 className="text-xs font-bold t-secondary mb-3">ملخص الدفع | Payment Summary</h4>
+                    <h4 className="text-xs font-bold t-secondary mb-3">{t("expoDetail.paymentSummary")}</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
-                        <span className="t-tertiary">سعر الوحدة</span>
-                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.87).toLocaleString()} ر.س</span>
+                        <span className="t-tertiary">{t("expoDetail.unitPrice")}</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.87).toLocaleString()} {t("common.sar")}</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="t-tertiary">ضريبة القيمة المضافة (15%)</span>
-                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} ر.س</span>
+                        <span className="t-tertiary">{t("expoDetail.vat15")}</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} {t("common.sar")}</span>
                       </div>
                       <div className="flex justify-between text-xs pt-2 border-t border-[var(--glass-border)]">
-                        <span className="t-secondary font-bold">العربون (5%)</span>
-                        <span className="text-[#C5A55A] font-bold font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} ر.س</span>
+                        <span className="t-secondary font-bold">{t("expoDetail.deposit")} (5%)</span>
+                        <span className="text-[#C5A55A] font-bold font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} {t("common.sar")}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Payment Methods */}
                   <div className="space-y-2">
-                    <p className="text-[10px] t-tertiary">طريقة الدفع | Payment Method</p>
-                    {["بطاقة ائتمان | Credit Card", "مدى | Mada", "Apple Pay", "تحويل بنكي | Bank Transfer"].map((m, i) => (
+                    <p className="text-[10px] t-tertiary">{t("expoDetail.paymentMethod")}</p>
+                    {["Credit Card", "Mada", "Apple Pay", "Bank Transfer"].map((m, i) => (
                       <label key={i} className="flex items-center gap-3 glass-card rounded-xl p-3 cursor-pointer hover:bg-[var(--glass-bg)] transition-colors">
                         <input type="radio" name="payment" defaultChecked={i === 0} className="accent-[#C5A55A]" />
                         <span className="text-xs t-secondary">{m}</span>
@@ -550,10 +547,10 @@ export default function ExpoDetail() {
                     className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 size={14} />
-                    تأكيد الدفع — {(selectedBooth.price * 0.05).toLocaleString()} ر.س
+                    {t("expoDetail.confirmPayment")} — {(selectedBooth.price * 0.05).toLocaleString()} {t("common.sar")}
                   </button>
                   <p className="text-[9px] t-muted text-center">
-                    العربون غير مسترد | Deposit is non-refundable
+                    {t("expoDetail.depositNonRefundable")}
                   </p>
                 </div>
               )}
@@ -561,8 +558,7 @@ export default function ExpoDetail() {
           ) : (
             <div className="glass-card rounded-2xl p-8 text-center">
               <Eye size={32} className="mx-auto t-muted mb-3" />
-              <p className="text-sm t-tertiary">اختر وحدة من الخريطة</p>
-              <p className="text-[10px] t-muted font-['Inter']">Select a unit from the map</p>
+              <p className="text-sm t-tertiary">{t("expoDetail.selectUnit")}</p>
             </div>
           )}
 
@@ -570,13 +566,10 @@ export default function ExpoDetail() {
           <div className="glass-card rounded-2xl p-4 border-purple-400/10">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={14} className="text-purple-400" />
-              <h4 className="text-xs font-bold text-purple-300">اقتراح الذكاء الاصطناعي</h4>
+              <h4 className="text-xs font-bold text-purple-300">{t("expoDetail.aiSuggestion")}</h4>
             </div>
             <p className="text-[11px] t-tertiary leading-relaxed">
-              بناءً على نشاطك التجاري في قطاع التقنية، ننصحك بالوحدات في المنطقة ب (التقنية) — خاصة الوحدات الزاوية B21 و B31 لأنها تحقق أعلى نسبة مرور زوار (34% أكثر من الوحدات القياسية).
-            </p>
-            <p className="text-[9px] t-muted font-['Inter'] mt-2">
-              AI suggests Zone B corner units for 34% higher foot traffic based on your tech sector.
+              {t("expoDetail.aiSuggestionText")}
             </p>
           </div>
         </div>

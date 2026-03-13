@@ -1,10 +1,11 @@
 /**
  * ExpoMap — Interactive exhibition map with booth selection
  * Design: Obsidian Glass with gold-highlighted zones
+ * Fully localized via useLanguage()
  */
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Search, Filter, Eye, ShoppingCart, Info, ChevronDown } from "lucide-react";
+import { MapPin, Search, ShoppingCart, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -43,17 +44,17 @@ const statusColors: Record<BoothStatus, string> = {
   booked: "#F87171",
 };
 
-const statusLabels: Record<BoothStatus, { ar: string; en: string }> = {
-  available: { ar: "متاح", en: "Available" },
-  reserved: { ar: "محجوز مؤقتاً", en: "Reserved" },
-  booked: { ar: "مؤجر", en: "Booked" },
-};
-
 export default function ExpoMap() {
   const { t, lang, isRTL } = useLanguage();
   const [selected, setSelected] = useState<Booth | null>(null);
   const [filter, setFilter] = useState<BoothStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const statusLabels: Record<BoothStatus, string> = {
+    available: t("expoMap.statusAvailable"),
+    reserved: t("expoMap.statusReserved"),
+    booked: t("expoMap.statusBooked"),
+  };
 
   const filtered = booths.filter(b => {
     if (filter !== "all" && b.status !== filter) return false;
@@ -61,12 +62,14 @@ export default function ExpoMap() {
     return true;
   });
 
+  const getBoothName = (b: Booth) => lang === "ar" || lang === "fa" ? b.nameAr : b.nameEn;
+
   const handleBook = (booth: Booth) => {
     if (booth.status !== "available") {
-      toast.error("هذه الوحدة غير متاحة للحجز حالياً");
+      toast.error(t("expoMap.unitNotAvailable"));
       return;
     }
-    toast.success(`تم إضافة ${booth.nameAr} إلى سلة الحجوزات`);
+    toast.success(`${t("expoMap.addedToCart")} — ${getBoothName(booth)}`);
   };
 
   return (
@@ -74,27 +77,25 @@ export default function ExpoMap() {
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-tertiary" />
+          <Search size={16} className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 t-tertiary`} />
           <input
             type="text"
-            placeholder="ابحث عن وحدة... | Search units..."
+            placeholder={t("expoMap.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full glass-card rounded-xl pr-10 pl-4 py-3 text-sm t-primary placeholder:t-muted gold-focus bg-transparent"
+            className={`w-full glass-card rounded-xl ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 text-sm t-primary placeholder:t-muted gold-focus bg-transparent`}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {(["all", "available", "reserved", "booked"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-xl text-xs transition-all ${
-                filter === f
-                  ? "btn-gold"
-                  : "glass-card t-secondary hover:t-secondary"
+                filter === f ? "btn-gold" : "glass-card t-secondary hover:t-secondary"
               }`}
             >
-              {f === "all" ? "الكل" : statusLabels[f].ar}
+              {f === "all" ? t("common.all") : statusLabels[f]}
             </button>
           ))}
         </div>
@@ -103,7 +104,7 @@ export default function ExpoMap() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Map Area */}
         <div className="lg:col-span-2 glass-card rounded-2xl overflow-hidden relative" style={{ minHeight: "300px" }}>
-          <img src={MAP_BG} alt="Expo Map" className="w-full h-full object-cover absolute inset-0 opacity-60" />
+          <img src={MAP_BG} alt={t("expoMap.title")} className="w-full h-full object-cover absolute inset-0 opacity-60" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A12]/80 to-transparent" />
           
           {/* Booth Markers */}
@@ -136,14 +137,13 @@ export default function ExpoMap() {
           ))}
 
           {/* Legend */}
-          <div className="absolute bottom-4 right-4 glass-card rounded-xl p-3">
-            <p className="text-[10px] t-secondary mb-2">دليل الألوان | Legend</p>
+          <div className={`absolute bottom-4 ${isRTL ? 'right-4' : 'left-4'} glass-card rounded-xl p-3`}>
+            <p className="text-[10px] t-secondary mb-2">{t("expoMap.legend")}</p>
             <div className="space-y-1.5">
-              {(Object.entries(statusLabels) as [BoothStatus, { ar: string; en: string }][]).map(([key, val]) => (
+              {(["available", "reserved", "booked"] as BoothStatus[]).map((key) => (
                 <div key={key} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: statusColors[key] }} />
-                  <span className="text-[10px] t-secondary">{val.ar}</span>
-                  <span className="text-[9px] t-tertiary font-['Inter']">{val.en}</span>
+                  <span className="text-[10px] t-secondary">{statusLabels[key]}</span>
                 </div>
               ))}
             </div>
@@ -155,14 +155,14 @@ export default function ExpoMap() {
           {selected ? (
             <motion.div
               key={selected.id}
-              initial={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
               animate={{ opacity: 1, x: 0 }}
               className="glass-card rounded-2xl p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold t-primary">{selected.nameAr}</h3>
-                  <p className="text-xs t-gold/60 font-['Inter']">{selected.nameEn}</p>
+                  <h3 className="text-lg font-bold t-primary">{getBoothName(selected)}</h3>
+                  <p className="text-xs t-gold/60 font-['Inter']">{selected.id}</p>
                 </div>
                 <div
                   className="px-3 py-1 rounded-full text-[10px] font-medium"
@@ -172,22 +172,19 @@ export default function ExpoMap() {
                     border: `1px solid ${statusColors[selected.status]}30`,
                   }}
                 >
-                  {statusLabels[selected.status].ar}
+                  {statusLabels[selected.status]}
                 </div>
               </div>
 
               <div className="space-y-3 mb-6">
                 {[
-                  { labelAr: "رقم الوحدة", labelEn: "Unit ID", value: selected.id },
-                  { labelAr: "المنطقة", labelEn: "Zone", value: `المنطقة ${selected.zone}` },
-                  { labelAr: "المساحة", labelEn: "Size", value: selected.size },
-                  { labelAr: "السعر", labelEn: "Price", value: `${selected.price} ريال` },
+                  { label: t("expoMap.unitId"), value: selected.id },
+                  { label: t("expoMap.zone"), value: `${t("expoMap.zone")} ${selected.zone}` },
+                  { label: t("expoMap.size"), value: selected.size },
+                  { label: t("expoMap.price"), value: `${selected.price} ${t("common.sar")}` },
                 ].map((d, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
-                    <div>
-                      <span className="text-xs t-secondary">{d.labelAr}</span>
-                      <span className="text-[9px] t-muted font-['Inter'] mr-2">{d.labelEn}</span>
-                    </div>
+                    <span className="text-xs t-secondary">{d.label}</span>
                     <span className="text-sm t-primary font-medium">{d.value}</span>
                   </div>
                 ))}
@@ -199,40 +196,39 @@ export default function ExpoMap() {
                   className="w-full btn-gold py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
                 >
                   <ShoppingCart size={16} />
-                  احجز هذه الوحدة | Book This Unit
+                  {t("expoMap.bookUnit")}
                 </button>
               ) : (
                 <div className="w-full py-3 rounded-xl text-sm text-center t-tertiary bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                  هذه الوحدة غير متاحة حالياً
+                  {t("expoMap.unitNotAvailable")}
                 </div>
               )}
             </motion.div>
           ) : (
             <div className="glass-card rounded-2xl p-6 text-center">
               <Info size={32} className="mx-auto t-muted mb-3" />
-              <p className="text-sm t-tertiary">اختر وحدة من الخريطة لعرض التفاصيل</p>
-              <p className="text-[10px] t-muted font-['Inter'] mt-1">Select a unit from the map to view details</p>
+              <p className="text-sm t-tertiary">{t("expoMap.selectUnit")}</p>
             </div>
           )}
 
           {/* Available Units List */}
           <div className="glass-card rounded-2xl p-5">
-            <h4 className="text-sm font-bold t-primary mb-1">الوحدات المتاحة</h4>
-            <p className="text-[10px] t-gold/50 font-['Inter'] mb-3">Available Units ({filtered.filter(b => b.status === "available").length})</p>
+            <h4 className="text-sm font-bold t-primary mb-1">{t("expoMap.availableUnits")}</h4>
+            <p className="text-[10px] t-gold/50 font-['Inter'] mb-3">({filtered.filter(b => b.status === "available").length})</p>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {filtered.filter(b => b.status === "available").map((b) => (
                 <button
                   key={b.id}
                   onClick={() => setSelected(b)}
-                  className={`w-full text-right flex items-center justify-between p-3 rounded-xl transition-all ${
+                  className={`w-full ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between p-3 rounded-xl transition-all ${
                     selected?.id === b.id ? "bg-gold-subtle border border-[#C5A55A]/20" : "bg-[var(--glass-bg)] hover:bg-[var(--glass-bg)] border border-transparent"
                   }`}
                 >
                   <div>
-                    <p className="text-xs t-secondary">{b.nameAr}</p>
+                    <p className="text-xs t-secondary">{getBoothName(b)}</p>
                     <p className="text-[9px] t-tertiary font-['Inter']">{b.size}</p>
                   </div>
-                  <span className="text-xs t-gold font-['Inter']">{b.price} ر.س</span>
+                  <span className="text-xs t-gold font-['Inter']">{b.price} {t("common.sar")}</span>
                 </button>
               ))}
             </div>
