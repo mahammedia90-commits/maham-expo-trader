@@ -262,15 +262,15 @@ export default function BrowseExpos() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50"
-              style={{ backgroundColor: "var(--modal-overlay)" }}
+              className="fixed inset-0 z-50 backdrop-blur-sm"
+              style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
               onClick={() => setSelectedExpo(null)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[650px] md:max-h-[85vh] glass-card rounded-2xl z-50 overflow-y-auto"
+              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[650px] md:max-h-[85vh] modal-solid rounded-2xl z-50 overflow-y-auto"
               dir="rtl"
             >
               <div className="relative h-48">
@@ -301,7 +301,7 @@ export default function BrowseExpos() {
                     { icon: Building2, label: "الوحدات المتاحة", value: `${selectedExpo.availableUnits} / ${selectedExpo.totalUnits}` },
                     { icon: CreditCard, label: "نطاق الأسعار", value: `${selectedExpo.priceRange} SAR` },
                   ].map((d, i) => (
-                    <div key={i} className="p-3 rounded-xl" style={{ backgroundColor: "var(--glass-bg)" }}>
+                    <div key={i} className="p-3 rounded-xl modal-inner">
                       <div className="flex items-center gap-1.5 mb-1">
                         <d.icon size={12} className="t-gold" style={{ opacity: 0.6 }} />
                         <span className="text-[9px] t-muted">{d.label}</span>

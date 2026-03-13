@@ -256,14 +256,14 @@ export default function Bookings() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-50"
+              className="fixed inset-0 bg-black/70 z-50 backdrop-blur-sm"
               onClick={() => setSelectedBooking(null)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[600px] md:max-h-[80vh] glass-card rounded-2xl z-50 overflow-y-auto p-6"
+              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[600px] md:max-h-[80vh] modal-solid rounded-2xl z-50 overflow-y-auto p-6"
               dir="rtl"
             >
               <div className="flex items-center justify-between mb-5">
@@ -287,7 +287,7 @@ export default function Bookings() {
                     { label: "المنطقة", value: `Zone ${selectedBooking.zone}` },
                     { label: "تاريخ الحجز", value: selectedBooking.date },
                   ].map((d, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-[var(--glass-bg)]">
+                    <div key={i} className="p-3 rounded-xl modal-inner">
                       <p className="text-[9px] t-tertiary mb-1">{d.label}</p>
                       <p className="text-xs t-secondary">{d.value}</p>
                     </div>
@@ -295,7 +295,7 @@ export default function Bookings() {
                 </div>
 
                 {/* Financial Summary */}
-                <div className="glass-card rounded-xl p-4">
+                <div className="modal-inner rounded-xl p-4">
                   <h4 className="text-xs font-bold t-secondary mb-3">الملخص المالي | Financial Summary</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">

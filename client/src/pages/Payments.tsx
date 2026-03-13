@@ -263,14 +263,14 @@ export default function Payments() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-50"
+              className="fixed inset-0 bg-black/70 z-50 backdrop-blur-sm"
               onClick={() => !processing && setShowPayModal(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] glass-card rounded-2xl z-50 p-6"
+              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] modal-solid rounded-2xl z-50 p-6"
               dir="rtl"
             >
               <div className="flex items-center justify-between mb-5">
@@ -286,7 +286,7 @@ export default function Payments() {
               </div>
 
               {/* Payment Details */}
-              <div className="glass-card rounded-xl p-4 mb-5">
+              <div className="modal-inner rounded-xl p-4 mb-5">
                 <p className="text-xs t-secondary">{selectedPayment.descAr}</p>
                 <p className="text-2xl font-bold t-gold font-['Inter'] mt-2">
                   {selectedPayment.amount.toLocaleString()} <span className="text-sm t-tertiary">SAR</span>
