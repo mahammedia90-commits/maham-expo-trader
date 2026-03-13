@@ -370,6 +370,71 @@
     color: #1E1E32;
   }
 
+  /* Solid Modal — completely opaque for inner sections */
+  .solid-modal {
+    background: var(--modal-inner-bg);
+    border: 1px solid var(--glass-border);
+  }
+  :root:not(.dark) .solid-modal {
+    background: #FAFAF7;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+  }
+
+  /* ===== RESPONSIVE — Mobile First ===== */
+  @media (max-width: 768px) {
+    /* Sidebar mobile overlay */
+    .sidebar-glass {
+      position: fixed;
+      z-index: 50;
+      width: 280px;
+      height: 100vh;
+      top: 0;
+      right: 0;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    .sidebar-glass.open {
+      transform: translateX(0);
+    }
+
+    /* Modal mobile */
+    .modal-solid {
+      width: 95vw !important;
+      max-width: 95vw !important;
+      max-height: 90vh !important;
+      margin: auto;
+    }
+
+    /* Text sizes mobile */
+    .t-primary { font-size: 0.9rem; }
+
+    /* Table mobile */
+    table {
+      font-size: 0.75rem;
+    }
+    table th, table td {
+      padding: 0.5rem 0.4rem;
+    }
+
+    /* Glass card mobile */
+    .glass-card {
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal-solid {
+      width: 98vw !important;
+      max-width: 98vw !important;
+      border-radius: 0.75rem;
+    }
+    .btn-gold {
+      font-size: 0.8rem;
+      padding: 0.6rem 1rem;
+    }
+  }
+
   /* Scrollbar styling */
   ::-webkit-scrollbar {
     width: 6px;

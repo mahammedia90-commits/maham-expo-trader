@@ -213,7 +213,7 @@ export default function Login() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="rounded-2xl p-8 shadow-2xl"
+        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-8 shadow-2xl"
           style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)" }}>
           
           {/* Logo */}

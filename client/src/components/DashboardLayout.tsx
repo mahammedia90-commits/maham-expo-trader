@@ -305,13 +305,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 glass-card px-6 py-3" style={{ borderBottom: "1px solid var(--glass-border)" }}>
+        <header className="sticky top-0 z-30 glass-card px-3 sm:px-6 py-2 sm:py-3" style={{ borderBottom: "1px solid var(--glass-border)" }}>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-base font-bold text-gold-gradient font-['Inter']">
+              <h1 className="text-sm sm:text-base font-bold text-gold-gradient font-['Inter']">
                 {currentItem?.labelEn || "Dashboard"}
               </h1>
-              <p className="text-[10px] t-tertiary">
+              <p className="text-[9px] sm:text-[10px] t-tertiary">
                 {currentItem?.labelAr || "لوحة التحكم"}
               </p>
             </div>
@@ -352,7 +352,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <div className="p-4 lg:p-6">
+        <div className="p-2 sm:p-4 lg:p-6">
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 10 }}

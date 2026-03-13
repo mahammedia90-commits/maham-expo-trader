@@ -208,7 +208,7 @@ export default function Reviews() {
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
-                className="grid grid-cols-3 gap-3 mt-3"
+                className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3"
               >
                 <div>
                   <label className="text-[9px] t-tertiary block mb-1">الإيرادات (SAR)</label>

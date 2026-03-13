@@ -158,7 +158,7 @@ export default function Payments() {
           <h3 className="text-sm font-bold t-secondary">شفافية توزيع الإيرادات</h3>
           <span className="text-[9px] t-muted font-['Inter']">Revenue Split Transparency</span>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div className="p-4 rounded-xl bg-[var(--glass-bg)] text-center">
             <p className="text-[10px] t-tertiary mb-1">المستثمر (المنظم)</p>
             <p className="text-lg font-bold text-[var(--status-blue)] font-['Inter']">70%</p>
@@ -270,7 +270,7 @@ export default function Payments() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] modal-solid rounded-2xl z-50 p-6"
+              className="fixed inset-2 sm:inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] md:max-h-[90vh] modal-solid rounded-xl sm:rounded-2xl z-50 p-3 sm:p-6 overflow-y-auto"
               dir="rtl"
             >
               <div className="flex items-center justify-between mb-5">

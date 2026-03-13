@@ -294,7 +294,7 @@ export default function ExpoDetail() {
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "إجمالي الوحدات", labelEn: "Total Units", value: stats.total, color: "t-secondary" },
           { label: "متاحة", labelEn: "Available", value: stats.available, color: "text-green-400" },

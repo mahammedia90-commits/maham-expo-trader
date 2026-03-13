@@ -274,7 +274,7 @@ export default function Bookings() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[600px] md:max-h-[80vh] modal-solid rounded-2xl z-50 overflow-y-auto p-6"
+              className="fixed inset-2 sm:inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[600px] md:max-h-[85vh] modal-solid rounded-xl sm:rounded-2xl z-50 overflow-y-auto p-3 sm:p-6"
               dir="rtl"
             >
               <div className="flex items-center justify-between mb-5">

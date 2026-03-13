@@ -274,10 +274,10 @@ export default function BrowseExpos() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[650px] md:max-h-[85vh] modal-solid rounded-2xl z-50 overflow-y-auto"
+              className="fixed inset-1 sm:inset-3 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[650px] md:max-h-[85vh] modal-solid rounded-xl sm:rounded-2xl z-50 overflow-y-auto"
               dir="rtl"
             >
-              <div className="relative h-48">
+              <div className="relative h-36 sm:h-48">
                 <img src={selectedExpo.image} alt={selectedExpo.nameAr} className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), color-mix(in srgb, var(--surface-dark) 50%, transparent), transparent)" }} />
                 <button
@@ -293,7 +293,7 @@ export default function BrowseExpos() {
                 </div>
               </div>
 
-              <div className="p-6 space-y-5">
+              <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
                 <p className="text-xs t-tertiary leading-relaxed">{selectedExpo.descAr}</p>
 
                 <div className="grid grid-cols-2 gap-3">
