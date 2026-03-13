@@ -1,5 +1,6 @@
 /**
  * Profile — Trader Profile with real data from AuthContext
+import { useLanguage } from "@/contexts/LanguageContext";
  * Includes: Personal info, business info, KYC status, logout
  */
 import { useState } from "react";
@@ -12,8 +13,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Profile() {
+  const { t, lang, isRTL } = useLanguage();
   const { trader, logout, canBook } = useAuth();
   const [, navigate] = useLocation();
   const [showSensitive, setShowSensitive] = useState(false);

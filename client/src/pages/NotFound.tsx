@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Home } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation } from "wouter";
 
 export default function NotFound() {
+  const { t, lang, isRTL } = useLanguage();
   const [, setLocation] = useLocation();
 
   const handleGoHome = () => {

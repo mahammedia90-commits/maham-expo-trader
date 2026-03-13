@@ -18,6 +18,7 @@ import {
   CheckCircle, AlertTriangle, Clock, ArrowLeft
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { events2026, eventStats, type ExpoEvent } from "@/data/events2026";
 
 interface Message {
@@ -31,6 +32,7 @@ interface Message {
 }
 
 export default function AIAssistant() {
+  const { t, lang, isRTL } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);

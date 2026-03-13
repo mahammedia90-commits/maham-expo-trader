@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Search, Filter, Eye, ShoppingCart, Info, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const MAP_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/maham-map-overlay-5pDgnRKWBGMyWUThxqDPGn.webp";
 
@@ -49,6 +50,7 @@ const statusLabels: Record<BoothStatus, { ar: string; en: string }> = {
 };
 
 export default function ExpoMap() {
+  const { t, lang, isRTL } = useLanguage();
   const [selected, setSelected] = useState<Booth | null>(null);
   const [filter, setFilter] = useState<BoothStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");

@@ -11,6 +11,7 @@ import {
   MessageSquare, Star, Zap, Info
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type NotifType = "booking" | "payment" | "contract" | "security" | "system" | "ai" | "message" | "review";
 type NotifPriority = "high" | "medium" | "low";
@@ -47,6 +48,7 @@ const initialNotifications: Notification[] = [
 ];
 
 export default function Notifications() {
+  const { t, lang, isRTL } = useLanguage();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [filter, setFilter] = useState<"all" | NotifType>("all");
   const [showRead, setShowRead] = useState(true);

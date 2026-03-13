@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Settings2, Truck, ShieldCheck, Users, Wrench, Wifi, Zap, CheckCircle, Clock, AlertTriangle, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const services = [
   { id: 1, nameAr: "تصريح تشغيل", nameEn: "Operating Permit", icon: ShieldCheck, status: "approved", desc: "تصريح تشغيل البوث من الجهات المختصة", cost: "مجاني" },
@@ -31,6 +32,7 @@ const timeline = [
 ];
 
 export default function Operations() {
+  const { t, lang, isRTL } = useLanguage();
   return (
     <div className="space-y-4 sm:space-y-5">
       <div className="flex items-center justify-between">

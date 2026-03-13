@@ -9,6 +9,7 @@ import {
   Send, Copy, ExternalLink, FileText, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { generateContractPDF, type ContractData } from "@/lib/pdfGenerator";
 
 interface ContractShareProps {

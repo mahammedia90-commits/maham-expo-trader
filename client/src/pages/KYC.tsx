@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 
 type KYCStep = "personal" | "business" | "bank" | "documents" | "declaration" | "complete";
 
@@ -41,6 +42,7 @@ interface FormData {
 }
 
 export default function KYC() {
+  const { t, lang, isRTL } = useLanguage();
   const [currentStep, setCurrentStep] = useState<KYCStep>("personal");
   const [completedSteps, setCompletedSteps] = useState<KYCStep[]>([]);
   const [agreedTerms, setAgreedTerms] = useState(false);

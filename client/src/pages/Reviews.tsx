@@ -11,6 +11,7 @@ import {
   Send, Camera, ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ReviewItem {
   id: string;
@@ -93,6 +94,7 @@ function StarRating({ value, onChange, size = 20 }: { value: number; onChange: (
 }
 
 export default function Reviews() {
+  const { t, lang, isRTL } = useLanguage();
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");
   const [overallRating, setOverallRating] = useState(0);

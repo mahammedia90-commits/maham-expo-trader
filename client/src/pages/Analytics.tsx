@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { generateAnalyticsPDF } from "@/lib/pdfGenerator";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { events2026, eventStats } from "@/data/events2026";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -24,6 +25,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Analytics() {
+  const { t, lang, isRTL } = useLanguage();
   const { trader, bookings, payments, contracts } = useAuth();
 
   // Dynamic KPIs from real data

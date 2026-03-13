@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { generatePaymentsPDF, generateContractPDF } from "@/lib/pdfGenerator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { BookingRecord } from "@/contexts/AuthContext";
 
 const statusStyle: Record<string, { ar: string; color: string }> = {
@@ -23,6 +24,7 @@ const statusStyle: Record<string, { ar: string; color: string }> = {
 };
 
 export default function Payments() {
+  const { t, lang, isRTL } = useLanguage();
   const {
     trader, kycData, bookings, payments,
     addPayment, updateBookingPayment, addContract, markContractSent,

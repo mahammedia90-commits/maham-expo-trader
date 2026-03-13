@@ -1,17 +1,19 @@
 /**
  * DashboardLayout — Sidebar + main content area
- * Features: Bottom Nav (always visible on mobile), Back button, Logout, Responsive
+ * Features: Bottom Nav, Back button, Logout, Responsive, Language Switcher, Theme Toggle
  */
 import { useState, useCallback } from "react";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContext";
 import {
   LayoutDashboard, Map, CalendarCheck, FileText, CreditCard,
   Settings2, BarChart3, Bot, User, ChevronLeft, ChevronRight,
   Menu, X, Building2, MessageSquare, Star, Bell,
-  Shield, HelpCircle, Sun, Moon, LogOut, Phone, Mail, ArrowRight
+  Shield, HelpCircle, Sun, Moon, LogOut, Phone, Mail, ArrowRight,
+  Globe, Check
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,64 +22,137 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QX
 interface NavItem {
   path: string;
   icon: any;
-  labelAr: string;
-  labelEn: string;
+  labelKey: string;
   badge?: number;
   badgeKey?: "bookings" | "notifications" | "messages";
 }
 
-const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
-  {
-    titleAr: "الرئيسية", titleEn: "MAIN",
-    items: [
-      { path: "/dashboard", icon: LayoutDashboard, labelAr: "لوحة التحكم", labelEn: "Dashboard" },
-      { path: "/expos", icon: Building2, labelAr: "تصفح المعارض", labelEn: "Browse Expos" },
-      { path: "/map", icon: Map, labelAr: "خريطة المعرض", labelEn: "Expo Map" },
-    ],
-  },
-  {
-    titleAr: "الحجوزات والعقود", titleEn: "BOOKINGS",
-    items: [
-      { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings", badgeKey: "bookings" as const },
-      { path: "/contracts", icon: FileText, labelAr: "العقود", labelEn: "Contracts" },
-      { path: "/payments", icon: CreditCard, labelAr: "المدفوعات", labelEn: "Payments" },
-    ],
-  },
-  {
-    titleAr: "التشغيل والتحليل", titleEn: "OPERATIONS",
-    items: [
-      { path: "/operations", icon: Settings2, labelAr: "العمليات", labelEn: "Operations" },
-      { path: "/analytics", icon: BarChart3, labelAr: "التحليلات", labelEn: "Analytics" },
-      { path: "/ai-assistant", icon: Bot, labelAr: "المساعد الذكي", labelEn: "AI Assistant" },
-    ],
-  },
-  {
-    titleAr: "التواصل والتقييم", titleEn: "COMMUNICATION",
-    items: [
-      { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badgeKey: "messages" as const },
-      { path: "/notifications", icon: Bell, labelAr: "الإشعارات", labelEn: "Notifications", badgeKey: "notifications" as const },
-      { path: "/reviews", icon: Star, labelAr: "التقييمات", labelEn: "Reviews" },
-    ],
-  },
-  {
-    titleAr: "الحساب", titleEn: "ACCOUNT",
-    items: [
-      { path: "/profile", icon: User, labelAr: "الملف الشخصي", labelEn: "Profile" },
-      { path: "/kyc", icon: Shield, labelAr: "التحقق (KYC)", labelEn: "Verification" },
-      { path: "/help", icon: HelpCircle, labelAr: "المساعدة", labelEn: "Help Center" },
-    ],
-  },
-];
+function useNavSections(t: (key: string) => string): { titleKey: string; items: NavItem[] }[] {
+  return [
+    {
+      titleKey: "nav.dashboard",
+      items: [
+        { path: "/dashboard", icon: LayoutDashboard, labelKey: "nav.dashboard" },
+        { path: "/expos", icon: Building2, labelKey: "nav.expos" },
+        { path: "/map", icon: Map, labelKey: "nav.map" },
+      ],
+    },
+    {
+      titleKey: "nav.bookings",
+      items: [
+        { path: "/bookings", icon: CalendarCheck, labelKey: "nav.bookings", badgeKey: "bookings" as const },
+        { path: "/contracts", icon: FileText, labelKey: "nav.contracts" },
+        { path: "/payments", icon: CreditCard, labelKey: "nav.payments" },
+      ],
+    },
+    {
+      titleKey: "nav.operations",
+      items: [
+        { path: "/operations", icon: Settings2, labelKey: "nav.operations" },
+        { path: "/analytics", icon: BarChart3, labelKey: "nav.analytics" },
+        { path: "/ai-assistant", icon: Bot, labelKey: "nav.ai" },
+      ],
+    },
+    {
+      titleKey: "common.notifications",
+      items: [
+        { path: "/messages", icon: MessageSquare, labelKey: "nav.help", badgeKey: "messages" },
+        { path: "/notifications", icon: Bell, labelKey: "common.notifications", badgeKey: "notifications" },
+        { path: "/reviews", icon: Star, labelKey: "nav.help" },
+      ],
+    },
+    {
+      titleKey: "settings.profile",
+      items: [
+        { path: "/profile", icon: User, labelKey: "settings.profile" },
+        { path: "/kyc", icon: Shield, labelKey: "nav.kyc" },
+        { path: "/help", icon: HelpCircle, labelKey: "nav.help" },
+      ],
+    },
+  ];
+}
 
-const allNavItems = navSections.flatMap(s => s.items);
+function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
+  const { lang, setLang, t } = useLanguage();
+  const [open, setOpen] = useState(false);
 
-const mobileNavItems: NavItem[] = [
-  { path: "/expos", icon: Building2, labelAr: "المعارض", labelEn: "Expos" },
-  { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings", badgeKey: "bookings" },
-  { path: "/dashboard", icon: LayoutDashboard, labelAr: "الرئيسية", labelEn: "Home" },
-  { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badgeKey: "messages" },
-  { path: "/profile", icon: User, labelAr: "حسابي", labelEn: "Account" },
-];
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-2 rounded-lg transition-colors ${
+          compact ? "p-2" : "w-full px-3 py-3"
+        }`}
+        style={{
+          color: "var(--text-secondary)",
+          background: compact ? "transparent" : "var(--glass-bg)",
+          border: compact ? "none" : "1px solid var(--glass-border)",
+        }}
+        title={t("settings.language")}
+      >
+        <Globe size={16} />
+        {!compact && (
+          <>
+            <span className="text-xs flex-1 text-start">
+              {LANGUAGES.find(l => l.code === lang)?.nativeName}
+            </span>
+            <ChevronLeft size={12} className={`transition-transform ${open ? "rotate-90" : ""}`} />
+          </>
+        )}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <>
+            <div className="fixed inset-0 z-[100]" onClick={() => setOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className={`absolute z-[101] rounded-xl overflow-hidden shadow-2xl ${
+                compact ? "bottom-full mb-2 left-0" : "bottom-full mb-2 left-0 right-0"
+              }`}
+              style={{
+                background: "var(--sidebar-bg)",
+                backdropFilter: "blur(40px)",
+                border: "1px solid var(--glass-border)",
+                minWidth: compact ? "200px" : undefined,
+              }}
+            >
+              <div className="p-2">
+                <p className="px-2 py-1 text-[9px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                  {t("settings.language")}
+                </p>
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => { setLang(l.code); setOpen(false); toast.success(`${l.nativeName}`); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                      lang === l.code ? "bg-gold-subtle" : "hover:bg-[var(--glass-bg-hover)]"
+                    }`}
+                    style={lang === l.code ? { border: "1px solid var(--gold-border)" } : { border: "1px solid transparent" }}
+                  >
+                    <span className="text-base">{l.flag}</span>
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-xs font-medium" style={{ color: lang === l.code ? "var(--gold-light)" : "var(--text-secondary)" }}>
+                        {l.nativeName}
+                      </span>
+                      <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
+                        {l.name}
+                      </span>
+                    </div>
+                    {lang === l.code && <Check size={14} style={{ color: "var(--gold-accent)" }} />}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
@@ -85,8 +160,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { trader, logout, unreadCount, pendingBookingsCount } = useAuth();
-  const traderName = trader?.name || "التاجر";
+  const { t, lang, isRTL, dir } = useLanguage();
+  const traderName = trader?.name || t("settings.profile");
   const traderCompany = trader?.companyName || "";
+
+  const navSections = useNavSections(t);
+  const allNavItems = navSections.flatMap(s => s.items);
+
+  const mobileNavItems: NavItem[] = [
+    { path: "/expos", icon: Building2, labelKey: "nav.expos" },
+    { path: "/bookings", icon: CalendarCheck, labelKey: "nav.bookings", badgeKey: "bookings" },
+    { path: "/dashboard", icon: LayoutDashboard, labelKey: "nav.dashboard" },
+    { path: "/messages", icon: MessageSquare, labelKey: "nav.help", badgeKey: "messages" },
+    { path: "/profile", icon: User, labelKey: "settings.profile" },
+  ];
 
   const currentItem = allNavItems.find(n => n.path === location) || allNavItems.find(n => location.startsWith(n.path));
   const isSubPage = location !== "/dashboard" && location !== "/expos";
@@ -95,9 +182,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleLogout = useCallback(() => {
     logout();
-    toast.success("تم تسجيل الخروج بنجاح");
+    toast.success(t("nav.logout"));
     window.location.href = "/";
-  }, [logout]);
+  }, [logout, t]);
 
   const handleBack = useCallback(() => {
     if (window.history.length > 1) {
@@ -107,11 +194,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [navigate]);
 
+  // Dynamic positioning based on RTL/LTR
+  const sidebarSide = isRTL ? "right-0" : "left-0";
+  const mainMargin = isRTL
+    ? (collapsed ? "lg:mr-20" : "lg:mr-64")
+    : (collapsed ? "lg:ml-20" : "lg:ml-64");
+  const drawerSide = isRTL ? "right-0" : "left-0";
+  const drawerBorder = isRTL
+    ? { borderLeft: "1px solid var(--glass-border)" }
+    : { borderRight: "1px solid var(--glass-border)" };
+  const drawerInitial = isRTL ? { x: "100%" } : { x: "-100%" };
+
   return (
-    <div className="min-h-screen flex" dir="rtl">
+    <div className="min-h-screen flex" dir={dir}>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col sidebar-glass fixed top-0 right-0 h-screen z-40 transition-all duration-300 ${
+        className={`hidden lg:flex flex-col sidebar-glass fixed top-0 ${sidebarSide} h-screen z-40 transition-all duration-300 ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
@@ -132,8 +230,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {navSections.map((section, si) => (
             <div key={si} className="mb-2">
               {!collapsed && (
-                <p className="px-5 py-1.5 text-[9px] t-muted uppercase tracking-wider font-['Inter']">
-                  {section.titleEn}
+                <p className="px-5 py-1.5 text-[9px] t-muted uppercase tracking-wider">
+                  {t(section.titleKey)}
                 </p>
               )}
               {section.items.map((item) => {
@@ -168,16 +266,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         })()}
                       </div>
                       {!collapsed && (
-                        <div className="flex flex-col leading-tight flex-1">
-                          <span className="text-[13px] font-medium"
-                            style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>
-                            {item.labelAr}
-                          </span>
-                          <span className="text-[9px] font-['Inter']"
-                            style={{ color: isActive ? "var(--gold-accent)" : "var(--text-muted)" }}>
-                            {item.labelEn}
-                          </span>
-                        </div>
+                        <span className="text-[13px] font-medium"
+                          style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>
+                          {t(item.labelKey)}
+                        </span>
                       )}
                     </div>
                   </Link>
@@ -187,7 +279,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* Bottom: Theme Toggle + Logout + Collapse */}
+        {/* Bottom: Language + Theme Toggle + Logout + Collapse */}
         <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
           {!collapsed && (
             <>
@@ -205,10 +297,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Mail size={10} className="t-gold" style={{ opacity: 0.6 }} />
                   info@mahamexpo.sa
                 </a>
-                <a href="mailto:rent@mahamexpo.sa" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
-                  <Mail size={10} className="t-gold" style={{ opacity: 0.6 }} />
-                  rent@mahamexpo.sa
-                </a>
+              </div>
+              {/* Language Switcher */}
+              <div className="px-3 py-1.5">
+                <LanguageSwitcher />
               </div>
               <button
                 onClick={toggleTheme}
@@ -216,7 +308,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 style={{ color: "var(--text-tertiary)" }}
               >
                 {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+                <span className="text-xs">{theme === "dark" ? t("settings.light") : t("settings.dark")}</span>
               </button>
               <button
                 onClick={handleLogout}
@@ -224,16 +316,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 style={{ color: "var(--status-red)" }}
               >
                 <LogOut size={16} />
-                <span className="text-xs">تسجيل الخروج</span>
+                <span className="text-xs">{t("nav.logout")}</span>
               </button>
             </>
+          )}
+          {collapsed && (
+            <div className="flex flex-col items-center gap-2 py-2">
+              <LanguageSwitcher compact />
+              <button onClick={toggleTheme} className="p-2 rounded-lg" style={{ color: "var(--text-tertiary)" }}>
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+            </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex items-center justify-center w-full py-3 transition-colors"
             style={{ color: "var(--text-muted)" }}
           >
-            {collapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            {collapsed
+              ? (isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />)
+              : (isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />)
+            }
           </button>
         </div>
       </aside>
@@ -269,7 +372,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       ) : null;
                     })()}
                   </div>
-                  <span className="text-[10px] font-medium leading-tight">{item.labelAr}</span>
+                  <span className="text-[10px] font-medium leading-tight">{t(item.labelKey)}</span>
                   {isExactActive && (
                     <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
                   )}
@@ -284,7 +387,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             style={{ color: mobileOpen ? "var(--gold-accent)" : "var(--text-tertiary)" }}
           >
             <Menu size={20} strokeWidth={1.8} />
-            <span className="text-[10px] font-medium leading-tight">المزيد</span>
+            <span className="text-[10px] font-medium leading-tight">{t("common.filter")}</span>
           </button>
         </div>
       </nav>
@@ -302,16 +405,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onClick={closeMobile}
             />
             <motion.div
-              initial={{ x: "100%" }}
+              initial={drawerInitial}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              exit={drawerInitial}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-0 right-0 h-full w-[280px] z-[56] overflow-y-auto"
+              className={`lg:hidden fixed top-0 ${drawerSide} h-full w-[280px] z-[56] overflow-y-auto`}
               style={{
                 background: "var(--sidebar-bg)",
                 backdropFilter: "blur(40px)",
                 WebkitBackdropFilter: "blur(40px)",
-                borderLeft: "1px solid var(--glass-border)",
+                ...drawerBorder,
               }}
             >
               {/* Drawer Header */}
@@ -340,8 +443,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <nav className="p-3">
                 {navSections.map((section, si) => (
                   <div key={si} className="mb-3">
-                    <p className="px-2 py-1 text-[9px] t-muted uppercase tracking-wider font-['Inter']">
-                      {section.titleAr} · {section.titleEn}
+                    <p className="px-2 py-1 text-[9px] t-muted uppercase tracking-wider">
+                      {t(section.titleKey)}
                     </p>
                     {section.items.map((item) => {
                       const isActive = location === item.path;
@@ -369,10 +472,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 ) : null;
                               })()}
                             </div>
-                            <div className="flex flex-col leading-tight">
-                              <span className="text-[13px]" style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>{item.labelAr}</span>
-                              <span className="text-[9px] font-['Inter']" style={{ color: isActive ? "var(--gold-accent)" : "var(--text-muted)" }}>{item.labelEn}</span>
-                            </div>
+                            <span className="text-[13px]" style={{ color: isActive ? "var(--gold-light)" : "var(--text-secondary)" }}>
+                              {t(item.labelKey)}
+                            </span>
                           </div>
                         </Link>
                       );
@@ -383,13 +485,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Drawer Footer */}
               <div className="p-3 border-t mt-auto" style={{ borderColor: "var(--glass-border)" }}>
+                {/* Language Switcher */}
+                <div className="mb-2">
+                  <LanguageSwitcher />
+                </div>
                 <button
                   onClick={toggleTheme}
                   className="w-full flex items-center gap-3 px-3 py-3 rounded-xl mb-2"
                   style={{ color: "var(--text-secondary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
                 >
                   {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                  <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+                  <span className="text-xs">{theme === "dark" ? t("settings.light") : t("settings.dark")}</span>
                 </button>
                 <button
                   onClick={() => { closeMobile(); handleLogout(); }}
@@ -397,7 +503,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   style={{ color: "var(--status-red)", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.12)" }}
                 >
                   <LogOut size={16} />
-                  <span className="text-xs font-medium">تسجيل الخروج</span>
+                  <span className="text-xs font-medium">{t("nav.logout")}</span>
                 </button>
               </div>
             </motion.div>
@@ -407,9 +513,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main
-        className={`flex-1 min-h-screen transition-all duration-300 ${
-          collapsed ? "lg:mr-20" : "lg:mr-64"
-        }`}
+        className={`flex-1 min-h-screen transition-all duration-300 ${mainMargin}`}
         style={{ paddingBottom: "calc(70px + env(safe-area-inset-bottom, 0px))" }}
       >
         {/* Top Bar */}
@@ -427,26 +531,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   onClick={handleBack}
                   className="p-2 rounded-lg transition-colors shrink-0"
                   style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)" }}
-                  title="رجوع"
+                  title={t("common.back")}
                 >
-                  <ArrowRight size={16} />
+                  {isRTL ? <ArrowRight size={16} /> : <ChevronLeft size={16} />}
                 </button>
               )}
               <div>
-                <h1 className="text-sm sm:text-base font-bold text-gold-gradient font-['Inter']">
-                  {currentItem?.labelEn || "Dashboard"}
+                <h1 className="text-sm sm:text-base font-bold text-gold-gradient">
+                  {currentItem ? t(currentItem.labelKey) : t("nav.dashboard")}
                 </h1>
-                <p className="text-[9px] sm:text-[10px] t-tertiary">
-                  {currentItem?.labelAr || "لوحة التحكم"}
-                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* Language Switcher — compact in header */}
+              <LanguageSwitcher compact />
               <button
                 onClick={toggleTheme}
                 className="hidden sm:block p-2 rounded-lg transition-colors"
                 style={{ color: "var(--text-tertiary)" }}
-                title={theme === "dark" ? "Light Mode" : "Dark Mode"}
+                title={theme === "dark" ? t("settings.light") : t("settings.dark")}
               >
                 {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               </button>
@@ -467,8 +570,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ backgroundColor: "var(--status-blue)" }} />
                 </button>
               </Link>
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs t-secondary">مرحباً، {traderName}</span>
+              <div className="hidden sm:flex flex-col" style={{ textAlign: isRTL ? "left" : "right" }}>
+                <span className="text-xs t-secondary">{traderName}</span>
                 <span className="text-[9px]" style={{ color: "var(--gold-accent)", opacity: 0.6 }}>{traderCompany}</span>
               </div>
               <Link href="/profile">

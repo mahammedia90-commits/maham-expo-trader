@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import BookingGuard from "@/components/BookingGuard";
 import { generateBookingPDF } from "@/lib/pdfGenerator";
 
@@ -28,6 +29,7 @@ const statusConfig: Record<string, { ar: string; en: string; color: string; icon
 };
 
 export default function Bookings() {
+  const { t, lang, isRTL } = useLanguage();
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);

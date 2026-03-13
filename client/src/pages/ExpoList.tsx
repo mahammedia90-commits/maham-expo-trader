@@ -12,6 +12,7 @@ import {
   ChevronDown, Eye, Bookmark, BookmarkCheck, Tag
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const EXPO_HALL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/maham-expo-hall-m4YgR74uTYE4NetFPntQ7y.webp";
 const CONFERENCE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/maham-conference-4KK48Bkfs9akEJfJ3nqc96.webp";
@@ -208,6 +209,7 @@ const categories: { value: ExpoCategory; labelAr: string; labelEn: string; icon:
 const cities = ["الكل", "الرياض", "جدة", "الدمام", "مكة", "المدينة"];
 
 export default function ExpoList() {
+  const { t, lang, isRTL } = useLanguage();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<ExpoCategory>("all");
   const [city, setCity] = useState("الكل");

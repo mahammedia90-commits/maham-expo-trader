@@ -3,6 +3,7 @@
  * Shows clear steps for the trader to complete verification
  */
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation } from "wouter";
 import { ShieldCheck, FileText, CheckCircle2, AlertTriangle, ArrowLeft, X } from "lucide-react";
 

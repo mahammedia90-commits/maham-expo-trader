@@ -10,6 +10,7 @@ import {
   Check, CheckCheck, ArrowRight, XCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Conversation {
   id: string;
@@ -56,6 +57,7 @@ const sampleMessages: Message[] = [
 const blockedPatterns = ["رقم هاتف", "رقم جوال", "واتساب", "whatsapp", "phone", "email", "بريد إلكتروني", "تلقرام", "telegram", "@", "05", "+966"];
 
 export default function Messages() {
+  const { t, lang, isRTL } = useLanguage();
   const [activeConv, setActiveConv] = useState<string>("conv-1");
   const [messages, setMessages] = useState<Message[]>(sampleMessages);
   const [newMessage, setNewMessage] = useState("");

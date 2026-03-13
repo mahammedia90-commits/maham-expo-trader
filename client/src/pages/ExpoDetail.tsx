@@ -13,6 +13,7 @@ import {
   FileText, CreditCard, Timer, XCircle, Info
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type BoothStatus = "available" | "reserved" | "sold" | "my-hold";
 type BoothType = "standard" | "premium" | "corner" | "island" | "kiosk";
@@ -104,6 +105,7 @@ const generateBooths = (): Booth[] => {
 };
 
 export default function ExpoDetail() {
+  const { t, lang, isRTL } = useLanguage();
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [booths, setBooths] = useState<Booth[]>(generateBooths);

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import BookingGuard from "@/components/BookingGuard";
 import { events2026, eventCategories, eventStats, type ExpoEvent, type ExpoUnit } from "@/data/events2026";
 
@@ -31,6 +32,7 @@ export default function BrowseExpos() {
   const [showFilters, setShowFilters] = useState(false);
   const [cityFilter, setCityFilter] = useState("الكل");
   const { canBook, addNotification, addPendingBooking, addBooking } = useAuth();
+  const { t, lang, isRTL } = useLanguage();
   const [, navigate] = useLocation();
 
   const cities = useMemo(() => {
@@ -74,13 +76,13 @@ export default function BrowseExpos() {
   }, [search, activeCategory, cityFilter, sortBy]);
 
   const getStatusStyle = (status: string) => {
-    const map: Record<string, { ar: string; color: string }> = {
-      open: { ar: "متاح للحجز", color: "var(--status-green)" },
-      closing_soon: { ar: "يغلق قريباً", color: "var(--status-yellow)" },
-      full: { ar: "مكتمل", color: "var(--status-red)" },
-      upcoming: { ar: "قريباً", color: "var(--status-blue)" },
+    const map: Record<string, { label: string; color: string }> = {
+      open: { label: t("expos.open"), color: "var(--status-green)" },
+      closing_soon: { label: t("expos.closingSoon"), color: "var(--status-yellow)" },
+      full: { label: t("expos.full"), color: "var(--status-red)" },
+      upcoming: { label: t("expos.upcoming"), color: "var(--status-blue)" },
     };
-    return map[status] || { ar: status, color: "var(--text-tertiary)" };
+    return map[status] || { label: status, color: "var(--text-tertiary)" };
   };
 
   /** Book a specific unit — creates real booking record */
@@ -127,8 +129,8 @@ export default function BrowseExpos() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">تصفح المعارض والفعاليات 2026</h2>
-          <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {events2026.length} Events Available</p>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("expos.title")}</h2>
+          <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>{events2026.length} {t("expos.eventsAvailable")}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowFilters(!showFilters)} className={`p-2 rounded-lg transition-colors ${showFilters ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}>
@@ -147,7 +149,7 @@ export default function BrowseExpos() {
       <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
         <div className="flex-1 relative">
           <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
-          <input type="text" placeholder="ابحث عن معرض أو فعالية أو مكان..." value={search} onChange={(e) => setSearch(e.target.value)}
+          <input type="text" placeholder={t("expos.search")} value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus" style={{ backgroundColor: "var(--input-bg)" }} />
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
@@ -166,24 +168,24 @@ export default function BrowseExpos() {
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
             <div className="glass-card rounded-xl p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label className="text-[10px] t-muted mb-1 block">المدينة</label>
+                <label className="text-[10px] t-muted mb-1 block">{t("expos.city")}</label>
                 <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
                   className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-2 py-1.5 text-xs t-secondary">
                   {cities.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] t-muted mb-1 block">ترتيب حسب</label>
+                <label className="text-[10px] t-muted mb-1 block">{t("expos.sortBy")}</label>
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}
                   className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-2 py-1.5 text-xs t-secondary">
-                  <option value="date">التاريخ</option>
-                  <option value="price">السعر</option>
-                  <option value="rating">التقييم</option>
-                  <option value="availability">الوحدات المتاحة</option>
+                  <option value="date">{t("expos.sort.date")}</option>
+                  <option value="price">{t("expos.sort.price")}</option>
+                  <option value="rating">{t("expos.sort.rating")}</option>
+                  <option value="availability">{t("expos.sort.availability")}</option>
                 </select>
               </div>
               <div>
-                <label className="text-[10px] t-muted mb-1 block">الفئات المتبقية</label>
+                <label className="text-[10px] t-muted mb-1 block">{t("expos.remainingCategories")}</label>
                 <div className="flex gap-1 flex-wrap">
                   {eventCategories.slice(8).map(cat => (
                     <button key={cat.ar} onClick={() => setActiveCategory(cat.ar)}
@@ -195,7 +197,7 @@ export default function BrowseExpos() {
               </div>
               <div className="flex items-end">
                 <button onClick={() => { setActiveCategory("الكل"); setCityFilter("الكل"); setSortBy("date"); }}
-                  className="text-[10px] t-gold underline">إعادة تعيين الفلاتر</button>
+                  className="text-[10px] t-gold underline">{t("expos.resetFilters")}</button>
               </div>
             </div>
           </motion.div>
@@ -205,10 +207,10 @@ export default function BrowseExpos() {
       {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
-          { label: "فعاليات متاحة", value: eventStats.openEvents, color: "var(--status-green)", icon: Building2 },
-          { label: "يغلق قريباً", value: eventStats.closingSoon, color: "var(--status-yellow)", icon: Clock },
-          { label: "إجمالي الوحدات", value: eventStats.totalUnits.toLocaleString(), color: "var(--gold-accent)", icon: TrendingUp },
-          { label: "وحدات متاحة", value: eventStats.availableUnits.toLocaleString(), color: "var(--status-blue)", icon: Users },
+          { label: t("expos.eventsAvailable"), value: eventStats.openEvents, color: "var(--status-green)", icon: Building2 },
+          { label: t("expos.closingSoonCount"), value: eventStats.closingSoon, color: "var(--status-yellow)", icon: Clock },
+          { label: t("expos.totalUnits"), value: eventStats.totalUnits.toLocaleString(), color: "var(--gold-accent)", icon: TrendingUp },
+          { label: t("expos.availableUnitsCount"), value: eventStats.availableUnits.toLocaleString(), color: "var(--status-blue)", icon: Users },
         ].map((s, i) => (
           <div key={i} className="glass-card rounded-xl p-2 sm:p-3 text-center">
             <s.icon size={14} className="mx-auto mb-1" style={{ color: s.color, opacity: 0.7 }} />
@@ -220,7 +222,7 @@ export default function BrowseExpos() {
 
       {/* Results count */}
       <div className="flex items-center justify-between">
-        <p className="text-[10px] t-muted">{filtered.length} نتيجة {search && `لـ "${search}"`}</p>
+        <p className="text-[10px] t-muted">{filtered.length} {t("expos.results")} {search && `${t("expos.for")} "${search}"`}</p>
       </div>
 
       {/* Expo Grid */}
@@ -235,12 +237,12 @@ export default function BrowseExpos() {
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
                 <span className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
                   style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}>
-                  {sc.ar}
+                  {sc.label}
                 </span>
                 {expo.featured && (
                   <span className="absolute top-3 right-3 px-2 py-1 rounded-full text-[10px] bg-gold-subtle border-gold flex items-center gap-1"
                     style={{ color: "var(--gold-light)", border: "1px solid var(--gold-border)" }}>
-                    <Sparkles size={10} /> مميز
+                    <Sparkles size={10} /> {t("expos.featured")}
                   </span>
                 )}
                 <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
@@ -262,14 +264,14 @@ export default function BrowseExpos() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[9px] t-muted">الوحدات المتاحة</p>
+                    <p className="text-[9px] t-muted">{t("expos.availableUnits")}</p>
                     <p className="text-sm font-bold font-['Inter']">
                       <span style={{ color: expo.availableUnits > 0 ? "var(--status-green)" : "var(--status-red)" }}>{expo.availableUnits}</span>
                       <span className="t-muted text-[10px]"> / {expo.totalUnits}</span>
                     </p>
                   </div>
                   <div className="text-left">
-                    <p className="text-[9px] t-muted">نطاق الأسعار (ر.س)</p>
+                    <p className="text-[9px] t-muted">{t("expos.priceRange")} ({t("expos.sar")})</p>
                     <p className="text-xs t-gold font-['Inter']">{expo.priceRange}</p>
                   </div>
                 </div>
@@ -282,8 +284,8 @@ export default function BrowseExpos() {
       {filtered.length === 0 && (
         <div className="text-center py-12 glass-card rounded-2xl">
           <Search size={40} className="mx-auto t-muted mb-3" style={{ opacity: 0.3 }} />
-          <p className="text-sm t-tertiary">لا توجد نتائج مطابقة</p>
-          <p className="text-[10px] t-muted mt-1">جرب تغيير الفلاتر أو كلمة البحث</p>
+          <p className="text-sm t-tertiary">{t("expos.noResults")}</p>
+          <p className="text-[10px] t-muted mt-1">{t("expos.tryDifferent")}</p>
         </div>
       )}
 
@@ -319,12 +321,12 @@ export default function BrowseExpos() {
 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
-                    { icon: MapPin, label: "الموقع", value: selectedExpo.location },
-                    { icon: Calendar, label: "الفترة", value: `${selectedExpo.dateStart} — ${selectedExpo.dateEnd}` },
-                    { icon: Building2, label: "المكان", value: selectedExpo.venue },
-                    { icon: Star, label: "التصنيف", value: `${selectedExpo.category} · ${selectedExpo.categoryEn}` },
-                    { icon: Users, label: "الزوار المتوقعون", value: selectedExpo.footfall },
-                    { icon: CreditCard, label: "نطاق الأسعار", value: `${selectedExpo.priceRange} ر.س` },
+                    { icon: MapPin, label: t("expos.location"), value: selectedExpo.location },
+                    { icon: Calendar, label: t("expos.period"), value: `${selectedExpo.dateStart} — ${selectedExpo.dateEnd}` },
+                    { icon: Building2, label: t("expos.venue"), value: selectedExpo.venue },
+                    { icon: Star, label: t("expos.category"), value: `${selectedExpo.category} · ${selectedExpo.categoryEn}` },
+                    { icon: Users, label: t("expos.visitors"), value: selectedExpo.footfall },
+                    { icon: CreditCard, label: t("expos.priceRange"), value: `${selectedExpo.priceRange} ${t("expos.sar")}` },
                   ].map((d, i) => (
                     <div key={i} className="p-3 rounded-xl modal-inner">
                       <div className="flex items-center gap-1.5 mb-1">
@@ -338,7 +340,7 @@ export default function BrowseExpos() {
 
                 <div>
                   <div className="flex justify-between text-[10px] t-muted mb-1.5">
-                    <span>نسبة الإشغال</span>
+                    <span>{t("expos.occupancy")}</span>
                     <span className="font-['Inter']">{Math.round(((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100)}%</span>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--glass-bg)" }}>
@@ -346,8 +348,8 @@ export default function BrowseExpos() {
                       style={{ width: `${((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100}%`, backgroundColor: selectedExpo.availableUnits === 0 ? "var(--status-red)" : "var(--gold-accent)" }} />
                   </div>
                   <div className="flex justify-between text-[9px] t-muted mt-1">
-                    <span>الوحدات المتاحة: {selectedExpo.availableUnits}</span>
-                    <span>الإجمالي: {selectedExpo.totalUnits}</span>
+                    <span>{t("expos.availableUnits")}: {selectedExpo.availableUnits}</span>
+                    <span>{t("expos.total")}: {selectedExpo.totalUnits}</span>
                   </div>
                 </div>
 
@@ -356,25 +358,25 @@ export default function BrowseExpos() {
                     <>
                       <Link href="/map" className="flex-1">
                         <button className="w-full btn-gold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
-                          <Map size={15} /> عرض الخريطة والبوثات
+                          <Map size={15} /> {t("expos.viewMap")}
                         </button>
                       </Link>
                       <button onClick={() => {
                         if (!canBook) { setSelectedExpo(null); setShowGuard(true); return; }
                         setShowUnitPicker(true);
                       }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-gold transition-colors flex items-center justify-center gap-1.5">
-                        <CreditCard size={14} /> احجز الآن
+                        <CreditCard size={14} /> {t("expos.bookNow")}
                       </button>
                     </>
                   ) : selectedExpo.status === "upcoming" ? (
                     <button onClick={() => { toast.info("سيتم إشعارك عند فتح باب الحجز"); setSelectedExpo(null); }}
                       className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
-                      <Clock size={15} /> تنبيهي عند فتح الحجز
+                      <Clock size={15} /> {t("expos.notifyOpen")}
                     </button>
                   ) : (
                     <button onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات"); setSelectedExpo(null); }}
                       className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
-                      <Clock size={15} /> انضم لقائمة الانتظار
+                      <Clock size={15} /> {t("expos.waitlist")}
                     </button>
                   )}
                 </div>
@@ -401,7 +403,7 @@ export default function BrowseExpos() {
               <div className="px-4 sm:px-6 py-4">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-sm font-bold t-primary">اختر الوحدة للحجز</h3>
+                    <h3 className="text-sm font-bold t-primary">{t("expos.selectUnit")}</h3>
                     <p className="text-[10px] t-gold/50 font-['Inter']">{selectedExpo.nameEn}</p>
                   </div>
                   <button onClick={() => setShowUnitPicker(false)} className="p-2 rounded-lg t-tertiary" style={{ background: "var(--glass-bg)" }}>
@@ -412,7 +414,7 @@ export default function BrowseExpos() {
                 {/* KYC Requirement Notice */}
                 {!canBook && (
                   <div className="p-3 rounded-xl mb-3 bg-[var(--status-red)]/5 border border-[var(--status-red)]/10">
-                    <p className="text-[11px] text-[var(--status-red)]">يجب توثيق حسابك أولاً قبل الحجز</p>
+                    <p className="text-[11px] text-[var(--status-red)]">{t("expos.kycRequired")}</p>
                   </div>
                 )}
 
@@ -429,7 +431,7 @@ export default function BrowseExpos() {
                       <div className="flex items-center gap-3 text-[10px] t-tertiary mb-2">
                         <span>{unit.type}</span>
                         <span>{unit.size}</span>
-                        <span>عربون: {unit.deposit.toLocaleString()} ر.س</span>
+                        <span>{t("expos.deposit")}: {unit.deposit.toLocaleString()} {t("expos.sar")}</span>
                       </div>
                       <div className="flex items-center gap-1.5 flex-wrap mb-2">
                         {unit.services.map((s, j) => (
@@ -438,7 +440,7 @@ export default function BrowseExpos() {
                       </div>
                       <button onClick={() => handleBookUnit(selectedExpo, unit)}
                         className="w-full btn-gold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5">
-                        <CreditCard size={12} /> حجز هذه الوحدة
+                        <CreditCard size={12} /> {t("expos.bookUnit")}
                       </button>
                     </div>
                   ))}

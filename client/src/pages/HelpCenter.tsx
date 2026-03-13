@@ -11,6 +11,7 @@ import {
   Send, CheckCircle2, Clock, ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FAQ {
   id: string;
@@ -62,6 +63,7 @@ const faqs: FAQ[] = [
 const categories = ["الكل", "حجز", "دفع", "أمان", "عقود", "تحقق"];
 
 export default function HelpCenter() {
+  const { t, lang, isRTL } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);

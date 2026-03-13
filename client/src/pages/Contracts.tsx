@@ -10,6 +10,7 @@ import { FileText, Download, PenLine, Shield, CheckCircle, Clock, AlertTriangle,
 import { toast } from "sonner";
 import { generateContractPDF } from "@/lib/pdfGenerator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { ContractRecord } from "@/contexts/AuthContext";
 import ContractShare from "@/components/ContractShare";
 
@@ -20,6 +21,7 @@ const statusMap: Record<string, { ar: string; en: string; color: string; icon: t
 };
 
 export default function Contracts() {
+  const { t, lang, isRTL } = useLanguage();
   const { trader, kycData, contracts, bookings, markContractSent } = useAuth();
   const [selectedContract, setSelectedContract] = useState<ContractRecord | null>(null);
   const [shareContract, setShareContract] = useState<ContractRecord | null>(null);
