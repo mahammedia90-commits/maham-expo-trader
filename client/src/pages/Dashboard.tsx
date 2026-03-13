@@ -20,8 +20,9 @@ const statusIcon = (s: string) => {
 };
 
 export default function Dashboard() {
-  const { bookings, contracts, payments } = useAuth();
+  const { bookings, contracts, payments, trader } = useAuth();
   const { t, lang, isRTL } = useLanguage();
+  const isArabicLike = lang === "ar" || lang === "fa";
 
   const totalPaid = payments.filter(p => p.status === "completed").reduce((a, p) => a + p.amount, 0);
   const activeBookings = bookings.filter(b => b.status !== "cancelled").length;
@@ -32,9 +33,9 @@ export default function Dashboard() {
   const statusLabel = (s: string) => {
     const map: Record<string, string> = {
       pending_payment: t("bookings.pending"),
-      confirmed: t("bookings.confirmed") || (lang === "ar" ? "مؤكد" : "Confirmed"),
-      active: t("bookings.active") || (lang === "ar" ? "نشط" : "Active"),
-      cancelled: t("bookings.cancelled") || (lang === "ar" ? "ملغي" : "Cancelled"),
+      confirmed: t("bookings.confirmed"),
+      active: t("bookings.active"),
+      cancelled: t("bookings.cancelled"),
     };
     return map[s] || s;
   };
@@ -57,8 +58,30 @@ export default function Dashboard() {
     .filter(e => e.status === "open" || e.status === "upcoming" || e.status === "closing_soon")
     .slice(0, 3);
 
+  const needsVerification = trader && trader.kycStatus !== "verified";
+
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* KYC Verification Banner */}
+      {needsVerification && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl sm:rounded-2xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
+          style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))", border: "1px solid var(--gold-border)" }}>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(251,191,36,0.15)" }}>
+            <AlertTriangle size={20} style={{ color: "var(--status-yellow)" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm sm:text-base font-bold t-primary">{t("guard.mustVerifyFirst")}</p>
+            <p className="text-[10px] sm:text-xs t-tertiary mt-0.5">{t("guard.verificationMessage")}</p>
+          </div>
+          <Link href="/kyc">
+            <button className="btn-gold px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs whitespace-nowrap shrink-0">
+              {t("guard.completeKYC")}
+            </button>
+          </Link>
+        </motion.div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {stats.map((s, i) => (
@@ -95,8 +118,8 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     {statusIcon(b.status)}
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm t-primary truncate">{b.unitAr} — {b.expoNameAr}</p>
-                      <p className="text-[9px] sm:text-[10px] t-muted font-['Inter'] truncate">{b.unitEn}</p>
+                      <p className="text-xs sm:text-sm t-primary truncate">{isArabicLike ? b.unitAr : b.unitEn} — {isArabicLike ? b.expoNameAr : b.expoNameEn}</p>
+                      <p className="text-[9px] sm:text-[10px] t-muted font-['Inter'] truncate">{isArabicLike ? b.unitEn : b.unitAr}</p>
                     </div>
                   </div>
                   <div className={`${isRTL ? "text-left" : "text-right"} shrink-0 ${isRTL ? "mr-2" : "ml-2"}`}>
@@ -154,8 +177,8 @@ export default function Dashboard() {
                 <div className="flex items-start gap-3 mb-2">
                   <img src={e.image} alt={e.nameAr} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-semibold t-primary truncate">{e.nameAr}</p>
-                    <p className="text-[9px] sm:text-[10px] t-gold font-['Inter'] truncate" style={{ opacity: 0.6 }}>{e.nameEn}</p>
+                    <p className="text-xs sm:text-sm font-semibold t-primary truncate">{isArabicLike ? e.nameAr : e.nameEn}</p>
+                    <p className="text-[9px] sm:text-[10px] t-gold font-['Inter'] truncate" style={{ opacity: 0.6 }}>{isArabicLike ? e.nameEn : e.nameAr}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -168,7 +191,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-1.5 text-[9px] t-muted">
-                  <span className="flex items-center gap-0.5"><MapPin size={9} />{e.city}</span>
+                  <span className="flex items-center gap-0.5"><MapPin size={9} />{isArabicLike ? e.city : e.cityEn}</span>
                   <span className="flex items-center gap-0.5"><Star size={9} style={{ color: "var(--gold-accent)" }} />{e.rating}</span>
                   <span className="flex items-center gap-0.5"><Users size={9} />{e.footfall.split(" ")[0]}</span>
                 </div>

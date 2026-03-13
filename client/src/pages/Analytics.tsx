@@ -64,7 +64,8 @@ export default function Analytics() {
       insights.push({ icon: DollarSign, text: `${pendingPayments.length} ${t("analytics.pendingPaymentInsight")}`, type: "warning" });
     }
     const topEvent = events2026.reduce((a, b) => a.rating > b.rating ? a : b);
-    const eName = lang === "ar" ? topEvent.nameAr : topEvent.nameEn;
+    const useAr = lang === "ar" || lang === "fa";
+    const eName = useAr ? topEvent.nameAr : topEvent.nameEn;
     insights.push({ icon: Sparkles, text: `${t("analytics.topRated")}: ${eName} (${topEvent.rating}/5) — ${topEvent.availableUnits} ${t("analytics.unitsAvailable")}`, type: "info" });
     insights.push({ icon: Building2, text: `${t("common.total")} ${eventStats.totalUnits.toLocaleString()} ${t("analytics.unitsAcross")} ${eventStats.totalEvents} ${t("analytics.events")} — ${occupancyRate}% ${t("analytics.occupancy")}`, type: "success" });
     return insights;
@@ -93,7 +94,7 @@ export default function Analytics() {
               totalBookings: bookings.length,
               occupancyRate: `${occupancyRate}%`,
               topExpos: events2026.filter(e => e.featured).slice(0, 4).map(e => ({
-                name: lang === "ar" ? e.nameAr : e.nameEn, revenue: 0, bookings: e.totalUnits - e.availableUnits
+                name: (lang === "ar" || lang === "fa") ? e.nameAr : e.nameEn, revenue: 0, bookings: e.totalUnits - e.availableUnits
               })),
               traderName: trader?.name || t("common.trader"),
             }).then(() => toast.success(t("analytics.reportDownloaded"))).catch(() => toast.error(t("analytics.reportError")));

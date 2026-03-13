@@ -40,50 +40,41 @@ export default function Home() {
   ];
 
   const sectors = [
-    { icon: Utensils, name: lang === "ar" ? "المطاعم" : lang === "en" ? "Restaurants" : lang === "zh" ? "餐厅" : lang === "ru" ? "Рестораны" : lang === "fa" ? "رستوران‌ها" : "Restoranlar" },
-    { icon: Coffee, name: lang === "ar" ? "الكافيهات" : lang === "en" ? "Cafés" : lang === "zh" ? "咖啡馆" : lang === "ru" ? "Кафе" : lang === "fa" ? "کافه‌ها" : "Kafeler" },
-    { icon: ShoppingBag, name: lang === "ar" ? "البيع بالتجزئة" : lang === "en" ? "Retail" : lang === "zh" ? "零售" : lang === "ru" ? "Розница" : lang === "fa" ? "خرده‌فروشی" : "Perakende" },
-    { icon: Landmark, name: lang === "ar" ? "العقارات" : lang === "en" ? "Real Estate" : lang === "zh" ? "房地产" : lang === "ru" ? "Недвижимость" : lang === "fa" ? "املاک" : "Gayrimenkul" },
-    { icon: Cpu, name: lang === "ar" ? "التقنية" : lang === "en" ? "Technology" : lang === "zh" ? "科技" : lang === "ru" ? "Технологии" : lang === "fa" ? "فناوری" : "Teknoloji" },
-    { icon: PartyPopper, name: lang === "ar" ? "الترفيه" : lang === "en" ? "Entertainment" : lang === "zh" ? "娱乐" : lang === "ru" ? "Развлечения" : lang === "fa" ? "سرگرمی" : "Eğlence" },
+    { icon: Utensils, name: t("home.sector.restaurants") },
+    { icon: Coffee, name: t("home.sector.cafes") },
+    { icon: ShoppingBag, name: t("home.sector.retail") },
+    { icon: Landmark, name: t("home.sector.realEstate") },
+    { icon: Cpu, name: t("home.sector.technology") },
+    { icon: PartyPopper, name: t("home.sector.entertainment") },
   ];
 
   const howItWorks = [
-    { step: "01", title: lang === "ar" ? "تصفح المعارض" : lang === "en" ? "Browse Expos" : lang === "zh" ? "浏览展览" : lang === "ru" ? "Обзор выставок" : lang === "fa" ? "مرور نمایشگاه‌ها" : "Fuarları İncele", icon: Building2 },
-    { step: "02", title: lang === "ar" ? "اختر وحدتك" : lang === "en" ? "Select Your Unit" : lang === "zh" ? "选择展位" : lang === "ru" ? "Выберите стенд" : lang === "fa" ? "غرفه خود را انتخاب کنید" : "Biriminizi Seçin", icon: MapPin },
-    { step: "03", title: lang === "ar" ? "احجز وادفع" : lang === "en" ? "Book & Pay" : lang === "zh" ? "预订并支付" : lang === "ru" ? "Бронируйте и платите" : lang === "fa" ? "رزرو و پرداخت" : "Rezerve Et ve Öde", icon: CreditCard },
-    { step: "04", title: lang === "ar" ? "وقّع العقد" : lang === "en" ? "Sign Contract" : lang === "zh" ? "签署合同" : lang === "ru" ? "Подпишите контракт" : lang === "fa" ? "امضای قرارداد" : "Sözleşme İmzala", icon: FileText },
-    { step: "05", title: lang === "ar" ? "جهّز وانطلق" : lang === "en" ? "Setup & Launch" : lang === "zh" ? "准备并启动" : lang === "ru" ? "Подготовка и запуск" : lang === "fa" ? "آماده‌سازی و شروع" : "Hazırla ve Başla", icon: Rocket },
+    { step: "01", title: t("home.step.browse"), icon: Building2 },
+    { step: "02", title: t("home.step.select"), icon: MapPin },
+    { step: "03", title: t("home.step.book"), icon: CreditCard },
+    { step: "04", title: t("home.step.sign"), icon: FileText },
+    { step: "05", title: t("home.step.launch"), icon: Rocket },
   ];
 
   const features = [
-    { icon: Map, title: lang === "ar" ? "خريطة تفاعلية ذكية" : lang === "en" ? "Smart Interactive Map" : lang === "zh" ? "智能互动地图" : lang === "ru" ? "Умная интерактивная карта" : lang === "fa" ? "نقشه هوشمند تعاملی" : "Akıllı İnteraktif Harita" },
-    { icon: Lock, title: lang === "ar" ? "حجز فوري آمن" : lang === "en" ? "Instant Secure Booking" : lang === "zh" ? "即时安全预订" : lang === "ru" ? "Мгновенное бронирование" : lang === "fa" ? "رزرو فوری امن" : "Anında Güvenli Rezervasyon" },
-    { icon: Shield, title: lang === "ar" ? "حماية كاملة" : lang === "en" ? "Full Protection" : lang === "zh" ? "全面保护" : lang === "ru" ? "Полная защита" : lang === "fa" ? "حفاظت کامل" : "Tam Koruma" },
-    { icon: FileText, title: lang === "ar" ? "عقود إلكترونية" : lang === "en" ? "E-Contracts" : lang === "zh" ? "电子合同" : lang === "ru" ? "Электронные контракты" : lang === "fa" ? "قراردادهای الکترونیکی" : "E-Sözleşmeler" },
-    { icon: CreditCard, title: lang === "ar" ? "بوابة دفع متعددة" : lang === "en" ? "Multi-Payment Gateway" : lang === "zh" ? "多支付网关" : lang === "ru" ? "Мульти-платёж" : lang === "fa" ? "درگاه پرداخت چندگانه" : "Çoklu Ödeme Ağ Geçidi" },
-    { icon: Bot, title: lang === "ar" ? "مساعد MAHAM AI" : lang === "en" ? "MAHAM AI Assistant" : lang === "zh" ? "MAHAM AI助手" : lang === "ru" ? "Ассистент MAHAM AI" : lang === "fa" ? "دستیار MAHAM AI" : "MAHAM AI Asistanı" },
+    { icon: Map, title: t("home.feature.map") },
+    { icon: Lock, title: t("home.feature.booking") },
+    { icon: Shield, title: t("home.feature.protection") },
+    { icon: FileText, title: t("home.feature.contracts") },
+    { icon: CreditCard, title: t("home.feature.payment") },
+    { icon: Bot, title: t("home.feature.ai") },
   ];
 
   const faqs = [
-    {
-      q: lang === "ar" ? "كيف أحجز وحدة تجارية في المعرض؟" : lang === "en" ? "How do I book a commercial unit?" : lang === "zh" ? "如何预订商业单位？" : lang === "ru" ? "Как забронировать коммерческий стенд?" : lang === "fa" ? "چگونه یک واحد تجاری رزرو کنم؟" : "Ticari bir birim nasıl rezerve edilir?",
-      a: lang === "ar" ? "تصفح المعارض المتاحة، اختر الوحدة من الخريطة التفاعلية، ادفع العربون، ووقّع العقد الإلكتروني." : lang === "en" ? "Browse available exhibitions, select a unit from the interactive map, pay the deposit, and sign the e-contract." : lang === "zh" ? "浏览可用展览，从互动地图中选择展位，支付押金，签署电子合同。" : lang === "ru" ? "Просмотрите доступные выставки, выберите стенд на интерактивной карте, оплатите залог и подпишите электронный контракт." : lang === "fa" ? "نمایشگاه‌های موجود را مرور کنید، واحد را از نقشه تعاملی انتخاب کنید، بیعانه بپردازید و قرارداد الکترونیکی را امضا کنید." : "Mevcut fuarları inceleyin, interaktif haritadan bir birim seçin, depozitoyu ödeyin ve e-sözleşmeyi imzalayın.",
-    },
-    {
-      q: lang === "ar" ? "ما هي طرق الدفع المتاحة؟" : lang === "en" ? "What payment methods are available?" : lang === "zh" ? "有哪些付款方式？" : lang === "ru" ? "Какие способы оплаты доступны?" : lang === "fa" ? "چه روش‌های پرداختی موجود است؟" : "Hangi ödeme yöntemleri mevcuttur?",
-      a: lang === "ar" ? "ندعم مدى، فيزا، ماستركارد، Apple Pay، والتحويل البنكي مع نظام أقساط مرن." : lang === "en" ? "We support Mada, Visa, Mastercard, Apple Pay, and bank transfer with flexible installment plans." : lang === "zh" ? "我们支持Mada、Visa、万事达、Apple Pay和银行转账，并提供灵活的分期付款计划。" : lang === "ru" ? "Мы поддерживаем Mada, Visa, Mastercard, Apple Pay и банковский перевод с гибкими рассрочками." : lang === "fa" ? "ما مادا، ویزا، مسترکارت، Apple Pay و انتقال بانکی با اقساط انعطاف‌پذیر را پشتیبانی می‌کنیم." : "Mada, Visa, Mastercard, Apple Pay ve esnek taksit planlarıyla banka havalesi destekliyoruz.",
-    },
-    {
-      q: lang === "ar" ? "هل العقود محمية قانونياً؟" : lang === "en" ? "Are contracts legally protected?" : lang === "zh" ? "合同是否受法律保护？" : lang === "ru" ? "Контракты защищены юридически?" : lang === "fa" ? "آیا قراردادها از نظر قانونی محافظت می‌شوند؟" : "Sözleşmeler yasal olarak korunuyor mu?",
-      a: lang === "ar" ? "نعم، جميع العقود محمية بموجب أنظمة المملكة العربية السعودية مع توقيع رقمي معتمد." : lang === "en" ? "Yes, all contracts are protected under Saudi Arabian regulations with certified digital signatures." : lang === "zh" ? "是的，所有合同均受沙特阿拉伯法规保护，并附有认证数字签名。" : lang === "ru" ? "Да, все контракты защищены законодательством Саудовской Аравии с сертифицированной цифровой подписью." : lang === "fa" ? "بله، تمام قراردادها تحت مقررات عربستان سعودی با امضای دیجیتال معتبر محافظت می‌شوند." : "Evet, tüm sözleşmeler onaylı dijital imzalarla Suudi Arabistan mevzuatı kapsamında korunmaktadır.",
-    },
+    { q: t("home.faq.q1"), a: t("home.faq.a1") },
+    { q: t("home.faq.q2"), a: t("home.faq.a2") },
+    { q: t("home.faq.q3"), a: t("home.faq.a3") },
   ];
 
   const testimonials = [
-    { name: lang === "ar" ? "أحمد المالكي" : "Ahmed Al-Malki", role: lang === "ar" ? "مالك سلسلة مطاعم" : lang === "en" ? "Restaurant Chain Owner" : lang === "zh" ? "连锁餐厅老板" : lang === "ru" ? "Владелец сети ресторанов" : lang === "fa" ? "صاحب زنجیره رستوران" : "Restoran Zinciri Sahibi", text: lang === "ar" ? "المنصة غيّرت طريقة تعاملنا مع المعارض — كل شيء في مكان واحد" : lang === "en" ? "The platform changed how we deal with exhibitions — everything in one place" : lang === "zh" ? "该平台改变了我们处理展览的方式——一切尽在一处" : lang === "ru" ? "Платформа изменила наш подход к выставкам — всё в одном месте" : lang === "fa" ? "این پلتفرم نحوه برخورد ما با نمایشگاه‌ها را تغییر داد" : "Platform fuar deneyimimizi tamamen değiştirdi" },
-    { name: lang === "ar" ? "سارة العتيبي" : "Sara Al-Otaibi", role: lang === "ar" ? "مديرة تسويق" : lang === "en" ? "Marketing Director" : lang === "zh" ? "营销总监" : lang === "ru" ? "Директор по маркетингу" : lang === "fa" ? "مدیر بازاریابی" : "Pazarlama Müdürü", text: lang === "ar" ? "الخريطة التفاعلية ونظام الحجز الفوري وفّرا علينا أسابيع" : lang === "en" ? "The interactive map and instant booking saved us weeks" : lang === "zh" ? "互动地图和即时预订为我们节省了数周时间" : lang === "ru" ? "Интерактивная карта и мгновенное бронирование сэкономили нам недели" : lang === "fa" ? "نقشه تعاملی و رزرو فوری هفته‌ها در وقت ما صرفه‌جویی کرد" : "İnteraktif harita ve anında rezervasyon bize haftalar kazandırdı" },
-    { name: lang === "ar" ? "خالد الحربي" : "Khaled Al-Harbi", role: lang === "ar" ? "مستثمر عقاري" : lang === "en" ? "Real Estate Investor" : lang === "zh" ? "房地产投资者" : lang === "ru" ? "Инвестор в недвижимость" : lang === "fa" ? "سرمایه‌گذار املاک" : "Gayrimenkul Yatırımcısı", text: lang === "ar" ? "شفافية التسعير والعقود الإلكترونية أعطتنا ثقة كاملة" : lang === "en" ? "Pricing transparency and e-contracts gave us full confidence" : lang === "zh" ? "定价透明和电子合同给了我们充分的信心" : lang === "ru" ? "Прозрачность цен и электронные контракты дали нам полную уверенность" : lang === "fa" ? "شفافیت قیمت‌گذاری و قراردادهای الکترونیکی اعتماد کامل به ما داد" : "Fiyat şeffaflığı ve e-sözleşmeler bize tam güven verdi" },
+    { name: t("home.testimonial.name1"), role: t("home.testimonial.role1"), text: t("home.testimonial.text1") },
+    { name: t("home.testimonial.name2"), role: t("home.testimonial.role2"), text: t("home.testimonial.text2") },
+    { name: t("home.testimonial.name3"), role: t("home.testimonial.role3"), text: t("home.testimonial.text3") },
   ];
 
   return (
@@ -202,7 +193,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {lang === "ar" ? "القطاعات المدعومة" : lang === "en" ? "Supported Sectors" : lang === "zh" ? "支持的行业" : lang === "ru" ? "Поддерживаемые секторы" : lang === "fa" ? "بخش‌های پشتیبانی شده" : "Desteklenen Sektörler"}
+              {t("home.sectionTitle.sectors")}
             </h2>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -224,7 +215,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {lang === "ar" ? "كيف يعمل النظام؟" : lang === "en" ? "How It Works" : lang === "zh" ? "系统如何运作？" : lang === "ru" ? "Как это работает?" : lang === "fa" ? "سیستم چگونه کار می‌کند؟" : "Sistem Nasıl Çalışır?"}
+              {t("home.sectionTitle.howItWorks")}
             </h2>
           </motion.div>
           <div className="space-y-4">
@@ -251,7 +242,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {lang === "ar" ? "كل ما تحتاجه في مكان واحد" : lang === "en" ? "Everything You Need in One Place" : lang === "zh" ? "一站式满足所有需求" : lang === "ru" ? "Всё что нужно в одном месте" : lang === "fa" ? "همه چیز در یک مکان" : "İhtiyacınız Olan Her Şey Tek Yerde"}
+              {t("home.sectionTitle.features")}
             </h2>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -273,7 +264,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {lang === "ar" ? "ماذا يقول عملاؤنا؟" : lang === "en" ? "What Our Clients Say" : lang === "zh" ? "客户评价" : lang === "ru" ? "Что говорят наши клиенты?" : lang === "fa" ? "مشتریان ما چه می‌گویند؟" : "Müşterilerimiz Ne Diyor?"}
+              {t("home.sectionTitle.testimonials")}
             </h2>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -301,7 +292,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {lang === "ar" ? "الأسئلة الشائعة" : lang === "en" ? "FAQ" : lang === "zh" ? "常见问题" : lang === "ru" ? "Часто задаваемые вопросы" : lang === "fa" ? "سوالات متداول" : "Sıkça Sorulan Sorular"}
+              {t("home.sectionTitle.faq")}
             </h2>
           </motion.div>
           <div className="space-y-3">
@@ -330,13 +321,13 @@ export default function Home() {
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeUp}>
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-4">
-              {lang === "ar" ? "ابدأ رحلتك التجارية الآن" : lang === "en" ? "Start Your Business Journey Now" : lang === "zh" ? "立即开始您的商业之旅" : lang === "ru" ? "Начните свой бизнес-путь сейчас" : lang === "fa" ? "سفر تجاری خود را همین الان شروع کنید" : "Ticari Yolculuğunuza Şimdi Başlayın"}
+              {t("home.cta.title")}
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
               <Link href="/login">
                 <button className="btn-gold px-10 py-4 rounded-xl text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0">
                   <Sparkles size={18} />
-                  {lang === "ar" ? "ابدأ الآن مجاناً" : lang === "en" ? "Start Free Now" : lang === "zh" ? "立即免费开始" : lang === "ru" ? "Начать бесплатно" : lang === "fa" ? "همین الان رایگان شروع کنید" : "Şimdi Ücretsiz Başla"}
+                  {t("home.cta.button")}
                 </button>
               </Link>
             </div>
@@ -351,7 +342,7 @@ export default function Home() {
             <div>
               <img src={LOGO_URL} alt="Maham Expo" className="h-10 mb-3 object-contain" style={{ filter: isDark ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
               <p className="text-xs t-tertiary leading-relaxed">
-                {lang === "ar" ? "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات — فرع من شركة مهام للخدمات وتقنية المعلومات" : "Maham Expo for Exhibitions & Conferences — A subsidiary of Maham Services & IT"}
+                {t("home.footer.about")}
               </p>
             </div>
             <div>
@@ -364,7 +355,7 @@ export default function Home() {
             </div>
             <div>
               <h4 className="text-xs font-bold t-primary mb-3">
-                {lang === "ar" ? "تواصل معنا" : lang === "en" ? "Contact Us" : lang === "zh" ? "联系我们" : lang === "ru" ? "Свяжитесь с нами" : lang === "fa" ? "تماس با ما" : "Bize Ulaşın"}
+                {t("common.contactUs")}
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -378,7 +369,7 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <MapPin size={12} className="t-gold" />
                   <p className="text-[11px] t-tertiary">
-                    {lang === "ar" ? "الرياض، المملكة العربية السعودية" : "Riyadh, Saudi Arabia"}
+                    {t("home.footer.location")}
                   </p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 /**
  * Login Page — Smooth 3-Step Trader Registration
- * Fully localized with useLanguage()
+ * Fully localized with useLanguage() — v2 updated
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -33,9 +33,19 @@ const ACTIVITIES = [
 ];
 
 const REGIONS = [
-  "الرياض", "مكة المكرمة", "المدينة المنورة", "القصيم", "المنطقة الشرقية",
-  "عسير", "تبوك", "حائل", "الحدود الشمالية", "جازان",
-  "نجران", "الباحة", "الجوف",
+  { value: "riyadh", ar: "الرياض", en: "Riyadh", zh: "利雅得", ru: "Эр-Рияд", fa: "ریاض", tr: "Riyad" },
+  { value: "makkah", ar: "مكة المكرمة", en: "Makkah", zh: "麦加", ru: "Мекка", fa: "مکه مکرمه", tr: "Mekke" },
+  { value: "madinah", ar: "المدينة المنورة", en: "Madinah", zh: "麦地那", ru: "Медина", fa: "مدینه منوره", tr: "Medine" },
+  { value: "qassim", ar: "القصيم", en: "Qassim", zh: "盖西姆", ru: "Касим", fa: "قصیم", tr: "Kasım" },
+  { value: "eastern", ar: "المنطقة الشرقية", en: "Eastern Province", zh: "东部省", ru: "Восточная провинция", fa: "منطقه شرقی", tr: "Doğu Bölgesi" },
+  { value: "asir", ar: "عسير", en: "Asir", zh: "阿西尔", ru: "Асир", fa: "عسیر", tr: "Asir" },
+  { value: "tabuk", ar: "تبوك", en: "Tabuk", zh: "塔布克", ru: "Табук", fa: "تبوک", tr: "Tebük" },
+  { value: "hail", ar: "حائل", en: "Hail", zh: "哈伊勒", ru: "Хаиль", fa: "حائل", tr: "Hail" },
+  { value: "northern", ar: "الحدود الشمالية", en: "Northern Borders", zh: "北部边境", ru: "Северные границы", fa: "مرزهای شمالی", tr: "Kuzey Sınırları" },
+  { value: "jazan", ar: "جازان", en: "Jazan", zh: "吉赞", ru: "Джизан", fa: "جازان", tr: "Cizan" },
+  { value: "najran", ar: "نجران", en: "Najran", zh: "奈季兰", ru: "Наджран", fa: "نجران", tr: "Necran" },
+  { value: "baha", ar: "الباحة", en: "Al-Baha", zh: "巴哈", ru: "Эль-Баха", fa: "الباحه", tr: "El-Baha" },
+  { value: "jawf", ar: "الجوف", en: "Al-Jawf", zh: "焦夫", ru: "Эль-Джауф", fa: "الجوف", tr: "El-Cevf" },
 ];
 
 export default function Login() {
@@ -234,15 +244,15 @@ export default function Login() {
                 <div className="flex items-center justify-center gap-4 mt-6 pt-5" style={{ borderTop: "1px solid var(--glass-border)" }}>
                   <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
                     <ShieldCheck size={12} style={{ color: "var(--gold-accent)" }} />
-                    {lang === "ar" ? "تسجيل آمن" : "Secure"}
+                    {t("auth.secure")}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
                     <Lock size={12} style={{ color: "var(--gold-accent)" }} />
-                    {lang === "ar" ? "مشفر" : "Encrypted"}
+                    {t("auth.encrypted")}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
                     <Sparkles size={12} style={{ color: "var(--gold-accent)" }} />
-                    {lang === "ar" ? "مجاني" : "Free"}
+                    {t("auth.free")}
                   </div>
                 </div>
               </motion.div>
@@ -280,11 +290,11 @@ export default function Login() {
                 <div className="text-center mb-4">
                   {resendTimer > 0 ? (
                     <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                      {lang === "ar" ? `إعادة الإرسال بعد` : "Resend in"} <span style={{ color: "var(--gold-accent)" }}>{resendTimer}</span>s
+                      {t("auth.resendIn")} <span style={{ color: "var(--gold-accent)" }}>{resendTimer}</span>s
                     </p>
                   ) : (
                     <button onClick={handleResendOTP} className="text-xs font-medium" style={{ color: "var(--gold-accent)" }}>
-                      {lang === "ar" ? "إعادة إرسال الرمز" : lang === "en" ? "Resend Code" : lang === "zh" ? "重新发送" : lang === "ru" ? "Отправить снова" : lang === "fa" ? "ارسال مجدد" : "Tekrar Gönder"}
+                      {t("auth.resendCode")}
                     </button>
                   )}
                 </div>
@@ -292,7 +302,7 @@ export default function Login() {
                   className="w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
                   style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
                   <BackArrow size={14} />
-                  {lang === "ar" ? "تغيير رقم الجوال" : lang === "en" ? "Change Phone Number" : lang === "zh" ? "更改手机号" : lang === "ru" ? "Изменить номер" : lang === "fa" ? "تغییر شماره" : "Numarayı Değiştir"}
+                  {t("auth.changePhone")}
                 </button>
               </motion.div>
             )}
@@ -345,7 +355,7 @@ export default function Login() {
                       className="w-full px-4 py-3 rounded-xl text-sm outline-none appearance-none cursor-pointer"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: region ? "var(--text-primary)" : "var(--text-muted)" }}>
                       <option value="">{t("auth.region")}</option>
-                      {REGIONS.map(r => (<option key={r} value={r}>{r}</option>))}
+                      {REGIONS.map(r => (<option key={r.value} value={r.value}>{(r as any)[lang] || r.en}</option>))}
                     </select>
                   </div>
                 </div>

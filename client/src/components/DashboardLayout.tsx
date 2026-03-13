@@ -2,7 +2,8 @@
  * DashboardLayout — Sidebar + main content area
  * Features: Bottom Nav, Back button, Logout, Responsive, Language Switcher, Theme Toggle
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -75,9 +76,22 @@ function useNavSections(t: (key: string) => string): { titleKey: string; items: 
 function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const { lang, setLang, t } = useLanguage();
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-2 rounded-lg transition-colors ${
@@ -104,13 +118,12 @@ function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
       <AnimatePresence>
         {open && (
           <>
-            <div className="fixed inset-0 z-[100]" onClick={() => setOpen(false)} />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className={`absolute z-[101] rounded-xl overflow-hidden shadow-2xl ${
+              className={`absolute z-[9999] rounded-xl overflow-hidden shadow-2xl ${
                 compact ? "bottom-full mb-2 left-0" : "bottom-full mb-2 left-0 right-0"
               }`}
               style={{
@@ -127,7 +140,8 @@ function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
                 {LANGUAGES.map((l) => (
                   <button
                     key={l.code}
-                    onClick={() => { setLang(l.code); setOpen(false); toast.success(`${l.nativeName}`); }}
+                    onClick={(e) => { e.stopPropagation(); setLang(l.code); setOpen(false); toast.success(`${l.nativeName}`); }}
+                    onPointerDown={(e) => { e.stopPropagation(); }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                       lang === l.code ? "bg-gold-subtle" : "hover:bg-[var(--glass-bg-hover)]"
                     }`}
@@ -218,9 +232,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-8" : "h-12"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
           {!collapsed && (
             <>
-              <p className="text-[8px] t-muted mt-1.5 text-center leading-tight">شركة مهام إكسبو لتنظيم المعارض والمؤتمرات</p>
-              <p className="text-[7px] t-muted text-center leading-tight font-['Inter']" style={{ opacity: 0.6 }}>Maham Expo for Exhibitions & Conferences</p>
-              <p className="text-[7px] t-muted text-center leading-tight" style={{ opacity: 0.5 }}>فرع من شركة مهام للخدمات وتقنية المعلومات</p>
+              <p className="text-[8px] t-muted mt-1.5 text-center leading-tight">{isRTL ? "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات" : "Maham Expo for Exhibitions & Conferences"}</p>
+              <p className="text-[7px] t-muted text-center leading-tight font-['Inter']" style={{ opacity: 0.6 }}>{isRTL ? "Maham Expo for Exhibitions & Conferences" : "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات"}</p>
+              <p className="text-[7px] t-muted text-center leading-tight" style={{ opacity: 0.5 }}>{isRTL ? "فرع من شركة مهام للخدمات وتقنية المعلومات" : "A branch of Maham Services & IT Company"}</p>
             </>
           )}
         </div>
@@ -284,7 +298,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {!collapsed && (
             <>
               <div className="px-4 py-2 border-t" style={{ borderColor: "var(--glass-border)" }}>
-                <p className="text-[8px] t-muted mb-1">تواصل معنا</p>
+                <p className="text-[8px] t-muted mb-1">{t("common.contactUs")}</p>
                 <a href="tel:+966535555900" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
                   <Phone size={10} className="t-gold" style={{ opacity: 0.6 }} />
                   +966 53 555 5900
@@ -511,7 +525,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main
-        className={`flex-1 min-h-screen transition-all duration-300 ${mainMargin}`}
+        className={`flex-1 min-w-0 min-h-screen transition-all duration-300 ${mainMargin}`}
         style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 24px))" }}
       >
         {/* Top Bar */}
@@ -521,7 +535,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           WebkitBackdropFilter: "blur(40px)",
           borderBottom: "1px solid var(--glass-border)",
         }}>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2">
               {/* Back Button — shows on sub-pages */}
               {isSubPage && (
@@ -540,7 +554,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </h1>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Language Switcher — compact in header */}
               <LanguageSwitcher compact />
               <button
@@ -583,7 +597,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <div className="p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6">
+        <div className="p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6 overflow-x-hidden">
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 10 }}

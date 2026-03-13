@@ -71,7 +71,7 @@ export default function Payments() {
         amount: paymentAmount,
         method: paymentMethod === "mada" ? t("payments.mada") : paymentMethod === "credit" ? t("payments.creditCard") : paymentMethod === "apple" ? "Apple Pay" : t("payments.bankTransfer"),
         type: "full_payment",
-        descAr: `دفعة كاملة — ${selectedBooking.unitAr}`,
+        descAr: `${t("payments.fullPayment")} — ${selectedBooking.unitAr}`,
         descEn: `Full Payment — ${selectedBooking.unitEn}`,
       });
 
@@ -84,14 +84,18 @@ export default function Payments() {
           type: "payment",
           titleAr: `تم الدفع بنجاح — ${selectedBooking.unitAr}`,
           titleEn: `Payment Successful — ${selectedBooking.unitEn}`,
-          message: `تم سداد مبلغ ${paymentAmount.toLocaleString()} ر.س بنجاح. تم إصدار العقد رقم ${newContract.id}`,
+          message: isRTL
+            ? `تم سداد مبلغ ${paymentAmount.toLocaleString()} ر.س بنجاح. تم إصدار العقد رقم ${newContract.id}`
+            : `Successfully paid ${paymentAmount.toLocaleString()} SAR. Contract #${newContract.id} has been issued.`,
           link: "/contracts",
         });
         addNotification({
           type: "contract",
           titleAr: `عقد جديد — ${newContract.id}`,
           titleEn: `New Contract — ${newContract.id}`,
-          message: `تم إصدار عقد تشغيل ${selectedBooking.unitAr} تلقائياً بعد اكتمال الدفع.`,
+          message: isRTL
+            ? `تم إصدار عقد تشغيل ${selectedBooking.unitAr} تلقائياً بعد اكتمال الدفع.`
+            : `Operations contract for ${selectedBooking.unitEn} has been automatically issued after payment completion.`,
           link: "/contracts",
         });
       }
@@ -175,12 +179,19 @@ export default function Payments() {
     const data = getContractDataForPDF();
     if (!data) return;
     const message = encodeURIComponent(
-      `*عقد تشغيل — ${data.expoName}*\n\n` +
-      `رقم العقد: ${data.contractId}\nرقم الحجز: ${data.bookingId}\n` +
-      `الموقع: بوث ${data.boothNumber}\nالمساحة: ${data.boothSize}\n` +
-      `القيمة الإجمالية: ${data.totalValue.toLocaleString()} ريال\n` +
-      `الفترة: ${data.startDate} — ${data.endDate}\n\n` +
-      `— شركة مهام إكسبو لتنظيم المعارض والمؤتمرات\n0535555900 | info@maham.com.sa`
+      isRTL
+        ? `*عقد تشغيل — ${data.expoName}*\n\n` +
+          `رقم العقد: ${data.contractId}\nرقم الحجز: ${data.bookingId}\n` +
+          `الموقع: بوث ${data.boothNumber}\nالمساحة: ${data.boothSize}\n` +
+          `القيمة الإجمالية: ${data.totalValue.toLocaleString()} ريال\n` +
+          `الفترة: ${data.startDate} — ${data.endDate}\n\n` +
+          `— شركة مهام إكسبو لتنظيم المعارض والمؤتمرات\n0535555900 | info@maham.com.sa`
+        : `*Operations Contract — ${data.expoName}*\n\n` +
+          `Contract #: ${data.contractId}\nBooking #: ${data.bookingId}\n` +
+          `Location: Booth ${data.boothNumber}\nArea: ${data.boothSize}\n` +
+          `Total Value: ${data.totalValue.toLocaleString()} SAR\n` +
+          `Period: ${data.startDate} — ${data.endDate}\n\n` +
+          `— Maham Expo for Exhibitions & Conferences\n0535555900 | info@maham.com.sa`
     );
     window.open(`https://wa.me/${intlPhone}?text=${message}`, "_blank");
     setSentChannels(prev => [...prev, "whatsapp"]);

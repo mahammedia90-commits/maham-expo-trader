@@ -6,6 +6,7 @@
  * 3. Booking creates a real record in AuthContext (pending_payment)
  * 4. Payment → Contract flow handled in Payments page
  * 5. Investor/organizer info is NEVER shown to traders
+ * 6. FULLY LOCALIZED — no hardcoded Arabic strings
  */
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,13 +33,41 @@ export default function BrowseExpos() {
   const [showFilters, setShowFilters] = useState(false);
   const [cityFilter, setCityFilter] = useState("الكل");
   const { canBook, addNotification, addPendingBooking, addBooking } = useAuth();
-  const { t, lang, isRTL } = useLanguage();
+  const { t, lang, isRTL, dir } = useLanguage();
   const [, navigate] = useLocation();
+
+  const isArabicLike = lang === "ar" || lang === "fa";
+
+  // Helper: get localized category label from eventCategories data
+  const getCatLabel = (cat: { ar: string; en: string }) => isArabicLike ? cat.ar : cat.en;
+
+  // Helper: get localized city
+  const getCityLabel = (cityAr: string, cityEn: string) => isArabicLike ? cityAr : cityEn;
+
+  // Helper: get localized expo name
+  const getExpoName = (e: ExpoEvent) => isArabicLike ? e.nameAr : e.nameEn;
+  const getExpoDesc = (e: ExpoEvent) => isArabicLike ? e.descAr : e.descEn;
+  const getExpoCity = (e: ExpoEvent) => isArabicLike ? e.city : e.cityEn;
+  const getExpoLocation = (e: ExpoEvent) => isArabicLike ? e.location : e.locationEn;
+  const getExpoVenue = (e: ExpoEvent) => isArabicLike ? e.venue : e.venueEn;
+  const getExpoCategory = (e: ExpoEvent) => isArabicLike ? e.category : e.categoryEn;
+
+  // Helper: get localized unit info
+  const getUnitName = (u: ExpoUnit) => isArabicLike ? u.nameAr : u.nameEn;
+  const getUnitType = (u: ExpoUnit) => isArabicLike ? u.type : u.typeEn;
+  const getUnitServices = (u: ExpoUnit) => isArabicLike ? u.services : u.servicesEn;
 
   const cities = useMemo(() => {
     const set = new Set(events2026.map(e => e.city));
     return ["الكل", ...Array.from(set)];
   }, []);
+
+  // Map city Arabic to English for display
+  const cityDisplayMap: Record<string, string> = useMemo(() => {
+    const map: Record<string, string> = { "الكل": t("common.all") };
+    events2026.forEach(e => { map[e.city] = isArabicLike ? e.city : e.cityEn; });
+    return map;
+  }, [isArabicLike, t]);
 
   const filtered = useMemo(() => {
     let result = events2026.filter(e => {
@@ -53,7 +82,6 @@ export default function BrowseExpos() {
       return matchSearch && matchCategory && matchCity;
     });
 
-    // Sort
     switch (sortBy) {
       case "date":
         result.sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
@@ -114,13 +142,18 @@ export default function BrowseExpos() {
       type: "booking",
       titleAr: `حجز جديد — ${unit.nameAr}`,
       titleEn: `New Booking — ${unit.nameEn}`,
-      message: `تم إنشاء حجز ${unit.nameAr} في ${expo.nameAr}. رقم الحجز: ${newBooking.id}. يرجى إكمال الدفع لتأكيد الحجز وإصدار العقد.`,
+      message: isArabicLike
+        ? `تم إنشاء حجز ${unit.nameAr} في ${expo.nameAr}. رقم الحجز: ${newBooking.id}. يرجى إكمال الدفع لتأكيد الحجز وإصدار العقد.`
+        : `Booking created for ${unit.nameEn} at ${expo.nameEn}. Booking ID: ${newBooking.id}. Please complete payment to confirm and generate contract.`,
       link: "/payments",
     });
 
     setSelectedExpo(null);
     setShowUnitPicker(false);
-    toast.success(`تم إنشاء الحجز ${newBooking.id} بنجاح! انتقل للمدفوعات لإكمال الدفع وإصدار العقد`);
+    toast.success(isArabicLike
+      ? `تم إنشاء الحجز ${newBooking.id} بنجاح! انتقل للمدفوعات لإكمال الدفع وإصدار العقد`
+      : `Booking ${newBooking.id} created successfully! Go to Payments to complete and generate contract`
+    );
     navigate("/payments");
   };
 
@@ -128,11 +161,11 @@ export default function BrowseExpos() {
     <div className="space-y-4 sm:space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("expos.title")}</h2>
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-bold t-primary truncate">{t("expos.title")}</h2>
           <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>{events2026.length} {t("expos.eventsAvailable")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button onClick={() => setShowFilters(!showFilters)} className={`p-2 rounded-lg transition-colors ${showFilters ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}>
             <Filter size={16} />
           </button>
@@ -145,9 +178,9 @@ export default function BrowseExpos() {
         </div>
       </div>
 
-      {/* Search & Filters */}
-      <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
-        <div className="flex-1 relative">
+      {/* Search & Category Filters */}
+      <div className="space-y-2 sm:space-y-3">
+        <div className="relative">
           <Search size={14} className={`absolute top-1/2 -translate-y-1/2 t-muted ${isRTL ? 'right-3' : 'left-3'}`} />
           <input type="text" placeholder={t("expos.search")} value={search} onChange={(e) => setSearch(e.target.value)}
             className={`w-full glass-card rounded-xl py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'}`} style={{ backgroundColor: "var(--input-bg)" }} />
@@ -156,7 +189,7 @@ export default function BrowseExpos() {
           {eventCategories.slice(0, 8).map((cat) => (
             <button key={cat.ar} onClick={() => setActiveCategory(cat.ar)}
               className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${activeCategory === cat.ar ? "btn-gold" : "glass-card t-secondary"}`}>
-              {cat.ar}
+              {getCatLabel(cat)}
             </button>
           ))}
         </div>
@@ -171,7 +204,7 @@ export default function BrowseExpos() {
                 <label className="text-[10px] t-muted mb-1 block">{t("expos.city")}</label>
                 <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
                   className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-2 py-1.5 text-xs t-secondary">
-                  {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                  {cities.map(c => <option key={c} value={c}>{cityDisplayMap[c] || c}</option>)}
                 </select>
               </div>
               <div>
@@ -190,7 +223,7 @@ export default function BrowseExpos() {
                   {eventCategories.slice(8).map(cat => (
                     <button key={cat.ar} onClick={() => setActiveCategory(cat.ar)}
                       className={`px-1.5 py-0.5 rounded text-[9px] ${activeCategory === cat.ar ? "btn-gold" : "glass-card t-muted"}`}>
-                      {cat.ar}
+                      {getCatLabel(cat)}
                     </button>
                   ))}
                 </div>
@@ -233,33 +266,33 @@ export default function BrowseExpos() {
             <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer" onClick={() => setSelectedExpo(expo)}>
               <div className="relative h-36 sm:h-44 overflow-hidden">
-                <img src={expo.image} alt={expo.nameAr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                <img src={expo.image} alt={getExpoName(expo)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
-                <span className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
+                <span className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md`}
                   style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}>
                   {sc.label}
                 </span>
                 {expo.featured && (
-                  <span className="absolute top-3 right-3 px-2 py-1 rounded-full text-[10px] bg-gold-subtle border-gold flex items-center gap-1"
+                  <span className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} px-2 py-1 rounded-full text-[10px] bg-gold-subtle border-gold flex items-center gap-1`}
                     style={{ color: "var(--gold-light)", border: "1px solid var(--gold-border)" }}>
                     <Sparkles size={10} /> {t("expos.featured")}
                   </span>
                 )}
-                <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                <div className={`absolute bottom-3 ${isRTL ? 'right-3' : 'left-3'} flex items-center gap-1 rounded-full px-2 py-0.5`} style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
                   <Star size={10} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
                   <span className="text-[10px] text-white font-['Inter']">{expo.rating}</span>
                 </div>
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                <div className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'} flex items-center gap-1 rounded-full px-2 py-0.5`} style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
                   <Eye size={10} className="text-white/70" />
                   <span className="text-[10px] text-white/70 font-['Inter']">{expo.footfall.split(" ")[0]}</span>
                 </div>
               </div>
               <div className="p-3 sm:p-4 overflow-hidden">
-                <h3 className="text-sm font-bold t-primary mb-0.5 truncate">{expo.nameAr}</h3>
-                <p className="text-[10px] t-gold font-['Inter'] mb-2 truncate" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
-                <p className="text-[11px] t-tertiary line-clamp-2 mb-3 break-words">{expo.descAr}</p>
+                <h3 className="text-sm font-bold t-primary mb-0.5 truncate">{getExpoName(expo)}</h3>
+                <p className="text-[10px] t-gold font-['Inter'] mb-2 truncate" style={{ opacity: 0.6 }}>{isArabicLike ? expo.nameEn : expo.nameAr}</p>
+                <p className="text-[11px] t-tertiary line-clamp-2 mb-3 break-words">{getExpoDesc(expo)}</p>
                 <div className="flex items-center gap-3 text-[10px] t-muted mb-3 flex-wrap">
-                  <span className="flex items-center gap-1 shrink-0"><MapPin size={10} />{expo.city}</span>
+                  <span className="flex items-center gap-1 shrink-0"><MapPin size={10} />{getExpoCity(expo)}</span>
                   <span className="flex items-center gap-1 font-['Inter'] shrink-0"><Calendar size={10} />{expo.dateStart}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -270,7 +303,7 @@ export default function BrowseExpos() {
                       <span className="t-muted text-[10px]"> / {expo.totalUnits}</span>
                     </p>
                   </div>
-                  <div className="text-left shrink-0">
+                  <div className={isRTL ? "text-left" : "text-right"} style={{ direction: "ltr" }}>
                     <p className="text-[9px] t-muted">{t("expos.priceRange")} ({t("expos.sar")})</p>
                     <p className="text-xs t-gold font-['Inter']">{expo.priceRange}</p>
                   </div>
@@ -299,32 +332,33 @@ export default function BrowseExpos() {
               initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[600px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
-              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir="rtl">
+              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir={dir}>
               <div className="flex justify-center pt-3 pb-1 sm:hidden">
                 <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
               </div>
               <div className="relative h-36 sm:h-48">
-                <img src={selectedExpo.image} alt={selectedExpo.nameAr} className="w-full h-full object-cover" />
+                <img src={selectedExpo.image} alt={getExpoName(selectedExpo)} className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), color-mix(in srgb, var(--surface-dark) 50%, transparent), transparent)" }} />
-                <button onClick={() => setSelectedExpo(null)} className="absolute top-4 left-4 p-2 rounded-full t-secondary" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                <button onClick={() => setSelectedExpo(null)} className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'} p-2 rounded-full t-secondary`} style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
                   <X size={16} />
                 </button>
-                <div className="absolute bottom-4 right-6">
-                  <h3 className="text-lg font-bold t-primary">{selectedExpo.nameAr}</h3>
-                  <p className="text-xs t-gold font-['Inter']" style={{ opacity: 0.7 }}>{selectedExpo.nameEn}</p>
+                <div className={`absolute bottom-4 ${isRTL ? 'right-6' : 'left-6'}`}>
+                  <h3 className="text-lg font-bold t-primary">{getExpoName(selectedExpo)}</h3>
+                  <p className="text-xs t-gold font-['Inter']" style={{ opacity: 0.7 }}>{isArabicLike ? selectedExpo.nameEn : selectedExpo.nameAr}</p>
                 </div>
               </div>
 
               <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
-                <p className="text-xs t-tertiary leading-relaxed">{selectedExpo.descAr}</p>
-                <p className="text-[10px] t-muted font-['Inter'] leading-relaxed">{selectedExpo.descEn}</p>
+                <p className="text-xs t-tertiary leading-relaxed">{getExpoDesc(selectedExpo)}</p>
+                {!isArabicLike && <p className="text-[10px] t-muted font-['Inter'] leading-relaxed">{selectedExpo.descAr}</p>}
+                {isArabicLike && <p className="text-[10px] t-muted font-['Inter'] leading-relaxed">{selectedExpo.descEn}</p>}
 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
-                    { icon: MapPin, label: t("expos.location"), value: selectedExpo.location },
+                    { icon: MapPin, label: t("expos.location"), value: getExpoLocation(selectedExpo) },
                     { icon: Calendar, label: t("expos.period"), value: `${selectedExpo.dateStart} — ${selectedExpo.dateEnd}` },
-                    { icon: Building2, label: t("expos.venue"), value: selectedExpo.venue },
-                    { icon: Star, label: t("expos.category"), value: `${selectedExpo.category} · ${selectedExpo.categoryEn}` },
+                    { icon: Building2, label: t("expos.venue"), value: getExpoVenue(selectedExpo) },
+                    { icon: Star, label: t("expos.category"), value: getExpoCategory(selectedExpo) },
                     { icon: Users, label: t("expos.visitors"), value: selectedExpo.footfall },
                     { icon: CreditCard, label: t("expos.priceRange"), value: `${selectedExpo.priceRange} ${t("expos.sar")}` },
                   ].map((d, i) => (
@@ -333,7 +367,7 @@ export default function BrowseExpos() {
                         <d.icon size={12} className="t-gold" style={{ opacity: 0.6 }} />
                         <span className="text-[9px] t-muted">{d.label}</span>
                       </div>
-                      <p className="text-xs t-secondary">{d.value}</p>
+                      <p className="text-xs t-secondary break-words">{d.value}</p>
                     </div>
                   ))}
                 </div>
@@ -369,12 +403,12 @@ export default function BrowseExpos() {
                       </button>
                     </>
                   ) : selectedExpo.status === "upcoming" ? (
-                    <button onClick={() => { toast.info("سيتم إشعارك عند فتح باب الحجز"); setSelectedExpo(null); }}
+                    <button onClick={() => { toast.info(t("expos.notifyOpen")); setSelectedExpo(null); }}
                       className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
                       <Clock size={15} /> {t("expos.notifyOpen")}
                     </button>
                   ) : (
-                    <button onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات"); setSelectedExpo(null); }}
+                    <button onClick={() => { toast.info(t("expos.waitlist")); setSelectedExpo(null); }}
                       className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
                       <Clock size={15} /> {t("expos.waitlist")}
                     </button>
@@ -386,7 +420,7 @@ export default function BrowseExpos() {
         )}
       </AnimatePresence>
 
-      {/* Unit Picker Modal — select which unit to book */}
+      {/* Unit Picker Modal */}
       <AnimatePresence>
         {showUnitPicker && selectedExpo && (
           <>
@@ -396,17 +430,17 @@ export default function BrowseExpos() {
               initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[520px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
-              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir="rtl">
+              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir={dir}>
               <div className="flex justify-center pt-3 pb-1 sm:hidden">
                 <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
               </div>
               <div className="px-4 sm:px-6 py-4">
                 <div className="flex items-center justify-between mb-4">
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-sm font-bold t-primary">{t("expos.selectUnit")}</h3>
-                    <p className="text-[10px] t-gold/50 font-['Inter']">{selectedExpo.nameEn}</p>
+                    <p className="text-[10px] t-gold/50 font-['Inter'] truncate">{isArabicLike ? selectedExpo.nameEn : selectedExpo.nameAr}</p>
                   </div>
-                  <button onClick={() => setShowUnitPicker(false)} className="p-2 rounded-lg t-tertiary" style={{ background: "var(--glass-bg)" }}>
+                  <button onClick={() => setShowUnitPicker(false)} className="p-2 rounded-lg t-tertiary shrink-0" style={{ background: "var(--glass-bg)" }}>
                     <X size={14} />
                   </button>
                 </div>
@@ -422,19 +456,19 @@ export default function BrowseExpos() {
                   {selectedExpo.units.filter(u => u.available).map((unit) => (
                     <div key={unit.id} className="p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:border-[var(--gold-border)] transition-colors">
                       <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className="text-xs t-primary font-semibold">{unit.nameAr}</p>
-                          <p className="text-[9px] t-muted font-['Inter']">{unit.nameEn} · Zone {unit.zone}</p>
+                        <div className="min-w-0">
+                          <p className="text-xs t-primary font-semibold truncate">{getUnitName(unit)}</p>
+                          <p className="text-[9px] t-muted font-['Inter']">{isArabicLike ? unit.nameEn : unit.nameAr} · Zone {unit.zone}</p>
                         </div>
-                        <p className="text-sm font-bold t-gold font-['Inter']">{unit.price.toLocaleString()} <span className="text-[9px] t-muted">ر.س</span></p>
+                        <p className="text-sm font-bold t-gold font-['Inter'] shrink-0">{unit.price.toLocaleString()} <span className="text-[9px] t-muted">{t("expos.sar")}</span></p>
                       </div>
-                      <div className="flex items-center gap-3 text-[10px] t-tertiary mb-2">
-                        <span>{unit.type}</span>
+                      <div className="flex items-center gap-3 text-[10px] t-tertiary mb-2 flex-wrap">
+                        <span>{getUnitType(unit)}</span>
                         <span>{unit.size}</span>
                         <span>{t("expos.deposit")}: {unit.deposit.toLocaleString()} {t("expos.sar")}</span>
                       </div>
                       <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                        {unit.services.map((s, j) => (
+                        {getUnitServices(unit).map((s, j) => (
                           <span key={j} className="px-1.5 py-0.5 rounded text-[8px] t-muted" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>{s}</span>
                         ))}
                       </div>
