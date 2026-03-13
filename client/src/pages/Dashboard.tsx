@@ -1,33 +1,16 @@
 /**
- * Dashboard — Main overview with stats, recent activity, quick actions
- * Mobile-first: responsive grids and compact layout
+ * Dashboard — Main overview with real stats, recent activity, quick actions
+ * Uses real events data and AuthContext for dynamic stats
  */
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import {
   CalendarCheck, FileText, CreditCard, TrendingUp, MapPin,
-  Clock, ArrowLeft, CheckCircle, AlertTriangle, XCircle
+  Clock, ArrowLeft, CheckCircle, AlertTriangle, XCircle,
+  Star, Users, Building2, Calendar
 } from "lucide-react";
-
-const stats = [
-  { icon: CalendarCheck, valueAr: "12", labelAr: "حجز نشط", labelEn: "Active Bookings", color: "var(--status-green)" },
-  { icon: FileText, valueAr: "8", labelAr: "عقد موقّع", labelEn: "Signed Contracts", color: "var(--gold-accent)" },
-  { icon: CreditCard, valueAr: "٤٥٠K", labelAr: "ريال مدفوع", labelEn: "SAR Paid", color: "var(--status-blue)" },
-  { icon: TrendingUp, valueAr: "٩٢%", labelAr: "نسبة الإشغال", labelEn: "Occupancy", color: "var(--gold-light)" },
-];
-
-const recentBookings = [
-  { id: "BK-2025-001", zone: "المنطقة A - بوث 14", zoneEn: "Zone A - Booth #14", status: "confirmed", statusAr: "مؤكد", date: "2025-03-15" },
-  { id: "BK-2025-002", zone: "المنطقة B - محل 7", zoneEn: "Zone B - Shop #7", status: "pending", statusAr: "قيد المراجعة", date: "2025-03-12" },
-  { id: "BK-2025-003", zone: "المنطقة C - جناح VIP 3", zoneEn: "Zone C - VIP Wing #3", status: "confirmed", statusAr: "مؤكد", date: "2025-03-10" },
-  { id: "BK-2025-004", zone: "المنطقة D - كشك 22", zoneEn: "Zone D - Kiosk #22", status: "rejected", statusAr: "مرفوض", date: "2025-03-08" },
-];
-
-const statusIcon = (s: string) => {
-  if (s === "confirmed") return <CheckCircle size={13} style={{ color: "var(--status-green)" }} />;
-  if (s === "pending") return <AlertTriangle size={13} style={{ color: "var(--status-yellow)" }} />;
-  return <XCircle size={13} style={{ color: "var(--status-red)" }} />;
-};
+import { useAuth } from "@/contexts/AuthContext";
+import { events2026, eventStats } from "@/data/events2026";
 
 const quickActions = [
   { labelAr: "حجز وحدة جديدة", labelEn: "Book New Unit", path: "/expos", icon: MapPin },
@@ -36,7 +19,41 @@ const quickActions = [
   { labelAr: "طلب تصريح", labelEn: "Request Permit", path: "/operations", icon: Clock },
 ];
 
+const statusIcon = (s: string) => {
+  if (s === "confirmed" || s === "active") return <CheckCircle size={13} style={{ color: "var(--status-green)" }} />;
+  if (s === "pending_payment") return <AlertTriangle size={13} style={{ color: "var(--status-yellow)" }} />;
+  return <XCircle size={13} style={{ color: "var(--status-red)" }} />;
+};
+
+const statusLabel = (s: string) => {
+  const map: Record<string, string> = {
+    pending_payment: "بانتظار الدفع",
+    confirmed: "مؤكد",
+    active: "نشط",
+    cancelled: "ملغي",
+  };
+  return map[s] || s;
+};
+
 export default function Dashboard() {
+  const { bookings, contracts, payments } = useAuth();
+
+  const totalPaid = payments.filter(p => p.status === "completed").reduce((a, p) => a + p.amount, 0);
+  const activeBookings = bookings.filter(b => b.status !== "cancelled").length;
+  const signedContracts = contracts.length;
+
+  const stats = [
+    { icon: CalendarCheck, valueAr: String(activeBookings), labelAr: "حجز نشط", labelEn: "Active Bookings", color: "var(--status-green)" },
+    { icon: FileText, valueAr: String(signedContracts), labelAr: "عقد صادر", labelEn: "Contracts Issued", color: "var(--gold-accent)" },
+    { icon: CreditCard, valueAr: totalPaid > 0 ? `${(totalPaid / 1000).toFixed(0)}K` : "0", labelAr: "ريال مدفوع", labelEn: "SAR Paid", color: "var(--status-blue)" },
+    { icon: TrendingUp, valueAr: `${eventStats.openEvents}`, labelAr: "فعالية متاحة", labelEn: "Open Events", color: "var(--gold-light)" },
+  ];
+
+  // Get featured upcoming events from real data
+  const upcomingEvents = events2026
+    .filter(e => e.status === "open" || e.status === "upcoming" || e.status === "closing_soon")
+    .slice(0, 3);
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Grid — 2 cols mobile, 4 cols desktop */}
@@ -82,24 +99,32 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="space-y-2 sm:space-y-3">
-            {recentBookings.map((b, i) => (
+            {bookings.length > 0 ? bookings.slice(0, 4).map((b, i) => (
               <Link key={i} href="/bookings">
                 <div className="flex items-center justify-between py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors cursor-pointer hover:bg-[var(--glass-bg-hover)]"
                   style={{ backgroundColor: "var(--glass-bg)" }}>
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     {statusIcon(b.status)}
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm t-primary truncate">{b.zone}</p>
-                      <p className="text-[9px] sm:text-[10px] t-muted font-['Inter'] truncate">{b.zoneEn}</p>
+                      <p className="text-xs sm:text-sm t-primary truncate">{b.unitAr} — {b.expoNameAr}</p>
+                      <p className="text-[9px] sm:text-[10px] t-muted font-['Inter'] truncate">{b.unitEn}</p>
                     </div>
                   </div>
                   <div className="text-left shrink-0 mr-2">
                     <p className="text-[10px] sm:text-[11px] t-secondary font-['Inter']">{b.id}</p>
-                    <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">{b.date}</p>
+                    <p className="text-[9px] sm:text-[10px]" style={{ color: b.status === "confirmed" ? "var(--status-green)" : "var(--status-yellow)" }}>{statusLabel(b.status)}</p>
                   </div>
                 </div>
               </Link>
-            ))}
+            )) : (
+              <div className="text-center py-6">
+                <CalendarCheck size={28} className="mx-auto t-muted mb-2" style={{ opacity: 0.3 }} />
+                <p className="text-xs t-tertiary">لا توجد حجوزات بعد</p>
+                <Link href="/expos">
+                  <span className="text-[10px] t-gold cursor-pointer">تصفح المعارض وابدأ الحجز</span>
+                </Link>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -131,28 +156,46 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Upcoming Events */}
+      {/* Upcoming Events — Real Data */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
         className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6"
       >
-        <h3 className="text-sm sm:text-base font-bold t-primary mb-1">الفعاليات القادمة</h3>
-        <p className="text-[9px] sm:text-[10px] t-gold font-['Inter'] mb-3 sm:mb-5" style={{ opacity: 0.6 }}>Upcoming Events</p>
+        <div className="flex items-center justify-between mb-3 sm:mb-5">
+          <div>
+            <h3 className="text-sm sm:text-base font-bold t-primary">الفعاليات القادمة</h3>
+            <p className="text-[9px] sm:text-[10px] t-gold font-['Inter']" style={{ opacity: 0.6 }}>Upcoming Events 2026</p>
+          </div>
+          <Link href="/expos">
+            <span className="text-[11px] sm:text-xs t-gold flex items-center gap-1 cursor-pointer">
+              عرض الكل <ArrowLeft size={11} />
+            </span>
+          </Link>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-          {[
-            { nameAr: "معرض الرياض الدولي للتقنية", nameEn: "Riyadh International Tech Expo", date: "أبريل 2025", spots: "23 وحدة متاحة" },
-            { nameAr: "مؤتمر الذكاء الاصطناعي السعودي", nameEn: "Saudi AI Conference", date: "مايو 2025", spots: "15 وحدة متاحة" },
-            { nameAr: "معرض الأغذية والمشروبات", nameEn: "Food & Beverage Exhibition", date: "يونيو 2025", spots: "42 وحدة متاحة" },
-          ].map((e, i) => (
+          {upcomingEvents.map((e, i) => (
             <Link key={i} href="/expos">
-              <div className="p-3 sm:p-4 rounded-xl cursor-pointer transition-colors" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
-                <p className="text-xs sm:text-sm font-semibold t-primary truncate">{e.nameAr}</p>
-                <p className="text-[9px] sm:text-[10px] t-gold font-['Inter'] mb-1.5 sm:mb-2" style={{ opacity: 0.6 }}>{e.nameEn}</p>
+              <div className="p-3 sm:p-4 rounded-xl cursor-pointer transition-colors group" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+                <div className="flex items-start gap-3 mb-2">
+                  <img src={e.image} alt={e.nameAr} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold t-primary truncate">{e.nameAr}</p>
+                    <p className="text-[9px] sm:text-[10px] t-gold font-['Inter'] truncate" style={{ opacity: 0.6 }}>{e.nameEn}</p>
+                  </div>
+                </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] sm:text-xs t-tertiary">{e.date}</span>
-                  <span className="text-[9px] sm:text-[10px]" style={{ color: "var(--status-green)", opacity: 0.8 }}>{e.spots}</span>
+                  <div className="flex items-center gap-1 text-[10px] t-tertiary">
+                    <Calendar size={10} />
+                    <span className="font-['Inter']">{e.dateStart}</span>
+                  </div>
+                  <span className="text-[9px] sm:text-[10px]" style={{ color: "var(--status-green)", opacity: 0.8 }}>{e.availableUnits} وحدة متاحة</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1.5 text-[9px] t-muted">
+                  <span className="flex items-center gap-0.5"><MapPin size={9} />{e.city}</span>
+                  <span className="flex items-center gap-0.5"><Star size={9} style={{ color: "var(--gold-accent)" }} />{e.rating}</span>
+                  <span className="flex items-center gap-0.5"><Users size={9} />{e.footfall.split(" ")[0]}</span>
                 </div>
               </div>
             </Link>

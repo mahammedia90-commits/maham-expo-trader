@@ -57,7 +57,7 @@ export default function KYC() {
     bankName: "", iban: "", accountHolder: "", accountNumber: ""
   });
 
-  const { trader, completeKYC } = useAuth();
+  const { trader, completeKYC, saveKYCData } = useAuth();
   const [, navigate] = useLocation();
 
   useEffect(() => {
@@ -108,6 +108,8 @@ export default function KYC() {
       setCurrentStep(steps[currentIndex + 1].id);
       toast.success("تم حفظ البيانات بنجاح");
     } else {
+      // Save KYC data to AuthContext for contract generation
+      saveKYCData(formData);
       if (completeKYC) completeKYC();
       setCurrentStep("complete");
       toast.success("تم إكمال التحقق من الهوية بنجاح! حسابك الآن موثق.");
@@ -309,6 +311,8 @@ export default function KYC() {
                   { id: "auth_letter", label: "تفويض / وكالة رسمية", labelEn: "Authorization Letter / Power of Attorney", required: true, desc: "للمفوض بالتوقيع على العقود" },
                   { id: "national_address", label: "العنوان الوطني", labelEn: "National Address Certificate", required: false, desc: "صادر من البريد السعودي — غير مشروط (اختياري)" },
                   { id: "bank_letter", label: "خطاب تعريف بنكي", labelEn: "Bank Identification Letter", required: false, desc: "يؤكد بيانات الحساب البنكي — اختياري" },
+                  { id: "company_profile", label: "بروفايل الشركة / الملف التعريفي", labelEn: "Company Profile / Product Catalog", required: true, desc: "ملف تعريفي للشركة يتضمن المنتجات والخدمات المقدمة (PDF أو صور)" },
+                  { id: "product_catalog", label: "كتالوج المنتجات / الخدمات", labelEn: "Products & Services Catalog", required: true, desc: "ملف يوضح المنتجات أو الخدمات التي ستعرضها في المعرض" },
                 ].map((doc) => (
                   <div key={doc.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:border-[var(--gold-border)] transition-colors gap-2 sm:gap-0">
                     <div className="flex items-start gap-3 min-w-0">

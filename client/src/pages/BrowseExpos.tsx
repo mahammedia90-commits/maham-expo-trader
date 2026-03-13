@@ -1,135 +1,77 @@
 /**
- * BrowseExpos — Explore available exhibitions and events
+ * BrowseExpos — Explore real 2026 Saudi exhibitions and events
  * RULES:
  * 1. Anyone can browse — no restrictions
  * 2. Only KYC-verified traders can book a unit
  * 3. Booking creates a real record in AuthContext (pending_payment)
  * 4. Payment → Contract flow handled in Payments page
+ * 5. Investor/organizer info is NEVER shown to traders
  */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import {
   Building2, Search, MapPin, Calendar, Star,
-  Clock, X, Grid3X3, List, Sparkles, CreditCard, Map
+  Clock, X, Grid3X3, List, Sparkles, CreditCard, Map,
+  Users, TrendingUp, Filter, ChevronDown, Eye
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import BookingGuard from "@/components/BookingGuard";
-
-interface Expo {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  descAr: string;
-  location: string;
-  dateStart: string;
-  dateEnd: string;
-  totalUnits: number;
-  availableUnits: number;
-  priceRange: string;
-  category: string;
-  rating: number;
-  featured: boolean;
-  status: "open" | "closing_soon" | "full" | "upcoming";
-  image: string;
-  organizer: string;
-  units: { nameAr: string; nameEn: string; zone: string; type: string; size: string; price: number; deposit: number; services: string[] }[];
-}
-
-const expos: Expo[] = [
-  {
-    id: "EX-001", nameAr: "معرض الرياض الدولي للتقنية", nameEn: "Riyadh International Tech Expo",
-    descAr: "أكبر معرض تقني في المنطقة — أكثر من 500 عارض و200 وحدة تجارية متاحة للتجار",
-    location: "الرياض — مركز المعارض الدولي", dateStart: "2025-05-01", dateEnd: "2025-05-10",
-    totalUnits: 200, availableUnits: 47, priceRange: "12,000 - 120,000", category: "تقنية",
-    rating: 4.8, featured: true, status: "open",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop",
-    organizer: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات",
-    units: [
-      { nameAr: "بوث رئيسي A21", nameEn: "Main Booth A21", zone: "A", type: "زاوية — Corner", size: "4×4 م²", price: 45000, deposit: 2250, services: ["كهرباء 3 فاز", "إنترنت فائق", "تكييف مركزي"] },
-      { nameAr: "محل تجاري B12", nameEn: "Shop B12", zone: "B", type: "مميز — Premium", size: "4×3 م²", price: 42000, deposit: 2100, services: ["كهرباء", "إنترنت", "موقع مميز"] },
-      { nameAr: "كشك B33", nameEn: "Kiosk B33", zone: "B", type: "قياسي — Standard", size: "3×3 م²", price: 12000, deposit: 600, services: ["كهرباء", "إنترنت"] },
-    ],
-  },
-  {
-    id: "EX-002", nameAr: "مؤتمر التقنية والابتكار", nameEn: "Tech & Innovation Conference",
-    descAr: "مؤتمر متخصص في الابتكار والتقنيات الناشئة — فرص استثمارية وتجارية",
-    location: "الرياض — فندق الفيصلية", dateStart: "2025-04-15", dateEnd: "2025-04-18",
-    totalUnits: 80, availableUnits: 12, priceRange: "18,000 - 65,000", category: "تقنية",
-    rating: 4.6, featured: false, status: "closing_soon",
-    image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&h=400&fit=crop",
-    organizer: "One May Events",
-    units: [
-      { nameAr: "بوث C5", nameEn: "Booth C5", zone: "C", type: "قياسي — Standard", size: "3×3 م²", price: 18000, deposit: 900, services: ["كهرباء", "إنترنت"] },
-    ],
-  },
-  {
-    id: "EX-003", nameAr: "معرض الأغذية والمشروبات", nameEn: "Food & Beverage Exhibition",
-    descAr: "معرض متخصص في قطاع الأغذية والمشروبات — مطاعم، كافيهات، موردين",
-    location: "الرياض — بوليفارد وورلد", dateStart: "2025-06-01", dateEnd: "2025-06-15",
-    totalUnits: 150, availableUnits: 89, priceRange: "15,000 - 180,000", category: "أغذية",
-    rating: 4.9, featured: true, status: "open",
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
-    organizer: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات",
-    units: [
-      { nameAr: "جناح VIP D01", nameEn: "VIP Wing D01", zone: "D", type: "جزيرة — Island", size: "6×4 م²", price: 120000, deposit: 6000, services: ["كهرباء 3 فاز", "إنترنت فائق", "تكييف مركزي", "شاشة LED", "تنظيف يومي"] },
-      { nameAr: "منطقة F&B D15", nameEn: "F&B Area D15", zone: "D", type: "مميز — Premium", size: "4×3 م²", price: 55000, deposit: 2750, services: ["كهرباء", "إنترنت", "تكييف"] },
-    ],
-  },
-  {
-    id: "EX-004", nameAr: "مؤتمر الذكاء الاصطناعي السعودي", nameEn: "Saudi AI Conference",
-    descAr: "مؤتمر عالمي للذكاء الاصطناعي — عروض حية وفرص شراكة",
-    location: "الرياض — مركز الملك عبدالعزيز", dateStart: "2025-07-10", dateEnd: "2025-07-13",
-    totalUnits: 60, availableUnits: 60, priceRange: "20,000 - 90,000", category: "تقنية",
-    rating: 4.7, featured: false, status: "upcoming",
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop",
-    organizer: "Maham AI",
-    units: [
-      { nameAr: "بوث A31", nameEn: "Booth A31", zone: "A", type: "قياسي — Standard", size: "3×3 م²", price: 18000, deposit: 900, services: ["كهرباء", "إنترنت"] },
-    ],
-  },
-  {
-    id: "EX-005", nameAr: "موسم الرياض — بوليفارد وورلد", nameEn: "Riyadh Season — Boulevard World",
-    descAr: "أكبر فعالية ترفيهية في المملكة — مساحات تجارية Retail و F&B",
-    location: "الرياض — بوليفارد وورلد", dateStart: "2025-10-01", dateEnd: "2026-03-31",
-    totalUnits: 300, availableUnits: 0, priceRange: "25,000 - 500,000", category: "ترفيه",
-    rating: 5.0, featured: true, status: "full",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop",
-    organizer: "Boulevard World Project",
-    units: [],
-  },
-  {
-    id: "EX-006", nameAr: "معرض العقارات والاستثمار", nameEn: "Real Estate & Investment Expo",
-    descAr: "معرض متخصص في العقارات والاستثمار العقاري — فرص حصرية",
-    location: "جدة — مركز المعارض", dateStart: "2025-08-20", dateEnd: "2025-08-25",
-    totalUnits: 100, availableUnits: 73, priceRange: "10,000 - 75,000", category: "عقارات",
-    rating: 4.5, featured: false, status: "open",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop",
-    organizer: "Maham Group",
-    units: [
-      { nameAr: "بوث E10", nameEn: "Booth E10", zone: "E", type: "قياسي — Standard", size: "3×3 م²", price: 15000, deposit: 750, services: ["كهرباء", "إنترنت"] },
-    ],
-  },
-];
-
-const categories = ["الكل", "تقنية", "أغذية", "ترفيه", "عقارات"];
+import { events2026, eventCategories, eventStats, type ExpoEvent, type ExpoUnit } from "@/data/events2026";
 
 export default function BrowseExpos() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedExpo, setSelectedExpo] = useState<Expo | null>(null);
+  const [selectedExpo, setSelectedExpo] = useState<ExpoEvent | null>(null);
   const [showGuard, setShowGuard] = useState(false);
   const [showUnitPicker, setShowUnitPicker] = useState(false);
+  const [sortBy, setSortBy] = useState<"date" | "price" | "rating" | "availability">("date");
+  const [showFilters, setShowFilters] = useState(false);
+  const [cityFilter, setCityFilter] = useState("الكل");
   const { canBook, addNotification, addPendingBooking, addBooking } = useAuth();
   const [, navigate] = useLocation();
 
-  const filtered = expos.filter(e => {
-    const matchSearch = search === "" || e.nameAr.includes(search) || e.nameEn.toLowerCase().includes(search.toLowerCase()) || e.descAr.includes(search);
-    const matchCategory = activeCategory === "الكل" || e.category === activeCategory;
-    return matchSearch && matchCategory;
-  });
+  const cities = useMemo(() => {
+    const set = new Set(events2026.map(e => e.city));
+    return ["الكل", ...Array.from(set)];
+  }, []);
+
+  const filtered = useMemo(() => {
+    let result = events2026.filter(e => {
+      const matchSearch = search === "" ||
+        e.nameAr.includes(search) ||
+        e.nameEn.toLowerCase().includes(search.toLowerCase()) ||
+        e.descAr.includes(search) ||
+        e.venue.includes(search) ||
+        e.categoryEn.toLowerCase().includes(search.toLowerCase());
+      const matchCategory = activeCategory === "الكل" || e.category === activeCategory;
+      const matchCity = cityFilter === "الكل" || e.city === cityFilter;
+      return matchSearch && matchCategory && matchCity;
+    });
+
+    // Sort
+    switch (sortBy) {
+      case "date":
+        result.sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+        break;
+      case "price":
+        result.sort((a, b) => {
+          const pa = parseInt(a.priceRange.replace(/[^0-9]/g, ""));
+          const pb = parseInt(b.priceRange.replace(/[^0-9]/g, ""));
+          return pa - pb;
+        });
+        break;
+      case "rating":
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      case "availability":
+        result.sort((a, b) => b.availableUnits - a.availableUnits);
+        break;
+    }
+    return result;
+  }, [search, activeCategory, cityFilter, sortBy]);
 
   const getStatusStyle = (status: string) => {
     const map: Record<string, { ar: string; color: string }> = {
@@ -142,7 +84,7 @@ export default function BrowseExpos() {
   };
 
   /** Book a specific unit — creates real booking record */
-  const handleBookUnit = (expo: Expo, unit: typeof expo.units[0]) => {
+  const handleBookUnit = (expo: ExpoEvent, unit: ExpoUnit) => {
     if (!canBook) {
       setSelectedExpo(null);
       setShowUnitPicker(false);
@@ -185,10 +127,13 @@ export default function BrowseExpos() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">تصفح المعارض والفعاليات</h2>
-          <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {expos.length} Available</p>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">تصفح المعارض والفعاليات 2026</h2>
+          <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {events2026.length} Events Available</p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setShowFilters(!showFilters)} className={`p-2 rounded-lg transition-colors ${showFilters ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}>
+            <Filter size={16} />
+          </button>
           <button onClick={() => setViewMode("grid")} className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}>
             <Grid3X3 size={16} />
           </button>
@@ -202,32 +147,80 @@ export default function BrowseExpos() {
       <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
         <div className="flex-1 relative">
           <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
-          <input type="text" placeholder="ابحث عن معرض أو فعالية..." value={search} onChange={(e) => setSearch(e.target.value)}
+          <input type="text" placeholder="ابحث عن معرض أو فعالية أو مكان..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus" style={{ backgroundColor: "var(--input-bg)" }} />
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-          {categories.map((cat) => (
-            <button key={cat} onClick={() => setActiveCategory(cat)}
-              className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${activeCategory === cat ? "btn-gold" : "glass-card t-secondary"}`}>
-              {cat}
+          {eventCategories.slice(0, 8).map((cat) => (
+            <button key={cat.ar} onClick={() => setActiveCategory(cat.ar)}
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${activeCategory === cat.ar ? "btn-gold" : "glass-card t-secondary"}`}>
+              {cat.ar}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Advanced Filters */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <div className="glass-card rounded-xl p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="text-[10px] t-muted mb-1 block">المدينة</label>
+                <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
+                  className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-2 py-1.5 text-xs t-secondary">
+                  {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] t-muted mb-1 block">ترتيب حسب</label>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-2 py-1.5 text-xs t-secondary">
+                  <option value="date">التاريخ</option>
+                  <option value="price">السعر</option>
+                  <option value="rating">التقييم</option>
+                  <option value="availability">الوحدات المتاحة</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] t-muted mb-1 block">الفئات المتبقية</label>
+                <div className="flex gap-1 flex-wrap">
+                  {eventCategories.slice(8).map(cat => (
+                    <button key={cat.ar} onClick={() => setActiveCategory(cat.ar)}
+                      className={`px-1.5 py-0.5 rounded text-[9px] ${activeCategory === cat.ar ? "btn-gold" : "glass-card t-muted"}`}>
+                      {cat.ar}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-end">
+                <button onClick={() => { setActiveCategory("الكل"); setCityFilter("الكل"); setSortBy("date"); }}
+                  className="text-[10px] t-gold underline">إعادة تعيين الفلاتر</button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
-          { label: "معارض متاحة", value: expos.filter(e => e.status === "open").length, color: "var(--status-green)" },
-          { label: "يغلق قريباً", value: expos.filter(e => e.status === "closing_soon").length, color: "var(--status-yellow)" },
-          { label: "إجمالي الوحدات", value: expos.reduce((a, e) => a + e.totalUnits, 0), color: "var(--gold-accent)" },
-          { label: "وحدات متاحة", value: expos.reduce((a, e) => a + e.availableUnits, 0), color: "var(--status-blue)" },
+          { label: "فعاليات متاحة", value: eventStats.openEvents, color: "var(--status-green)", icon: Building2 },
+          { label: "يغلق قريباً", value: eventStats.closingSoon, color: "var(--status-yellow)", icon: Clock },
+          { label: "إجمالي الوحدات", value: eventStats.totalUnits.toLocaleString(), color: "var(--gold-accent)", icon: TrendingUp },
+          { label: "وحدات متاحة", value: eventStats.availableUnits.toLocaleString(), color: "var(--status-blue)", icon: Users },
         ].map((s, i) => (
           <div key={i} className="glass-card rounded-xl p-2 sm:p-3 text-center">
+            <s.icon size={14} className="mx-auto mb-1" style={{ color: s.color, opacity: 0.7 }} />
             <p className="text-base sm:text-lg font-bold font-['Inter']" style={{ color: s.color }}>{s.value}</p>
             <p className="text-[9px] sm:text-[10px] t-tertiary">{s.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Results count */}
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] t-muted">{filtered.length} نتيجة {search && `لـ "${search}"`}</p>
       </div>
 
       {/* Expo Grid */}
@@ -235,10 +228,10 @@ export default function BrowseExpos() {
         {filtered.map((expo, i) => {
           const sc = getStatusStyle(expo.status);
           return (
-            <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+            <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer" onClick={() => setSelectedExpo(expo)}>
               <div className="relative h-32 sm:h-40 overflow-hidden">
-                <img src={expo.image} alt={expo.nameAr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={expo.image} alt={expo.nameAr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
                 <span className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
                   style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}>
@@ -254,13 +247,17 @@ export default function BrowseExpos() {
                   <Star size={10} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
                   <span className="text-[10px] text-white font-['Inter']">{expo.rating}</span>
                 </div>
+                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                  <Eye size={10} className="text-white/70" />
+                  <span className="text-[10px] text-white/70 font-['Inter']">{expo.footfall.split(" ")[0]}</span>
+                </div>
               </div>
               <div className="p-3 sm:p-4">
                 <h3 className="text-sm font-bold t-primary mb-0.5">{expo.nameAr}</h3>
                 <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
                 <p className="text-[11px] t-tertiary line-clamp-2 mb-3">{expo.descAr}</p>
                 <div className="flex items-center gap-4 text-[10px] t-muted mb-3">
-                  <span className="flex items-center gap-1"><MapPin size={10} />{expo.location.split("—")[0]}</span>
+                  <span className="flex items-center gap-1"><MapPin size={10} />{expo.city}</span>
                   <span className="flex items-center gap-1 font-['Inter']"><Calendar size={10} />{expo.dateStart}</span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -281,6 +278,14 @@ export default function BrowseExpos() {
           );
         })}
       </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12 glass-card rounded-2xl">
+          <Search size={40} className="mx-auto t-muted mb-3" style={{ opacity: 0.3 }} />
+          <p className="text-sm t-tertiary">لا توجد نتائج مطابقة</p>
+          <p className="text-[10px] t-muted mt-1">جرب تغيير الفلاتر أو كلمة البحث</p>
+        </div>
+      )}
 
       {/* Expo Detail Modal */}
       <AnimatePresence>
@@ -310,13 +315,15 @@ export default function BrowseExpos() {
 
               <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
                 <p className="text-xs t-tertiary leading-relaxed">{selectedExpo.descAr}</p>
+                <p className="text-[10px] t-muted font-['Inter'] leading-relaxed">{selectedExpo.descEn}</p>
+
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
                     { icon: MapPin, label: "الموقع", value: selectedExpo.location },
                     { icon: Calendar, label: "الفترة", value: `${selectedExpo.dateStart} — ${selectedExpo.dateEnd}` },
-                    { icon: Building2, label: "المنظم", value: selectedExpo.organizer },
-                    { icon: Star, label: "التصنيف", value: selectedExpo.category },
-                    { icon: Building2, label: "الوحدات المتاحة", value: `${selectedExpo.availableUnits} / ${selectedExpo.totalUnits}` },
+                    { icon: Building2, label: "المكان", value: selectedExpo.venue },
+                    { icon: Star, label: "التصنيف", value: `${selectedExpo.category} · ${selectedExpo.categoryEn}` },
+                    { icon: Users, label: "الزوار المتوقعون", value: selectedExpo.footfall },
                     { icon: CreditCard, label: "نطاق الأسعار", value: `${selectedExpo.priceRange} ر.س` },
                   ].map((d, i) => (
                     <div key={i} className="p-3 rounded-xl modal-inner">
@@ -338,10 +345,14 @@ export default function BrowseExpos() {
                     <div className="h-full rounded-full transition-all"
                       style={{ width: `${((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100}%`, backgroundColor: selectedExpo.availableUnits === 0 ? "var(--status-red)" : "var(--gold-accent)" }} />
                   </div>
+                  <div className="flex justify-between text-[9px] t-muted mt-1">
+                    <span>الوحدات المتاحة: {selectedExpo.availableUnits}</span>
+                    <span>الإجمالي: {selectedExpo.totalUnits}</span>
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pb-2">
-                  {selectedExpo.availableUnits > 0 ? (
+                  {selectedExpo.availableUnits > 0 && (selectedExpo.status === "open" || selectedExpo.status === "closing_soon") ? (
                     <>
                       <Link href="/map" className="flex-1">
                         <button className="w-full btn-gold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
@@ -355,6 +366,11 @@ export default function BrowseExpos() {
                         <CreditCard size={14} /> احجز الآن
                       </button>
                     </>
+                  ) : selectedExpo.status === "upcoming" ? (
+                    <button onClick={() => { toast.info("سيتم إشعارك عند فتح باب الحجز"); setSelectedExpo(null); }}
+                      className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
+                      <Clock size={15} /> تنبيهي عند فتح الحجز
+                    </button>
                   ) : (
                     <button onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات"); setSelectedExpo(null); }}
                       className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
@@ -389,7 +405,7 @@ export default function BrowseExpos() {
                     <p className="text-[10px] t-gold/50 font-['Inter']">{selectedExpo.nameEn}</p>
                   </div>
                   <button onClick={() => setShowUnitPicker(false)} className="p-2 rounded-lg t-tertiary" style={{ background: "var(--glass-bg)" }}>
-                    <X size={16} />
+                    <X size={14} />
                   </button>
                 </div>
 
@@ -401,8 +417,8 @@ export default function BrowseExpos() {
                 )}
 
                 <div className="space-y-2">
-                  {selectedExpo.units.map((unit, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:border-[var(--gold-border)] transition-colors">
+                  {selectedExpo.units.filter(u => u.available).map((unit) => (
+                    <div key={unit.id} className="p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:border-[var(--gold-border)] transition-colors">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <p className="text-xs t-primary font-semibold">{unit.nameAr}</p>
