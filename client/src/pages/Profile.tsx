@@ -64,14 +64,9 @@ export default function Profile() {
     <div className="space-y-5 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="p-2 rounded-lg glass-card t-tertiary hover:t-gold transition-colors flex-shrink-0">
-            <ArrowRight size={18} />
-          </button>
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold t-primary">الملف التعريفي للتاجر</h2>
-            <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Trader Profile & Account Settings</p>
-          </div>
+        <div>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">الملف التعريفي للتاجر</h2>
+          <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Trader Profile & Account Settings</p>
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}

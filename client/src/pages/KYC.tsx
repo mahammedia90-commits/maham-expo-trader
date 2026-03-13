@@ -150,15 +150,10 @@ export default function KYC() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto px-1">
-      {/* Header with back */}
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate("/dashboard")} className="p-2 rounded-lg glass-card t-tertiary hover:t-gold transition-colors flex-shrink-0">
-          <ArrowRight size={18} />
-        </button>
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">التحقق من الهوية (KYC)</h2>
-          <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Know Your Customer — Required before booking</p>
-        </div>
+      {/* Header */}
+      <div>
+        <h2 className="text-lg sm:text-xl font-bold t-primary">التحقق من الهوية (KYC)</h2>
+        <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Know Your Customer — Required before booking</p>
       </div>
 
       {/* Company Info Banner */}

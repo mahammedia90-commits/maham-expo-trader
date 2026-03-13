@@ -1,7 +1,6 @@
 /**
  * DashboardLayout — Sidebar + main content area
- * Supports: Light Mode / Dark Mode with theme toggle
- * Features: Bottom Nav, Back button, Logout in mobile drawer
+ * Features: Bottom Nav (always visible on mobile), Back button, Logout, Responsive
  */
 import { useState, useCallback } from "react";
 import { useLocation, Link } from "wouter";
@@ -72,9 +71,9 @@ const navSections: { titleAr: string; titleEn: string; items: NavItem[] }[] = [
 const allNavItems = navSections.flatMap(s => s.items);
 
 const mobileNavItems: NavItem[] = [
-  { path: "/dashboard", icon: LayoutDashboard, labelAr: "الرئيسية", labelEn: "Home" },
   { path: "/expos", icon: Building2, labelAr: "المعارض", labelEn: "Expos" },
   { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings" },
+  { path: "/dashboard", icon: LayoutDashboard, labelAr: "الرئيسية", labelEn: "Home" },
   { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badge: 3 },
   { path: "/profile", icon: User, labelAr: "حسابي", labelEn: "Account" },
 ];
@@ -89,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const traderCompany = trader?.companyName || "";
 
   const currentItem = allNavItems.find(n => n.path === location) || allNavItems.find(n => location.startsWith(n.path));
-  const isSubPage = location !== "/dashboard";
+  const isSubPage = location !== "/dashboard" && location !== "/expos";
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
@@ -98,6 +97,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     toast.success("تم تسجيل الخروج بنجاح");
     window.location.href = "/";
   }, [logout]);
+
+  const handleBack = useCallback(() => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate("/expos");
+    }
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex" dir="rtl">
@@ -177,7 +184,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
           {!collapsed && (
             <>
-              {/* Contact Info */}
               <div className="px-4 py-2 border-t" style={{ borderColor: "var(--glass-border)" }}>
                 <p className="text-[8px] t-muted mb-1">تواصل معنا</p>
                 <a href="tel:+966535555900" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
@@ -225,42 +231,50 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Mobile Bottom Nav — Always visible */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 sidebar-glass safe-area-bottom" style={{ borderTop: "1px solid var(--glass-border)" }}>
-        <div className="flex items-center justify-around py-2 px-1">
+      {/* ========== MOBILE BOTTOM NAV — ALWAYS VISIBLE ========== */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50" style={{
+        background: "var(--sidebar-bg)",
+        backdropFilter: "blur(40px)",
+        WebkitBackdropFilter: "blur(40px)",
+        borderTop: "1px solid var(--glass-border)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}>
+        <div className="flex items-center justify-around py-1.5 px-0.5">
           {mobileNavItems.map((item) => {
-            const isActive = location === item.path;
+            const isActive = location === item.path || (item.path !== "/dashboard" && item.path !== "/expos" && location.startsWith(item.path));
+            const isExactActive = location === item.path;
             return (
               <Link key={item.path} href={item.path}>
-                <div className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-lg transition-all relative"
-                  style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}>
+                <div className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all relative min-w-[48px]"
+                  style={{ color: isExactActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}>
                   <div className="relative">
-                    <item.icon size={18} />
+                    <item.icon size={20} strokeWidth={isExactActive ? 2.5 : 1.8} />
                     {item.badge && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[6px] font-bold"
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold"
                         style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
                         {item.badge}
                       </span>
                     )}
                   </div>
-                  <span className="text-[9px] font-medium">{item.labelAr}</span>
-                  {isActive && (
-                    <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
+                  <span className="text-[10px] font-medium leading-tight">{item.labelAr}</span>
+                  {isExactActive && (
+                    <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
                   )}
                 </div>
               </Link>
             );
           })}
+          {/* More button */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="flex flex-col items-center gap-0.5 py-1.5 px-2"
+            className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[48px]"
             style={{ color: mobileOpen ? "var(--gold-accent)" : "var(--text-tertiary)" }}
           >
-            <Menu size={18} />
-            <span className="text-[9px] font-medium">المزيد</span>
+            <Menu size={20} strokeWidth={1.8} />
+            <span className="text-[10px] font-medium leading-tight">المزيد</span>
           </button>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Drawer */}
       <AnimatePresence>
@@ -270,7 +284,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 z-50"
+              className="lg:hidden fixed inset-0 z-[55]"
               style={{ backgroundColor: "var(--modal-overlay)" }}
               onClick={closeMobile}
             />
@@ -279,7 +293,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-0 right-0 h-full w-72 sidebar-glass z-50 overflow-y-auto"
+              className="lg:hidden fixed top-0 right-0 h-full w-[280px] z-[56] overflow-y-auto"
+              style={{
+                background: "var(--sidebar-bg)",
+                backdropFilter: "blur(40px)",
+                WebkitBackdropFilter: "blur(40px)",
+                borderLeft: "1px solid var(--glass-border)",
+              }}
             >
               {/* Drawer Header */}
               <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
@@ -289,7 +309,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               </div>
 
-              {/* Trader Info in Drawer */}
+              {/* Trader Info */}
               <div className="p-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
@@ -342,12 +362,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 ))}
               </nav>
 
-              {/* Drawer Footer: Theme + Logout */}
+              {/* Drawer Footer */}
               <div className="p-3 border-t mt-auto" style={{ borderColor: "var(--glass-border)" }}>
                 <button
                   onClick={toggleTheme}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl glass-card mb-2"
-                  style={{ color: "var(--text-secondary)" }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl mb-2"
+                  style={{ color: "var(--text-secondary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
                 >
                   {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
                   <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
@@ -368,21 +388,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main
-        className={`flex-1 min-h-screen transition-all duration-300 pb-20 lg:pb-0 ${
+        className={`flex-1 min-h-screen transition-all duration-300 ${
           collapsed ? "lg:mr-20" : "lg:mr-64"
         }`}
+        style={{ paddingBottom: "calc(70px + env(safe-area-inset-bottom, 0px))" }}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 glass-card px-3 sm:px-6 py-2 sm:py-3" style={{ borderBottom: "1px solid var(--glass-border)" }}>
+        <header className="sticky top-0 z-30 px-3 sm:px-6 py-2 sm:py-3" style={{
+          background: "var(--sidebar-bg)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          borderBottom: "1px solid var(--glass-border)",
+        }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {/* Back Button — shows on all sub-pages */}
+              {/* Back Button — shows on sub-pages */}
               {isSubPage && (
                 <button
-                  onClick={() => navigate("/dashboard")}
+                  onClick={handleBack}
                   className="p-2 rounded-lg transition-colors shrink-0"
                   style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)" }}
-                  title="رجوع للرئيسية"
+                  title="رجوع"
                 >
                   <ArrowRight size={16} />
                 </button>
@@ -397,7 +423,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Theme Toggle (desktop top bar) */}
               <button
                 onClick={toggleTheme}
                 className="hidden sm:block p-2 rounded-lg transition-colors"

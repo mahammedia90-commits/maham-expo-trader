@@ -66,7 +66,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (authStep === "complete") {
-      navigate("/dashboard");
+      navigate("/expos");
     }
   }, [authStep, navigate]);
 
@@ -167,8 +167,8 @@ export default function Login() {
       region,
     });
     setInfoSubmitting(false);
-    toast.success(`مرحباً ${traderName}! تم تسجيلك بنجاح`);
-    navigate("/dashboard");
+    toast.success(`مرحباً ${traderName}! تم تسجيلك بنجاح — تصفح المعارض واحجز الآن`);
+    navigate("/expos");
   }, [traderName, companyName, activity, region, completeRegistration, navigate]);
 
   const stepVariants = {

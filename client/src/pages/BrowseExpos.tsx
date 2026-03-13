@@ -334,24 +334,23 @@ export default function BrowseExpos() {
                 <div className="flex gap-3">
                   {selectedExpo.availableUnits > 0 ? (
                     <>
-                      {canBook ? (
-                        <Link href="/map" className="flex-1">
-                          <button className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
-                            <Map size={16} />
-                            عرض الخريطة والحجز
-                          </button>
-                        </Link>
-                      ) : (
-                        <button onClick={() => { setSelectedExpo(null); setShowGuard(true); }} className="flex-1 btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                      <Link href="/map" className="flex-1">
+                        <button className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
                           <Map size={16} />
-                          عرض الخريطة والحجز
-                        </button>
-                      )}
-                      <Link href="/messages">
-                        <button className="glass-card px-4 py-3 rounded-xl text-xs t-secondary transition-colors">
-                          استفسار
+                          عرض الخريطة والبوثات
                         </button>
                       </Link>
+                      {canBook ? (
+                        <button onClick={() => { setSelectedExpo(null); toast.success("يمكنك الحجز مباشرة من الخريطة"); }} className="glass-card px-4 py-3 rounded-xl text-xs t-gold transition-colors flex items-center gap-1.5">
+                          <CreditCard size={14} />
+                          احجز الآن
+                        </button>
+                      ) : (
+                        <button onClick={() => { setSelectedExpo(null); setShowGuard(true); }} className="glass-card px-4 py-3 rounded-xl text-xs t-secondary transition-colors flex items-center gap-1.5">
+                          <CreditCard size={14} />
+                          احجز الآن
+                        </button>
+                      )}
                     </>
                   ) : (
                     <button

@@ -147,13 +147,13 @@ export default function Home() {
                 <ArrowLeft size={18} />
               </button>
             </Link>
-            <Link href="/expos">
+            <Link href="/login">
               <button className="glass-card px-8 py-3.5 rounded-xl text-sm t-secondary flex items-center gap-2 mx-auto sm:mx-0">
                 <Building2 size={16} />
-                تصفح المعارض
+                تصفح المعارض والحجز
               </button>
             </Link>
-            <Link href="/map">
+            <Link href="/login">
               <button className="glass-card px-8 py-3.5 rounded-xl text-sm t-secondary flex items-center gap-2 mx-auto sm:mx-0">
                 <Map size={16} />
                 استعراض الخريطة
@@ -425,7 +425,7 @@ export default function Home() {
                   ابدأ الآن مجاناً
                 </button>
               </Link>
-              <Link href="/expos">
+              <Link href="/login">
                 <button className="glass-card px-10 py-4 rounded-xl text-sm t-secondary flex items-center gap-2 mx-auto sm:mx-0">
                   <Building2 size={16} />
                   تصفح المعارض المتاحة
