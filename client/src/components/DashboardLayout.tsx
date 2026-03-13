@@ -343,19 +343,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ========== MOBILE BOTTOM NAV — ALWAYS VISIBLE ========== */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50" style={{
-        background: "var(--sidebar-bg)",
-        backdropFilter: "blur(40px)",
-        WebkitBackdropFilter: "blur(40px)",
+        background: "var(--bg-primary, #0a0a0a)",
         borderTop: "1px solid var(--glass-border)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)",
       }}>
-        <div className="flex items-center justify-around py-1.5 px-0.5">
+        <div className="flex items-center justify-around py-2 px-1">
           {mobileNavItems.map((item) => {
             const isActive = location === item.path || (item.path !== "/dashboard" && item.path !== "/expos" && location.startsWith(item.path));
             const isExactActive = location === item.path;
             return (
               <Link key={item.path} href={item.path}>
-                <div className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all relative min-w-[48px]"
+                <div className="flex flex-col items-center gap-0.5 py-1.5 px-2 sm:px-3 rounded-xl transition-all relative min-w-[44px]"
                   style={{ color: isExactActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}>
                   <div className="relative">
                     <item.icon size={20} strokeWidth={isExactActive ? 2.5 : 1.8} />
@@ -372,7 +370,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       ) : null;
                     })()}
                   </div>
-                  <span className="text-[10px] font-medium leading-tight">{t(item.labelKey)}</span>
+                  <span className="text-[9px] sm:text-[10px] font-medium leading-tight truncate max-w-[56px] text-center">{t(item.labelKey)}</span>
                   {isExactActive && (
                     <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
                   )}
@@ -383,11 +381,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* More button */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[48px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 px-2 sm:px-3 min-w-[44px]"
             style={{ color: mobileOpen ? "var(--gold-accent)" : "var(--text-tertiary)" }}
           >
             <Menu size={20} strokeWidth={1.8} />
-            <span className="text-[10px] font-medium leading-tight">{t("common.filter")}</span>
+            <span className="text-[9px] sm:text-[10px] font-medium leading-tight truncate max-w-[56px] text-center">{t("common.filter")}</span>
           </button>
         </div>
       </nav>
@@ -514,7 +512,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <main
         className={`flex-1 min-h-screen transition-all duration-300 ${mainMargin}`}
-        style={{ paddingBottom: "calc(70px + env(safe-area-inset-bottom, 0px))" }}
+        style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 24px))" }}
       >
         {/* Top Bar */}
         <header className="sticky top-0 z-30 px-3 sm:px-6 py-2 sm:py-3" style={{
@@ -585,7 +583,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <div className="p-2 sm:p-4 lg:p-6 pb-20 lg:pb-6">
+        <div className="p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6">
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 10 }}

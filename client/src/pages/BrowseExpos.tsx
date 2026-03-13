@@ -148,9 +148,9 @@ export default function BrowseExpos() {
       {/* Search & Filters */}
       <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
         <div className="flex-1 relative">
-          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
+          <Search size={14} className={`absolute top-1/2 -translate-y-1/2 t-muted ${isRTL ? 'right-3' : 'left-3'}`} />
           <input type="text" placeholder={t("expos.search")} value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus" style={{ backgroundColor: "var(--input-bg)" }} />
+            className={`w-full glass-card rounded-xl py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'}`} style={{ backgroundColor: "var(--input-bg)" }} />
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           {eventCategories.slice(0, 8).map((cat) => (
@@ -232,7 +232,7 @@ export default function BrowseExpos() {
           return (
             <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer" onClick={() => setSelectedExpo(expo)}>
-              <div className="relative h-32 sm:h-40 overflow-hidden">
+              <div className="relative h-36 sm:h-44 overflow-hidden">
                 <img src={expo.image} alt={expo.nameAr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
                 <span className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
@@ -254,23 +254,23 @@ export default function BrowseExpos() {
                   <span className="text-[10px] text-white/70 font-['Inter']">{expo.footfall.split(" ")[0]}</span>
                 </div>
               </div>
-              <div className="p-3 sm:p-4">
-                <h3 className="text-sm font-bold t-primary mb-0.5">{expo.nameAr}</h3>
-                <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
-                <p className="text-[11px] t-tertiary line-clamp-2 mb-3">{expo.descAr}</p>
-                <div className="flex items-center gap-4 text-[10px] t-muted mb-3">
-                  <span className="flex items-center gap-1"><MapPin size={10} />{expo.city}</span>
-                  <span className="flex items-center gap-1 font-['Inter']"><Calendar size={10} />{expo.dateStart}</span>
+              <div className="p-3 sm:p-4 overflow-hidden">
+                <h3 className="text-sm font-bold t-primary mb-0.5 truncate">{expo.nameAr}</h3>
+                <p className="text-[10px] t-gold font-['Inter'] mb-2 truncate" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
+                <p className="text-[11px] t-tertiary line-clamp-2 mb-3 break-words">{expo.descAr}</p>
+                <div className="flex items-center gap-3 text-[10px] t-muted mb-3 flex-wrap">
+                  <span className="flex items-center gap-1 shrink-0"><MapPin size={10} />{expo.city}</span>
+                  <span className="flex items-center gap-1 font-['Inter'] shrink-0"><Calendar size={10} />{expo.dateStart}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="shrink-0">
                     <p className="text-[9px] t-muted">{t("expos.availableUnits")}</p>
                     <p className="text-sm font-bold font-['Inter']">
                       <span style={{ color: expo.availableUnits > 0 ? "var(--status-green)" : "var(--status-red)" }}>{expo.availableUnits}</span>
                       <span className="t-muted text-[10px]"> / {expo.totalUnits}</span>
                     </p>
                   </div>
-                  <div className="text-left">
+                  <div className="text-left shrink-0">
                     <p className="text-[9px] t-muted">{t("expos.priceRange")} ({t("expos.sar")})</p>
                     <p className="text-xs t-gold font-['Inter']">{expo.priceRange}</p>
                   </div>
@@ -303,7 +303,7 @@ export default function BrowseExpos() {
               <div className="flex justify-center pt-3 pb-1 sm:hidden">
                 <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
               </div>
-              <div className="relative h-32 sm:h-48">
+              <div className="relative h-36 sm:h-48">
                 <img src={selectedExpo.image} alt={selectedExpo.nameAr} className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), color-mix(in srgb, var(--surface-dark) 50%, transparent), transparent)" }} />
                 <button onClick={() => setSelectedExpo(null)} className="absolute top-4 left-4 p-2 rounded-full t-secondary" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>

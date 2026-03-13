@@ -1,6 +1,6 @@
 /**
  * Analytics — AI-powered analytics dashboard with real data
- * Features: Dynamic KPIs, AI insights, event analytics, trader performance
+ * All text uses t() for multi-language support
  */
 import { useMemo } from "react";
 import { motion } from "framer-motion";
@@ -17,7 +17,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="glass-card rounded-lg px-3 py-2 border border-[var(--glass-border)]">
         <p className="text-[10px] t-secondary">{label}</p>
-        <p className="text-xs font-bold t-gold">{payload[0].value?.toLocaleString()} ر.س</p>
+        <p className="text-xs font-bold t-gold">{payload[0].value?.toLocaleString()}</p>
       </div>
     );
   }
@@ -28,140 +28,97 @@ export default function Analytics() {
   const { t, lang, isRTL } = useLanguage();
   const { trader, bookings, payments, contracts } = useAuth();
 
-  // Dynamic KPIs from real data
   const totalPaid = payments.filter(p => p.status === "completed").reduce((a, p) => a + p.amount, 0);
   const totalBookingValue = bookings.reduce((a, b) => a + b.price, 0);
   const confirmedBookings = bookings.filter(b => b.status === "confirmed").length;
   const occupancyRate = eventStats.totalUnits > 0 ? Math.round(((eventStats.totalUnits - eventStats.availableUnits) / eventStats.totalUnits) * 100) : 0;
 
-  // Event category distribution
   const categoryDist = useMemo(() => {
     const map = new Map<string, number>();
-    events2026.forEach(e => {
-      map.set(e.category, (map.get(e.category) || 0) + 1);
-    });
+    events2026.forEach(e => { map.set(e.category, (map.get(e.category) || 0) + 1); });
     const colors = ["#C5A55A", "#E8D5A3", "#60A5FA", "#4ADE80", "#F472B6", "#A78BFA", "#FB923C"];
-    return Array.from(map.entries()).map(([name, value], i) => ({
-      name, nameEn: name, value, color: colors[i % colors.length]
-    }));
+    return Array.from(map.entries()).map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }));
   }, []);
 
-  // Event timeline data
   const eventTimeline = useMemo(() => {
-    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-    const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthKeys = ["common.jan","common.feb","common.mar","common.apr","common.may","common.jun","common.jul","common.aug","common.sep","common.oct","common.nov","common.dec"];
     const counts = new Array(12).fill(0);
-    events2026.forEach(e => {
-      const m = new Date(e.dateStart).getMonth();
-      if (!isNaN(m)) counts[m]++;
-    });
-    return months.map((m, i) => ({ month: m, monthEn: monthsEn[i], value: counts[i] }));
-  }, []);
+    events2026.forEach(e => { const m = new Date(e.dateStart).getMonth(); if (!isNaN(m)) counts[m]++; });
+    return monthKeys.map((key, i) => ({ month: t(key), value: counts[i] }));
+  }, [t]);
 
-  // City distribution
   const cityDist = useMemo(() => {
     const map = new Map<string, number>();
-    events2026.forEach(e => {
-      map.set(e.city, (map.get(e.city) || 0) + e.totalUnits);
-    });
-    return Array.from(map.entries()).map(([day, visitors]) => ({ day, dayEn: day, visitors }));
+    events2026.forEach(e => { map.set(e.city, (map.get(e.city) || 0) + e.totalUnits); });
+    return Array.from(map.entries()).map(([day, visitors]) => ({ day, visitors }));
   }, []);
 
-  // AI Insights
   const aiInsights = useMemo(() => {
-    const insights: { icon: any; textAr: string; textEn: string; type: "success" | "warning" | "info" }[] = [];
-
+    const insights: { icon: any; text: string; type: "success" | "warning" | "info" }[] = [];
     const closingSoon = events2026.filter(e => e.status === "closing_soon");
     if (closingSoon.length > 0) {
-      insights.push({
-        icon: Target,
-        textAr: `${closingSoon.length} فعالية تغلق قريباً — فرصة استثمارية عالية`,
-        textEn: `${closingSoon.length} events closing soon — high investment opportunity`,
-        type: "warning"
-      });
+      insights.push({ icon: Target, text: `${closingSoon.length} ${t("analytics.closingSoonInsight")}`, type: "warning" });
     }
-
     const pendingPayments = bookings.filter(b => b.paymentStatus !== "fully_paid");
     if (pendingPayments.length > 0) {
-      insights.push({
-        icon: DollarSign,
-        textAr: `${pendingPayments.length} حجز بانتظار إكمال الدفع لإصدار العقد`,
-        textEn: `${pendingPayments.length} bookings awaiting payment for contract issuance`,
-        type: "warning"
-      });
+      insights.push({ icon: DollarSign, text: `${pendingPayments.length} ${t("analytics.pendingPaymentInsight")}`, type: "warning" });
     }
-
     const topEvent = events2026.reduce((a, b) => a.rating > b.rating ? a : b);
-    insights.push({
-      icon: Sparkles,
-      textAr: `أعلى فعالية تقييماً: ${topEvent.nameAr} (${topEvent.rating}/5) — ${topEvent.availableUnits} وحدة متاحة`,
-      textEn: `Top rated: ${topEvent.nameEn} (${topEvent.rating}/5) — ${topEvent.availableUnits} units available`,
-      type: "info"
-    });
-
-    insights.push({
-      icon: Building2,
-      textAr: `إجمالي ${eventStats.totalUnits.toLocaleString()} وحدة تجارية عبر ${eventStats.totalEvents} فعالية — نسبة إشغال ${occupancyRate}%`,
-      textEn: `Total ${eventStats.totalUnits.toLocaleString()} units across ${eventStats.totalEvents} events — ${occupancyRate}% occupancy`,
-      type: "success"
-    });
-
+    const eName = lang === "ar" ? topEvent.nameAr : topEvent.nameEn;
+    insights.push({ icon: Sparkles, text: `${t("analytics.topRated")}: ${eName} (${topEvent.rating}/5) — ${topEvent.availableUnits} ${t("analytics.unitsAvailable")}`, type: "info" });
+    insights.push({ icon: Building2, text: `${t("common.total")} ${eventStats.totalUnits.toLocaleString()} ${t("analytics.unitsAcross")} ${eventStats.totalEvents} ${t("analytics.events")} — ${occupancyRate}% ${t("analytics.occupancy")}`, type: "success" });
     return insights;
-  }, [bookings, occupancyRate]);
+  }, [bookings, occupancyRate, t, lang]);
 
   const kpis = [
-    { labelAr: "إجمالي المدفوع", labelEn: "Total Paid", value: totalPaid > 0 ? `${(totalPaid / 1000).toFixed(0)}K` : "0", change: "+23%", up: true, icon: DollarSign, color: "#4ADE80" },
-    { labelAr: "عدد الحجوزات", labelEn: "Bookings", value: String(bookings.length), change: bookings.length > 0 ? "+100%" : "0%", up: bookings.length > 0, icon: BarChart3, color: "#C5A55A" },
-    { labelAr: "نسبة الإشغال", labelEn: "Occupancy", value: `${occupancyRate}%`, change: "+5%", up: true, icon: TrendingUp, color: "#60A5FA" },
-    { labelAr: "الفعاليات المتاحة", labelEn: "Open Events", value: String(eventStats.openEvents), change: `${eventStats.totalEvents} إجمالي`, up: true, icon: Calendar, color: "#E8D5A3" },
+    { label: t("analytics.totalPaid"), value: totalPaid > 0 ? `${(totalPaid / 1000).toFixed(0)}K` : "0", change: "+23%", up: true, icon: DollarSign, color: "#4ADE80" },
+    { label: t("analytics.bookingsCount"), value: String(bookings.length), change: bookings.length > 0 ? "+100%" : "0%", up: bookings.length > 0, icon: BarChart3, color: "#C5A55A" },
+    { label: t("analytics.occupancyRate"), value: `${occupancyRate}%`, change: "+5%", up: true, icon: TrendingUp, color: "#60A5FA" },
+    { label: t("analytics.openEvents"), value: String(eventStats.openEvents), change: `${eventStats.totalEvents} ${t("common.total")}`, up: true, icon: Calendar, color: "#E8D5A3" },
   ];
 
   return (
     <div className="space-y-4 sm:space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">التحليلات والتقارير</h2>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("analytics.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">AI-Powered Analytics & Reports</p>
         </div>
         <button
           onClick={() => {
-            toast.info("جاري إنشاء التقرير...");
+            toast.info(t("analytics.generatingReport"));
             generateAnalyticsPDF({
               period: "2026",
               totalRevenue: totalPaid,
               totalBookings: bookings.length,
               occupancyRate: `${occupancyRate}%`,
               topExpos: events2026.filter(e => e.featured).slice(0, 4).map(e => ({
-                name: e.nameAr, revenue: 0, bookings: e.totalUnits - e.availableUnits
+                name: lang === "ar" ? e.nameAr : e.nameEn, revenue: 0, bookings: e.totalUnits - e.availableUnits
               })),
-              traderName: trader?.name || "التاجر",
-            }).then(() => toast.success("تم تحميل التقرير بنجاح!")).catch(() => toast.error("حدث خطأ في إنشاء التقرير"));
+              traderName: trader?.name || t("common.trader"),
+            }).then(() => toast.success(t("analytics.reportDownloaded"))).catch(() => toast.error(t("analytics.reportError")));
           }}
           className="glass-card px-3 py-2 rounded-xl text-[11px] t-gold flex items-center gap-1.5"
           style={{ border: "1px solid var(--gold-border)" }}
         >
           <Download size={13} />
-          <span className="hidden sm:inline">تصدير تقرير</span>
+          <span className="hidden sm:inline">{t("analytics.exportReport")}</span>
           <span className="sm:hidden">PDF</span>
         </button>
       </div>
 
-      {/* AI Insights Banner */}
+      {/* AI Insights */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-5" style={{ borderColor: "var(--gold-border)" }}>
         <div className="flex items-center gap-2 mb-3">
           <Brain size={16} className="t-gold" />
-          <h3 className="text-xs sm:text-sm font-bold t-primary">رؤى الذكاء الاصطناعي</h3>
-          <span className="text-[9px] t-gold/50 font-['Inter']">AI Insights</span>
+          <h3 className="text-xs sm:text-sm font-bold t-primary">{t("analytics.aiInsights")}</h3>
         </div>
         <div className="space-y-2">
           {aiInsights.map((ins, i) => (
             <div key={i} className="flex items-start gap-2 p-2 rounded-lg" style={{ backgroundColor: "var(--glass-bg)" }}>
               <ins.icon size={13} className={ins.type === "success" ? "text-[var(--status-green)]" : ins.type === "warning" ? "text-[var(--status-yellow)]" : "t-gold"} style={{ flexShrink: 0, marginTop: 2 }} />
-              <div>
-                <p className="text-[11px] t-secondary">{ins.textAr}</p>
-                <p className="text-[9px] t-muted font-['Inter']">{ins.textEn}</p>
-              </div>
+              <p className="text-[11px] t-secondary">{ins.text}</p>
             </div>
           ))}
         </div>
@@ -182,8 +139,7 @@ export default function Analytics() {
               </span>
             </div>
             <p className="text-lg sm:text-xl font-bold t-primary font-['Inter']">{k.value}</p>
-            <p className="text-[10px] sm:text-xs t-secondary mt-0.5">{k.labelAr}</p>
-            <p className="text-[8px] sm:text-[9px] t-muted font-['Inter']">{k.labelEn}</p>
+            <p className="text-[10px] sm:text-xs t-secondary mt-0.5">{k.label}</p>
           </motion.div>
         ))}
       </div>
@@ -191,13 +147,12 @@ export default function Analytics() {
       {/* Event Timeline Chart */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
         className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6">
-        <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">توزيع الفعاليات الشهري 2026</h3>
-        <p className="text-[9px] t-gold/50 font-['Inter'] mb-3 sm:mb-4">Monthly Event Distribution 2026</p>
-        <div style={{ height: 220 }} className="sm:h-[280px]">
+        <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">{t("analytics.monthlyDistribution")}</h3>
+        <div style={{ height: 220 }} className="sm:h-[280px] mt-3">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={eventTimeline}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="monthEn" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} width={25} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="value" fill="#C5A55A" radius={[4, 4, 0, 0]} barSize={24} />
@@ -206,19 +161,16 @@ export default function Analytics() {
         </div>
       </motion.div>
 
-      {/* Category Distribution + City Units */}
+      {/* Category + City */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6">
-          <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">توزيع الفعاليات حسب الفئة</h3>
-          <p className="text-[9px] t-gold/50 font-['Inter'] mb-3">Events by Category</p>
+          <h3 className="text-xs sm:text-sm font-bold t-primary mb-3">{t("analytics.byCategory")}</h3>
           <div style={{ height: 160 }} className="sm:h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={categoryDist} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" stroke="none">
-                  {categoryDist.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
+                  {categoryDist.map((entry, index) => (<Cell key={index} fill={entry.color} />))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
@@ -228,7 +180,7 @@ export default function Analytics() {
               <div key={i} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: z.color }} />
                 <span className="text-[10px] t-secondary truncate">{z.name}</span>
-                <span className="text-[10px] t-muted font-['Inter'] mr-auto">{z.value}</span>
+                <span className="text-[10px] t-muted font-['Inter']">{z.value}</span>
               </div>
             ))}
           </div>
@@ -236,8 +188,7 @@ export default function Analytics() {
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
           className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6">
-          <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">الوحدات التجارية حسب المدينة</h3>
-          <p className="text-[9px] t-gold/50 font-['Inter'] mb-3">Units by City</p>
+          <h3 className="text-xs sm:text-sm font-bold t-primary mb-3">{t("analytics.byCity")}</h3>
           <div style={{ height: 180 }} className="sm:h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={cityDist}>
