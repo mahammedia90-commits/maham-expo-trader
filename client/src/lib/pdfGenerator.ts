@@ -152,6 +152,11 @@ export interface ContractData {
   traderCR: string;
   traderPhone: string;
   traderEmail: string;
+  traderVAT?: string;
+  traderIBAN?: string;
+  traderBankName?: string;
+  traderNationalAddress?: string;
+  traderIdNumber?: string;
   totalValue: number;
   deposit: number;
   remaining: number;
@@ -191,13 +196,28 @@ export async function generateContractPDF(data: ContractData) {
   y = drawInfoRow(doc, y, "Mobile", "+966 53 555 5900");
   y = drawInfoRow(doc, y, "Email", "info@maham.com.sa");
 
-  // Second Party
+  // Second Party — Built from real KYC data
   y = drawSectionTitle(doc, y + 2, "Second Party (Operator / Trader)");
   y = drawInfoRow(doc, y, "Trader Name", data.traderName);
   y = drawInfoRow(doc, y, "Company", data.traderCompany);
   y = drawInfoRow(doc, y, "Commercial Reg.", data.traderCR || "—");
+  if (data.traderIdNumber && data.traderIdNumber !== "—") {
+    y = drawInfoRow(doc, y, "National ID / Iqama", data.traderIdNumber);
+  }
+  if (data.traderVAT && data.traderVAT !== "—") {
+    y = drawInfoRow(doc, y, "VAT Number", data.traderVAT);
+  }
   y = drawInfoRow(doc, y, "Mobile", data.traderPhone);
   y = drawInfoRow(doc, y, "Email", data.traderEmail);
+  if (data.traderNationalAddress && data.traderNationalAddress !== "—") {
+    y = drawInfoRow(doc, y, "National Address", data.traderNationalAddress);
+  }
+  if (data.traderBankName && data.traderBankName !== "—") {
+    y = drawInfoRow(doc, y, "Bank", `${data.traderBankName}`);
+  }
+  if (data.traderIBAN && data.traderIBAN !== "—") {
+    y = drawInfoRow(doc, y, "IBAN", data.traderIBAN);
+  }
 
   // Location Details
   y = drawSectionTitle(doc, y + 2, "Location & Expo Details");

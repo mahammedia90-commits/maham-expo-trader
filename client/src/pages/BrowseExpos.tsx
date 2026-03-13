@@ -1,11 +1,14 @@
 /**
  * BrowseExpos — Explore available exhibitions and events
- * Theme-aware: uses CSS variables for Light/Dark mode
- * All buttons, modals, and filters are fully functional
+ * RULES:
+ * 1. Anyone can browse — no restrictions
+ * 2. Only KYC-verified traders can book a unit
+ * 3. Booking creates a real record in AuthContext (pending_payment)
+ * 4. Payment → Contract flow handled in Payments page
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   Building2, Search, MapPin, Calendar, Star,
   Clock, X, Grid3X3, List, Sparkles, CreditCard, Map
@@ -31,6 +34,7 @@ interface Expo {
   status: "open" | "closing_soon" | "full" | "upcoming";
   image: string;
   organizer: string;
+  units: { nameAr: string; nameEn: string; zone: string; type: string; size: string; price: number; deposit: number; services: string[] }[];
 }
 
 const expos: Expo[] = [
@@ -42,6 +46,11 @@ const expos: Expo[] = [
     rating: 4.8, featured: true, status: "open",
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop",
     organizer: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات",
+    units: [
+      { nameAr: "بوث رئيسي A21", nameEn: "Main Booth A21", zone: "A", type: "زاوية — Corner", size: "4×4 م²", price: 45000, deposit: 2250, services: ["كهرباء 3 فاز", "إنترنت فائق", "تكييف مركزي"] },
+      { nameAr: "محل تجاري B12", nameEn: "Shop B12", zone: "B", type: "مميز — Premium", size: "4×3 م²", price: 42000, deposit: 2100, services: ["كهرباء", "إنترنت", "موقع مميز"] },
+      { nameAr: "كشك B33", nameEn: "Kiosk B33", zone: "B", type: "قياسي — Standard", size: "3×3 م²", price: 12000, deposit: 600, services: ["كهرباء", "إنترنت"] },
+    ],
   },
   {
     id: "EX-002", nameAr: "مؤتمر التقنية والابتكار", nameEn: "Tech & Innovation Conference",
@@ -51,6 +60,9 @@ const expos: Expo[] = [
     rating: 4.6, featured: false, status: "closing_soon",
     image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&h=400&fit=crop",
     organizer: "One May Events",
+    units: [
+      { nameAr: "بوث C5", nameEn: "Booth C5", zone: "C", type: "قياسي — Standard", size: "3×3 م²", price: 18000, deposit: 900, services: ["كهرباء", "إنترنت"] },
+    ],
   },
   {
     id: "EX-003", nameAr: "معرض الأغذية والمشروبات", nameEn: "Food & Beverage Exhibition",
@@ -60,6 +72,10 @@ const expos: Expo[] = [
     rating: 4.9, featured: true, status: "open",
     image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
     organizer: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات",
+    units: [
+      { nameAr: "جناح VIP D01", nameEn: "VIP Wing D01", zone: "D", type: "جزيرة — Island", size: "6×4 م²", price: 120000, deposit: 6000, services: ["كهرباء 3 فاز", "إنترنت فائق", "تكييف مركزي", "شاشة LED", "تنظيف يومي"] },
+      { nameAr: "منطقة F&B D15", nameEn: "F&B Area D15", zone: "D", type: "مميز — Premium", size: "4×3 م²", price: 55000, deposit: 2750, services: ["كهرباء", "إنترنت", "تكييف"] },
+    ],
   },
   {
     id: "EX-004", nameAr: "مؤتمر الذكاء الاصطناعي السعودي", nameEn: "Saudi AI Conference",
@@ -69,6 +85,9 @@ const expos: Expo[] = [
     rating: 4.7, featured: false, status: "upcoming",
     image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop",
     organizer: "Maham AI",
+    units: [
+      { nameAr: "بوث A31", nameEn: "Booth A31", zone: "A", type: "قياسي — Standard", size: "3×3 م²", price: 18000, deposit: 900, services: ["كهرباء", "إنترنت"] },
+    ],
   },
   {
     id: "EX-005", nameAr: "موسم الرياض — بوليفارد وورلد", nameEn: "Riyadh Season — Boulevard World",
@@ -78,6 +97,7 @@ const expos: Expo[] = [
     rating: 5.0, featured: true, status: "full",
     image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop",
     organizer: "Boulevard World Project",
+    units: [],
   },
   {
     id: "EX-006", nameAr: "معرض العقارات والاستثمار", nameEn: "Real Estate & Investment Expo",
@@ -87,6 +107,9 @@ const expos: Expo[] = [
     rating: 4.5, featured: false, status: "open",
     image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop",
     organizer: "Maham Group",
+    units: [
+      { nameAr: "بوث E10", nameEn: "Booth E10", zone: "E", type: "قياسي — Standard", size: "3×3 م²", price: 15000, deposit: 750, services: ["كهرباء", "إنترنت"] },
+    ],
   },
 ];
 
@@ -98,7 +121,9 @@ export default function BrowseExpos() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedExpo, setSelectedExpo] = useState<Expo | null>(null);
   const [showGuard, setShowGuard] = useState(false);
-  const { canBook, addNotification, addPendingBooking } = useAuth();
+  const [showUnitPicker, setShowUnitPicker] = useState(false);
+  const { canBook, addNotification, addPendingBooking, addBooking } = useAuth();
+  const [, navigate] = useLocation();
 
   const filtered = expos.filter(e => {
     const matchSearch = search === "" || e.nameAr.includes(search) || e.nameEn.toLowerCase().includes(search.toLowerCase()) || e.descAr.includes(search);
@@ -116,6 +141,45 @@ export default function BrowseExpos() {
     return map[status] || { ar: status, color: "var(--text-tertiary)" };
   };
 
+  /** Book a specific unit — creates real booking record */
+  const handleBookUnit = (expo: Expo, unit: typeof expo.units[0]) => {
+    if (!canBook) {
+      setSelectedExpo(null);
+      setShowUnitPicker(false);
+      setShowGuard(true);
+      return;
+    }
+
+    const newBooking = addBooking({
+      expoId: expo.id,
+      expoNameAr: expo.nameAr,
+      expoNameEn: expo.nameEn,
+      unitAr: unit.nameAr,
+      unitEn: unit.nameEn,
+      zone: unit.zone,
+      boothType: unit.type,
+      boothSize: unit.size,
+      price: unit.price,
+      deposit: unit.deposit,
+      services: unit.services,
+      location: expo.location,
+    });
+
+    addPendingBooking();
+    addNotification({
+      type: "booking",
+      titleAr: `حجز جديد — ${unit.nameAr}`,
+      titleEn: `New Booking — ${unit.nameEn}`,
+      message: `تم إنشاء حجز ${unit.nameAr} في ${expo.nameAr}. رقم الحجز: ${newBooking.id}. يرجى إكمال الدفع لتأكيد الحجز وإصدار العقد.`,
+      link: "/payments",
+    });
+
+    setSelectedExpo(null);
+    setShowUnitPicker(false);
+    toast.success(`تم إنشاء الحجز ${newBooking.id} بنجاح! انتقل للمدفوعات لإكمال الدفع وإصدار العقد`);
+    navigate("/payments");
+  };
+
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* Header */}
@@ -125,16 +189,10 @@ export default function BrowseExpos() {
           <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {expos.length} Available</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}
-          >
+          <button onClick={() => setViewMode("grid")} className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}>
             <Grid3X3 size={16} />
           </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}
-          >
+          <button onClick={() => setViewMode("list")} className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-gold-subtle t-gold" : "glass-card t-tertiary"}`}>
             <List size={16} />
           </button>
         </div>
@@ -144,24 +202,13 @@ export default function BrowseExpos() {
       <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
         <div className="flex-1 relative">
           <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
-          <input
-            type="text"
-            placeholder="ابحث عن معرض أو فعالية..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus"
-            style={{ backgroundColor: "var(--input-bg)" }}
-          />
+          <input type="text" placeholder="ابحث عن معرض أو فعالية..." value={search} onChange={(e) => setSearch(e.target.value)}
+            className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus" style={{ backgroundColor: "var(--input-bg)" }} />
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${
-                activeCategory === cat ? "btn-gold" : "glass-card t-secondary"
-              }`}
-            >
+            <button key={cat} onClick={() => setActiveCategory(cat)}
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${activeCategory === cat ? "btn-gold" : "glass-card t-secondary"}`}>
               {cat}
             </button>
           ))}
@@ -188,57 +235,34 @@ export default function BrowseExpos() {
         {filtered.map((expo, i) => {
           const sc = getStatusStyle(expo.status);
           return (
-            <motion.div
-              key={expo.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer"
-              onClick={() => setSelectedExpo(expo)}
-            >
+            <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+              className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer" onClick={() => setSelectedExpo(expo)}>
               <div className="relative h-32 sm:h-40 overflow-hidden">
-                <img
-                  src={expo.image}
-                  alt={expo.nameAr}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                <img src={expo.image} alt={expo.nameAr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
-                <span
-                  className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
-                  style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}
-                >
+                <span className="absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md"
+                  style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}>
                   {sc.ar}
                 </span>
                 {expo.featured && (
                   <span className="absolute top-3 right-3 px-2 py-1 rounded-full text-[10px] bg-gold-subtle border-gold flex items-center gap-1"
                     style={{ color: "var(--gold-light)", border: "1px solid var(--gold-border)" }}>
-                    <Sparkles size={10} />
-                    مميز
+                    <Sparkles size={10} /> مميز
                   </span>
                 )}
-                <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full px-2 py-0.5"
-                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
                   <Star size={10} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
                   <span className="text-[10px] text-white font-['Inter']">{expo.rating}</span>
                 </div>
               </div>
-
               <div className="p-3 sm:p-4">
                 <h3 className="text-sm font-bold t-primary mb-0.5">{expo.nameAr}</h3>
                 <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
                 <p className="text-[11px] t-tertiary line-clamp-2 mb-3">{expo.descAr}</p>
-
                 <div className="flex items-center gap-4 text-[10px] t-muted mb-3">
-                  <span className="flex items-center gap-1">
-                    <MapPin size={10} />
-                    {expo.location.split("—")[0]}
-                  </span>
-                  <span className="flex items-center gap-1 font-['Inter']">
-                    <Calendar size={10} />
-                    {expo.dateStart}
-                  </span>
+                  <span className="flex items-center gap-1"><MapPin size={10} />{expo.location.split("—")[0]}</span>
+                  <span className="flex items-center gap-1 font-['Inter']"><Calendar size={10} />{expo.dateStart}</span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[9px] t-muted">الوحدات المتاحة</p>
@@ -260,37 +284,22 @@ export default function BrowseExpos() {
 
       {/* Expo Detail Modal */}
       <AnimatePresence>
-        {selectedExpo && (
+        {selectedExpo && !showUnitPicker && (
           <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 backdrop-blur-sm" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => setSelectedExpo(null)} />
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 backdrop-blur-sm"
-              style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
-              onClick={() => setSelectedExpo(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: "100%" }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: "100%" }}
+              initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[600px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
-              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}
-              dir="rtl"
-            >
-              {/* Drag handle on mobile */}
+              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir="rtl">
               <div className="flex justify-center pt-3 pb-1 sm:hidden">
                 <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
               </div>
               <div className="relative h-32 sm:h-48">
                 <img src={selectedExpo.image} alt={selectedExpo.nameAr} className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), color-mix(in srgb, var(--surface-dark) 50%, transparent), transparent)" }} />
-                <button
-                  onClick={() => setSelectedExpo(null)}
-                  className="absolute top-4 left-4 p-2 rounded-full t-secondary"
-                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}
-                >
+                <button onClick={() => setSelectedExpo(null)} className="absolute top-4 left-4 p-2 rounded-full t-secondary" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
                   <X size={16} />
                 </button>
                 <div className="absolute bottom-4 right-6">
@@ -301,7 +310,6 @@ export default function BrowseExpos() {
 
               <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
                 <p className="text-xs t-tertiary leading-relaxed">{selectedExpo.descAr}</p>
-
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
                     { icon: MapPin, label: "الموقع", value: selectedExpo.location },
@@ -327,13 +335,8 @@ export default function BrowseExpos() {
                     <span className="font-['Inter']">{Math.round(((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100)}%</span>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--glass-bg)" }}>
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100}%`,
-                        backgroundColor: selectedExpo.availableUnits === 0 ? "var(--status-red)" : "var(--gold-accent)",
-                      }}
-                    />
+                    <div className="h-full rounded-full transition-all"
+                      style={{ width: `${((selectedExpo.totalUnits - selectedExpo.availableUnits) / selectedExpo.totalUnits) * 100}%`, backgroundColor: selectedExpo.availableUnits === 0 ? "var(--status-red)" : "var(--gold-accent)" }} />
                   </div>
                 </div>
 
@@ -342,40 +345,20 @@ export default function BrowseExpos() {
                     <>
                       <Link href="/map" className="flex-1">
                         <button className="w-full btn-gold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
-                          <Map size={15} />
-                          عرض الخريطة والبوثات
+                          <Map size={15} /> عرض الخريطة والبوثات
                         </button>
                       </Link>
-                      {canBook ? (
-                        <button onClick={() => {
-                          addPendingBooking();
-                          addNotification({
-                            type: "booking",
-                            titleAr: `حجز جديد — ${selectedExpo?.nameAr}`,
-                            titleEn: `New Booking — ${selectedExpo?.nameEn}`,
-                            message: `تم إنشاء حجز جديد في ${selectedExpo?.nameAr}. يرجى إكمال الدفع لتأكيد الحجز.`,
-                            link: "/bookings",
-                          });
-                          setSelectedExpo(null);
-                          toast.success("تم إنشاء الحجز بنجاح! انتقل للحجوزات لإكمال الدفع");
-                        }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-gold transition-colors flex items-center justify-center gap-1.5">
-                          <CreditCard size={14} />
-                          احجز الآن
-                        </button>
-                      ) : (
-                        <button onClick={() => { setSelectedExpo(null); setShowGuard(true); }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-secondary transition-colors flex items-center justify-center gap-1.5">
-                          <CreditCard size={14} />
-                          احجز الآن
-                        </button>
-                      )}
+                      <button onClick={() => {
+                        if (!canBook) { setSelectedExpo(null); setShowGuard(true); return; }
+                        setShowUnitPicker(true);
+                      }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-gold transition-colors flex items-center justify-center gap-1.5">
+                        <CreditCard size={14} /> احجز الآن
+                      </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات | You'll be notified"); setSelectedExpo(null); }}
-                      className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2"
-                    >
-                      <Clock size={15} />
-                      انضم لقائمة الانتظار
+                    <button onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات"); setSelectedExpo(null); }}
+                      className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2">
+                      <Clock size={15} /> انضم لقائمة الانتظار
                     </button>
                   )}
                 </div>
@@ -385,7 +368,71 @@ export default function BrowseExpos() {
         )}
       </AnimatePresence>
 
-      {/* Booking Guard — blocks booking without KYC */}
+      {/* Unit Picker Modal — select which unit to book */}
+      <AnimatePresence>
+        {showUnitPicker && selectedExpo && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 backdrop-blur-sm" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => setShowUnitPicker(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[520px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
+              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir="rtl">
+              <div className="flex justify-center pt-3 pb-1 sm:hidden">
+                <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
+              </div>
+              <div className="px-4 sm:px-6 py-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-sm font-bold t-primary">اختر الوحدة للحجز</h3>
+                    <p className="text-[10px] t-gold/50 font-['Inter']">{selectedExpo.nameEn}</p>
+                  </div>
+                  <button onClick={() => setShowUnitPicker(false)} className="p-2 rounded-lg t-tertiary" style={{ background: "var(--glass-bg)" }}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* KYC Requirement Notice */}
+                {!canBook && (
+                  <div className="p-3 rounded-xl mb-3 bg-[var(--status-red)]/5 border border-[var(--status-red)]/10">
+                    <p className="text-[11px] text-[var(--status-red)]">يجب توثيق حسابك أولاً قبل الحجز</p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {selectedExpo.units.map((unit, i) => (
+                    <div key={i} className="p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:border-[var(--gold-border)] transition-colors">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="text-xs t-primary font-semibold">{unit.nameAr}</p>
+                          <p className="text-[9px] t-muted font-['Inter']">{unit.nameEn} · Zone {unit.zone}</p>
+                        </div>
+                        <p className="text-sm font-bold t-gold font-['Inter']">{unit.price.toLocaleString()} <span className="text-[9px] t-muted">ر.س</span></p>
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] t-tertiary mb-2">
+                        <span>{unit.type}</span>
+                        <span>{unit.size}</span>
+                        <span>عربون: {unit.deposit.toLocaleString()} ر.س</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                        {unit.services.map((s, j) => (
+                          <span key={j} className="px-1.5 py-0.5 rounded text-[8px] t-muted" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>{s}</span>
+                        ))}
+                      </div>
+                      <button onClick={() => handleBookUnit(selectedExpo, unit)}
+                        className="w-full btn-gold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5">
+                        <CreditCard size={12} /> حجز هذه الوحدة
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <BookingGuard isOpen={showGuard} onClose={() => setShowGuard(false)} onProceedToKYC={() => setShowGuard(false)} />
     </div>
   );
