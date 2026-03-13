@@ -80,7 +80,7 @@ export default function Profile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Profile Card */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-5 sm:p-6">
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6">
           <div className="flex flex-col items-center text-center mb-5">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--gold-accent)] to-[var(--gold-light)] flex items-center justify-center mb-4">
               <User size={32} style={{ color: "var(--btn-gold-text)" }} />
@@ -129,7 +129,7 @@ export default function Profile() {
         {/* Right Column */}
         <div className="lg:col-span-2 space-y-5">
           {/* KYC Status Card */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-5 sm:p-6">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-bold t-primary">حالة التوثيق (KYC)</h3>
@@ -185,7 +185,7 @@ export default function Profile() {
           </motion.div>
 
           {/* Business Details */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card rounded-2xl p-5 sm:p-6">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-bold t-primary">بيانات المنشأة</h3>
@@ -257,13 +257,16 @@ export default function Profile() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: "var(--modal-overlay)" }}>
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" style={{ backgroundColor: "var(--modal-overlay)" }}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-sm rounded-2xl p-6 shadow-2xl"
-            style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)" }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl"
+            style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 20px)" }}
           >
+            <div className="flex justify-center pb-2 sm:hidden">
+              <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
+            </div>
             <div className="text-center mb-5">
               <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: "rgba(248,113,113,0.1)" }}>
                 <LogOut size={24} style={{ color: "var(--status-red)" }} />

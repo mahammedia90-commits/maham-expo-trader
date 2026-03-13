@@ -33,8 +33,12 @@ export default function BookingGuard({ isOpen, onClose, onProceedToKYC }: Bookin
   const progress = (completedSteps / steps.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4" style={{ backgroundColor: "var(--modal-overlay)" }}>
-      <div className="w-full max-w-md rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)" }}>
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" style={{ backgroundColor: "var(--modal-overlay)" }}>
+      <div className="w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-4 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto" style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)" }}>
+        {/* Drag handle on mobile */}
+        <div className="flex justify-center pb-2 sm:hidden">
+          <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
+        </div>
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">

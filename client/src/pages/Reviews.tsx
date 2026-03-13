@@ -114,22 +114,22 @@ export default function Reviews() {
     : "0.0";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold t-primary">التقييمات والمراجعات</h2>
-        <p className="text-xs t-gold/50 font-['Inter']">Ratings & Reviews — Post-Exhibition Feedback</p>
+        <h2 className="text-lg sm:text-xl font-bold t-primary">التقييمات والمراجعات</h2>
+        <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Ratings & Reviews — Post-Exhibition Feedback</p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         {[
           { label: "تقييمات مطلوبة", labelEn: "Pending", value: pendingReviews.length, icon: Clock, color: "text-[var(--status-yellow)]" },
           { label: "تقييمات مقدمة", labelEn: "Submitted", value: pastReviews.length, icon: CheckCircle2, color: "text-[var(--status-green)]" },
           { label: "متوسط تقييمك", labelEn: "Your Average", value: "4.5", icon: Star, color: "text-[#FBBF24]" },
           { label: "شارة الجودة", labelEn: "Quality Badge", value: "ذهبية", icon: Award, color: "t-gold" },
         ].map((s, i) => (
-          <div key={i} className="glass-card rounded-xl p-4">
+          <div key={i} className="glass-card rounded-xl p-2.5 sm:p-4">
             <div className="flex items-center gap-2 mb-2">
               <s.icon size={14} className={`${s.color} opacity-60`} />
               <span className="text-[10px] t-tertiary">{s.label}</span>
@@ -145,7 +145,7 @@ export default function Reviews() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-2xl p-6 border-[var(--gold-border)]"
+          className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6 border-[var(--gold-border)]"
         >
           <div className="flex items-center gap-2 mb-5">
             <MessageSquare size={16} className="t-gold" />
@@ -175,7 +175,7 @@ export default function Reviews() {
           </div>
 
           {/* Category Ratings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
             {ratingCategories.map((cat) => (
               <div key={cat.key} className="flex items-center justify-between p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                 <div className="flex items-center gap-2">

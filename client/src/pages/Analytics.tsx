@@ -1,10 +1,10 @@
 /**
  * Analytics — AI-powered analytics dashboard
- * Design: Obsidian Glass with Recharts visualizations
+ * Mobile-first: responsive charts, stacked layout on mobile
  */
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, Eye, Users, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from "recharts";
+import { BarChart3, TrendingUp, Users, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
 const monthlyRevenue = [
   { month: "يناير", monthEn: "Jan", value: 45000 },
@@ -33,18 +33,18 @@ const visitorTrend = [
 ];
 
 const kpis = [
-  { labelAr: "إجمالي الإيرادات", labelEn: "Total Revenue", value: "٤٨٩,٠٠٠", unit: "ريال", change: "+23%", up: true, icon: DollarSign, color: "#4ADE80" },
-  { labelAr: "عدد الحجوزات", labelEn: "Total Bookings", value: "٤٧", unit: "حجز", change: "+15%", up: true, icon: BarChart3, color: "#C5A55A" },
-  { labelAr: "نسبة الإشغال", labelEn: "Occupancy Rate", value: "٩٢%", unit: "", change: "+5%", up: true, icon: TrendingUp, color: "#60A5FA" },
-  { labelAr: "إجمالي الزوار", labelEn: "Total Visitors", value: "١٩,٠٠٠", unit: "زائر", change: "-3%", up: false, icon: Users, color: "#E8D5A3" },
+  { labelAr: "إجمالي الإيرادات", labelEn: "Total Revenue", value: "٤٨٩K", change: "+23%", up: true, icon: DollarSign, color: "#4ADE80" },
+  { labelAr: "عدد الحجوزات", labelEn: "Bookings", value: "٤٧", change: "+15%", up: true, icon: BarChart3, color: "#C5A55A" },
+  { labelAr: "نسبة الإشغال", labelEn: "Occupancy", value: "٩٢%", change: "+5%", up: true, icon: TrendingUp, color: "#60A5FA" },
+  { labelAr: "الزوار", labelEn: "Visitors", value: "١٩K", change: "-3%", up: false, icon: Users, color: "#E8D5A3" },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="glass-card rounded-lg px-3 py-2 border border-[var(--glass-border)]">
-        <p className="text-[11px] t-secondary">{label}</p>
-        <p className="text-sm font-bold t-gold">{payload[0].value?.toLocaleString()} ر.س</p>
+        <p className="text-[10px] t-secondary">{label}</p>
+        <p className="text-xs font-bold t-gold">{payload[0].value?.toLocaleString()} ر.س</p>
       </div>
     );
   }
@@ -53,75 +53,74 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function Analytics() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div>
-        <h2 className="text-xl font-bold t-primary">التحليلات والتقارير</h2>
-        <p className="text-xs t-gold/50 font-['Inter']">Analytics & Reports — Powered by AI</p>
+        <h2 className="text-lg sm:text-xl font-bold t-primary">التحليلات والتقارير</h2>
+        <p className="text-[10px] t-gold/50 font-['Inter']">Analytics & Reports</p>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPIs — 2 cols on mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {kpis.map((k, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
-            className="glass-card rounded-2xl p-5"
+            className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-5"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${k.color}12` }}>
-                <k.icon size={16} style={{ color: k.color }} />
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center" style={{ backgroundColor: `${k.color}12` }}>
+                <k.icon size={14} style={{ color: k.color }} />
               </div>
-              <span className={`text-[11px] font-medium flex items-center gap-0.5 ${k.up ? "text-[var(--status-green)]" : "text-[var(--status-red)]"}`}>
-                {k.up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+              <span className={`text-[10px] font-medium flex items-center gap-0.5 ${k.up ? "text-[var(--status-green)]" : "text-[var(--status-red)]"}`}>
+                {k.up ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
                 {k.change}
               </span>
             </div>
-            <p className="text-xl font-bold t-primary font-['Inter']">{k.value}</p>
-            <p className="text-[10px] t-tertiary">{k.unit}</p>
-            <p className="text-xs t-secondary mt-1">{k.labelAr}</p>
-            <p className="text-[9px] t-muted font-['Inter']">{k.labelEn}</p>
+            <p className="text-lg sm:text-xl font-bold t-primary font-['Inter']">{k.value}</p>
+            <p className="text-[10px] sm:text-xs t-secondary mt-0.5">{k.labelAr}</p>
+            <p className="text-[8px] sm:text-[9px] t-muted font-['Inter']">{k.labelEn}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Revenue Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="lg:col-span-2 glass-card rounded-2xl p-6"
-        >
-          <h3 className="text-sm font-bold t-primary mb-1">الإيرادات الشهرية</h3>
-          <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Monthly Revenue (ر.س)</p>
-          <div style={{ height: 280 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="monthEn" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" fill="#C5A55A" radius={[6, 6, 0, 0]} barSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
+      {/* Revenue Chart — full width on mobile */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6"
+      >
+        <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">الإيرادات الشهرية</h3>
+        <p className="text-[9px] t-gold/50 font-['Inter'] mb-3 sm:mb-4">Monthly Revenue (ر.س)</p>
+        <div style={{ height: 220 }} className="sm:h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={monthlyRevenue}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+              <XAxis dataKey="monthEn" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} width={40} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="value" fill="#C5A55A" radius={[4, 4, 0, 0]} barSize={24} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
 
-        {/* Zone Distribution */}
+      {/* Zone Distribution + Visitor Trend — stacked on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="glass-card rounded-2xl p-6"
+          className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6"
         >
-          <h3 className="text-sm font-bold t-primary mb-1">توزيع الحجوزات</h3>
-          <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Bookings by Zone</p>
-          <div style={{ height: 200 }}>
+          <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">توزيع الحجوزات</h3>
+          <p className="text-[9px] t-gold/50 font-['Inter'] mb-3">Bookings by Zone</p>
+          <div style={{ height: 160 }} className="sm:h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={bookingsByZone} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" stroke="none">
+                <Pie data={bookingsByZone} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" stroke="none">
                   {bookingsByZone.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
@@ -129,47 +128,43 @@ export default function Analytics() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-2 mt-2">
+          <div className="grid grid-cols-2 gap-1.5 mt-2">
             {bookingsByZone.map((z, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: z.color }} />
-                  <span className="text-[11px] t-secondary">{z.name}</span>
-                  <span className="text-[9px] t-muted font-['Inter']">{z.nameEn}</span>
-                </div>
-                <span className="text-[11px] t-secondary font-['Inter']">{z.value}%</span>
+              <div key={i} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: z.color }} />
+                <span className="text-[10px] t-secondary">{z.name}</span>
+                <span className="text-[10px] t-muted font-['Inter'] mr-auto">{z.value}%</span>
               </div>
             ))}
           </div>
         </motion.div>
-      </div>
 
-      {/* Visitor Trend */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="glass-card rounded-2xl p-6"
-      >
-        <h3 className="text-sm font-bold t-primary mb-1">حركة الزوار الأسبوعية</h3>
-        <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Weekly Visitor Trend</p>
-        <div style={{ height: 250 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={visitorTrend}>
-              <defs>
-                <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#C5A55A" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#C5A55A" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="dayEn" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Area type="monotone" dataKey="visitors" stroke="#C5A55A" strokeWidth={2} fill="url(#goldGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6"
+        >
+          <h3 className="text-xs sm:text-sm font-bold t-primary mb-1">حركة الزوار الأسبوعية</h3>
+          <p className="text-[9px] t-gold/50 font-['Inter'] mb-3">Weekly Visitor Trend</p>
+          <div style={{ height: 180 }} className="sm:h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={visitorTrend}>
+                <defs>
+                  <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#C5A55A" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#C5A55A" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="dayEn" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} width={35} />
+                <Area type="monotone" dataKey="visitors" stroke="#C5A55A" strokeWidth={2} fill="url(#goldGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

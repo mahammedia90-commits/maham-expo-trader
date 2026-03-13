@@ -85,15 +85,15 @@ export default function HelpCenter() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold t-primary">مركز المساعدة</h2>
-        <p className="text-xs t-gold/50 font-['Inter']">Help Center — Support & FAQ</p>
+        <h2 className="text-lg sm:text-xl font-bold t-primary">مركز المساعدة</h2>
+        <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Help Center — Support & FAQ</p>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         {[
           { icon: MessageSquare, label: "محادثة مباشرة", labelEn: "Live Chat", color: "text-[var(--status-blue)]", bg: "bg-[var(--status-blue)]/10", action: "chat" },
           { icon: Phone, label: "اتصل بنا", labelEn: "+966 53 555 5900", color: "text-[var(--status-green)]", bg: "bg-[var(--status-green)]/10", action: "phone" },
@@ -107,7 +107,7 @@ export default function HelpCenter() {
               else if (action.action === "email") window.open("mailto:info@mahamexpo.sa", "_self");
               else toast.info("سيتم تفعيل هذه الخدمة قريباً | Coming soon");
             }}
-            className="glass-card rounded-xl p-4 text-center hover:bg-[var(--glass-bg)] transition-colors"
+            className="glass-card rounded-xl p-2.5 sm:p-4 text-center hover:bg-[var(--glass-bg)] transition-colors"
           >
             <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center mx-auto mb-2`}>
               <action.icon size={18} className={action.color} />
@@ -131,7 +131,7 @@ export default function HelpCenter() {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         {categories.map((cat) => (
           <button
             key={cat}
@@ -183,7 +183,7 @@ export default function HelpCenter() {
       </div>
 
       {/* Submit Ticket */}
-      <div className="glass-card rounded-2xl p-6">
+      <div className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Send size={16} className="t-gold" />
           <h3 className="text-sm font-bold t-primary">إرسال طلب دعم</h3>

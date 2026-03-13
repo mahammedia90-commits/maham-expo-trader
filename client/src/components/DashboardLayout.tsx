@@ -458,7 +458,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <div className="p-2 sm:p-4 lg:p-6">
+        <div className="p-2 sm:p-4 lg:p-6 pb-20 lg:pb-6">
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 10 }}

@@ -100,7 +100,7 @@ export default function ExpoMap() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Map Area */}
-        <div className="lg:col-span-2 glass-card rounded-2xl overflow-hidden relative" style={{ minHeight: "500px" }}>
+        <div className="lg:col-span-2 glass-card rounded-2xl overflow-hidden relative" style={{ minHeight: "300px" }}>
           <img src={MAP_BG} alt="Expo Map" className="w-full h-full object-cover absolute inset-0 opacity-60" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A12]/80 to-transparent" />
           

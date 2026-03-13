@@ -117,12 +117,12 @@ export default function BrowseExpos() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold t-primary">تصفح المعارض والفعاليات</h2>
-          <p className="text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {expos.length} Available</p>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">تصفح المعارض والفعاليات</h2>
+          <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Browse Exhibitions & Events — {expos.length} Available</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -141,24 +141,24 @@ export default function BrowseExpos() {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
         <div className="flex-1 relative">
-          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
+          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
           <input
             type="text"
             placeholder="ابحث عن معرض أو فعالية..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full glass-card rounded-xl pr-10 pl-4 py-2.5 text-sm t-primary placeholder:t-muted gold-focus"
+            className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs sm:text-sm t-primary placeholder:t-muted gold-focus"
             style={{ backgroundColor: "var(--input-bg)" }}
           />
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-2 rounded-lg text-[11px] transition-all ${
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${
                 activeCategory === cat ? "btn-gold" : "glass-card t-secondary"
               }`}
             >
@@ -169,22 +169,22 @@ export default function BrowseExpos() {
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
           { label: "معارض متاحة", value: expos.filter(e => e.status === "open").length, color: "var(--status-green)" },
           { label: "يغلق قريباً", value: expos.filter(e => e.status === "closing_soon").length, color: "var(--status-yellow)" },
           { label: "إجمالي الوحدات", value: expos.reduce((a, e) => a + e.totalUnits, 0), color: "var(--gold-accent)" },
           { label: "وحدات متاحة", value: expos.reduce((a, e) => a + e.availableUnits, 0), color: "var(--status-blue)" },
         ].map((s, i) => (
-          <div key={i} className="glass-card rounded-xl p-3 text-center">
-            <p className="text-lg font-bold font-['Inter']" style={{ color: s.color }}>{s.value}</p>
-            <p className="text-[10px] t-tertiary">{s.label}</p>
+          <div key={i} className="glass-card rounded-xl p-2 sm:p-3 text-center">
+            <p className="text-base sm:text-lg font-bold font-['Inter']" style={{ color: s.color }}>{s.value}</p>
+            <p className="text-[9px] sm:text-[10px] t-tertiary">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Expo Grid */}
-      <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
+      <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4" : "space-y-3"}>
         {filtered.map((expo, i) => {
           const sc = getStatusStyle(expo.status);
           return (
@@ -193,10 +193,10 @@ export default function BrowseExpos() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card rounded-2xl overflow-hidden group cursor-pointer"
+              className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer"
               onClick={() => setSelectedExpo(expo)}
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative h-32 sm:h-40 overflow-hidden">
                 <img
                   src={expo.image}
                   alt={expo.nameAr}
@@ -223,7 +223,7 @@ export default function BrowseExpos() {
                 </div>
               </div>
 
-              <div className="p-4">
+              <div className="p-3 sm:p-4">
                 <h3 className="text-sm font-bold t-primary mb-0.5">{expo.nameAr}</h3>
                 <p className="text-[10px] t-gold font-['Inter'] mb-2" style={{ opacity: 0.6 }}>{expo.nameEn}</p>
                 <p className="text-[11px] t-tertiary line-clamp-2 mb-3">{expo.descAr}</p>
@@ -271,13 +271,19 @@ export default function BrowseExpos() {
               onClick={() => setSelectedExpo(null)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-1 sm:inset-3 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[650px] md:max-h-[85vh] modal-solid rounded-xl sm:rounded-2xl z-50 overflow-y-auto"
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[600px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
+              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}
               dir="rtl"
             >
-              <div className="relative h-36 sm:h-48">
+              {/* Drag handle on mobile */}
+              <div className="flex justify-center pt-3 pb-1 sm:hidden">
+                <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
+              </div>
+              <div className="relative h-32 sm:h-48">
                 <img src={selectedExpo.image} alt={selectedExpo.nameAr} className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), color-mix(in srgb, var(--surface-dark) 50%, transparent), transparent)" }} />
                 <button
@@ -296,7 +302,7 @@ export default function BrowseExpos() {
               <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
                 <p className="text-xs t-tertiary leading-relaxed">{selectedExpo.descAr}</p>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
                     { icon: MapPin, label: "الموقع", value: selectedExpo.location },
                     { icon: Calendar, label: "الفترة", value: `${selectedExpo.dateStart} — ${selectedExpo.dateEnd}` },
@@ -331,22 +337,22 @@ export default function BrowseExpos() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pb-2">
                   {selectedExpo.availableUnits > 0 ? (
                     <>
                       <Link href="/map" className="flex-1">
-                        <button className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
-                          <Map size={16} />
+                        <button className="w-full btn-gold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
+                          <Map size={15} />
                           عرض الخريطة والبوثات
                         </button>
                       </Link>
                       {canBook ? (
-                        <button onClick={() => { setSelectedExpo(null); toast.success("يمكنك الحجز مباشرة من الخريطة"); }} className="glass-card px-4 py-3 rounded-xl text-xs t-gold transition-colors flex items-center gap-1.5">
+                        <button onClick={() => { setSelectedExpo(null); toast.success("يمكنك الحجز مباشرة من الخريطة"); }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-gold transition-colors flex items-center justify-center gap-1.5">
                           <CreditCard size={14} />
                           احجز الآن
                         </button>
                       ) : (
-                        <button onClick={() => { setSelectedExpo(null); setShowGuard(true); }} className="glass-card px-4 py-3 rounded-xl text-xs t-secondary transition-colors flex items-center gap-1.5">
+                        <button onClick={() => { setSelectedExpo(null); setShowGuard(true); }} className="glass-card px-3 py-2.5 sm:py-3 rounded-xl text-xs t-secondary transition-colors flex items-center justify-center gap-1.5">
                           <CreditCard size={14} />
                           احجز الآن
                         </button>
@@ -355,9 +361,9 @@ export default function BrowseExpos() {
                   ) : (
                     <button
                       onClick={() => { toast.info("سيتم إشعارك عند توفر وحدات | You'll be notified"); setSelectedExpo(null); }}
-                      className="w-full glass-card py-3 rounded-xl text-sm t-tertiary flex items-center justify-center gap-2"
+                      className="w-full glass-card py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm t-tertiary flex items-center justify-center gap-2"
                     >
-                      <Clock size={16} />
+                      <Clock size={15} />
                       انضم لقائمة الانتظار
                     </button>
                   )}

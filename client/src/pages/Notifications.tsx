@@ -63,11 +63,11 @@ export default function Notifications() {
   const deleteNotification = (id: string) => { setNotifications(prev => prev.filter(n => n.id !== id)); toast.success("تم حذف الإشعار"); };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold t-primary">الإشعارات</h2>
-          <p className="text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Notifications — {unreadCount} unread</p>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">الإشعارات</h2>
+          <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Notifications — {unreadCount} unread</p>
         </div>
         {unreadCount > 0 && (
           <button onClick={markAllRead} className="glass-card px-3 py-1.5 rounded-lg text-[10px] t-gold transition-colors flex items-center gap-1">
@@ -76,7 +76,7 @@ export default function Notifications() {
         )}
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         {[
           { value: "all", label: "الكل", count: notifications.length },
           { value: "security", label: "أمان", count: notifications.filter(n => n.type === "security").length },
@@ -108,7 +108,7 @@ export default function Notifications() {
             const color = typeColors[notif.type];
             return (
               <motion.div key={notif.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ delay: i * 0.05 }}
-                className="glass-card rounded-xl p-4"
+                className="glass-card rounded-xl p-3 sm:p-4"
                 style={{
                   borderRight: notif.priority === "high" ? `2px solid color-mix(in srgb, var(--status-red) 50%, transparent)` : notif.priority === "medium" ? `2px solid var(--gold-border)` : undefined,
                   backgroundColor: !notif.read ? "var(--glass-bg-hover)" : undefined,

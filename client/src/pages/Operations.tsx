@@ -1,6 +1,6 @@
 /**
  * Operations — Permits, logistics, setup, crowd management
- * Design: Obsidian Glass with operational workflow cards
+ * Mobile-first: responsive cards and timeline
  */
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -32,23 +32,23 @@ const timeline = [
 
 export default function Operations() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold t-primary">الخدمات التشغيلية</h2>
-          <p className="text-xs t-gold/50 font-['Inter']">Operational Services</p>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">الخدمات التشغيلية</h2>
+          <p className="text-[10px] t-gold/50 font-['Inter']">Operational Services</p>
         </div>
         <button
           onClick={() => toast.info("طلب خدمة جديدة — سيتم التواصل معك خلال ٢٤ ساعة")}
-          className="btn-gold px-4 py-2 rounded-xl text-xs flex items-center gap-2"
+          className="btn-gold px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs flex items-center gap-1.5"
         >
-          <Plus size={14} />
+          <Plus size={13} />
           طلب خدمة
         </button>
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Services Grid — 1 col mobile, 2 cols tablet, 3 cols desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {services.map((s, i) => {
           const sc = statusMap[s.status];
           return (
@@ -56,27 +56,27 @@ export default function Operations() {
               key={s.id}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card rounded-2xl p-5"
+              transition={{ delay: i * 0.06 }}
+              className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-5"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gold-subtle flex items-center justify-center">
-                  <s.icon size={18} className="t-gold" />
+              <div className="flex items-start justify-between mb-2 sm:mb-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gold-subtle flex items-center justify-center shrink-0">
+                  <s.icon size={16} className="t-gold" />
                 </div>
                 <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px]"
                   style={{ backgroundColor: `${sc.color}12`, color: sc.color, border: `1px solid ${sc.color}25` }}
                 >
                   <sc.icon size={9} />
                   {sc.ar}
                 </span>
               </div>
-              <h4 className="text-sm font-bold t-primary mb-0.5">{s.nameAr}</h4>
-              <p className="text-[10px] t-gold/50 font-['Inter'] mb-2">{s.nameEn}</p>
-              <p className="text-[11px] t-tertiary leading-relaxed mb-3">{s.desc}</p>
-              <div className="flex items-center justify-between pt-3 border-t border-[var(--glass-border)]">
-                <span className="text-xs t-secondary">التكلفة</span>
-                <span className="text-xs t-gold font-medium">{s.cost}</span>
+              <h4 className="text-xs sm:text-sm font-bold t-primary mb-0.5">{s.nameAr}</h4>
+              <p className="text-[9px] sm:text-[10px] t-gold/50 font-['Inter'] mb-1.5 sm:mb-2">{s.nameEn}</p>
+              <p className="text-[10px] sm:text-[11px] t-tertiary leading-relaxed mb-2 sm:mb-3">{s.desc}</p>
+              <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-[var(--glass-border)]">
+                <span className="text-[11px] sm:text-xs t-secondary">التكلفة</span>
+                <span className="text-[11px] sm:text-xs t-gold font-medium">{s.cost}</span>
               </div>
             </motion.div>
           );
@@ -84,32 +84,31 @@ export default function Operations() {
       </div>
 
       {/* Timeline */}
-      <div className="glass-card rounded-2xl p-6">
-        <h3 className="text-base font-bold t-primary mb-1">الجدول الزمني للتجهيز</h3>
-        <p className="text-[10px] t-gold/50 font-['Inter'] mb-6">Setup Timeline</p>
+      <div className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6">
+        <h3 className="text-sm sm:text-base font-bold t-primary mb-1">الجدول الزمني للتجهيز</h3>
+        <p className="text-[9px] sm:text-[10px] t-gold/50 font-['Inter'] mb-4 sm:mb-6">Setup Timeline</p>
         <div className="relative">
-          <div className="absolute right-4 top-0 bottom-0 w-px bg-[var(--glass-bg-hover)]" />
-          <div className="space-y-6">
+          <div className="absolute right-3.5 sm:right-4 top-0 bottom-0 w-px bg-[var(--glass-bg-hover)]" />
+          <div className="space-y-4 sm:space-y-6">
             {timeline.map((t, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="flex items-start gap-4 relative"
+                className="flex items-start gap-3 sm:gap-4 relative"
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shrink-0 ${
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center z-10 shrink-0 ${
                   t.done ? "bg-[#4ADE80]/15 border border-[#4ADE80]/30" : "bg-[var(--glass-bg)] border border-[var(--glass-border)]"
                 }`}>
-                  {t.done ? <CheckCircle size={14} className="text-[#4ADE80]" /> : <Clock size={14} className="t-tertiary" />}
+                  {t.done ? <CheckCircle size={12} className="text-[#4ADE80]" /> : <Clock size={12} className="t-tertiary" />}
                 </div>
-                <div className="flex-1 pb-2">
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className={`text-xs font-medium ${t.done ? "text-[#4ADE80]" : "t-secondary"}`}>{t.dateAr}</span>
-                    <span className="text-[9px] t-muted font-['Inter']">{t.dateEn}</span>
+                <div className="flex-1 pb-1">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-0.5">
+                    <span className={`text-[11px] sm:text-xs font-medium ${t.done ? "text-[#4ADE80]" : "t-secondary"}`}>{t.dateAr}</span>
+                    <span className="text-[8px] sm:text-[9px] t-muted font-['Inter']">{t.dateEn}</span>
                   </div>
-                  <p className={`text-sm ${t.done ? "t-secondary" : "t-tertiary"}`}>{t.taskAr}</p>
-                  <p className="text-[10px] t-muted font-['Inter']">{t.taskEn}</p>
+                  <p className={`text-xs sm:text-sm ${t.done ? "t-secondary" : "t-tertiary"}`}>{t.taskAr}</p>
                 </div>
               </motion.div>
             ))}

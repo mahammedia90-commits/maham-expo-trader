@@ -1,16 +1,15 @@
 /**
  * Bookings — Enhanced Booking Management with Full Flow
- * Design: Obsidian Glass table with status indicators, timeline, actions
- * Features: Booking details modal, payment links, contract generation, countdown
+ * Mobile-first: Cards on mobile, table on desktop
+ * Features: Booking details modal (full-screen on mobile), payment links, contract generation
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
-  CalendarCheck, Search, Filter, Eye, Download, Plus, CheckCircle,
+  CalendarCheck, Search, Eye, Download, Plus, CheckCircle,
   AlertTriangle, XCircle, Clock, CreditCard, FileText, MapPin,
-  Timer, Shield, Sparkles, ChevronDown, ExternalLink, X, Printer,
-  ArrowLeft, Building2, Zap, Phone, Mail, Lock
+  Shield, ChevronDown, X, Building2, Zap
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -113,63 +112,64 @@ export default function Bookings() {
   const totalRemaining = bookings.reduce((a, b) => a + b.remainingAmount, 0);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold t-primary">إدارة الحجوزات</h2>
-          <p className="text-xs t-gold/50 font-['Inter']">Booking Management — Full Lifecycle</p>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">إدارة الحجوزات</h2>
+          <p className="text-[10px] t-gold/50 font-['Inter']">Booking Management</p>
         </div>
         {canBook ? (
           <Link href="/expos">
-            <button className="btn-gold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
-              <Plus size={16} />
-              حجز جديد | New Booking
+            <button className="btn-gold px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
+              <Plus size={14} />
+              <span className="hidden sm:inline">حجز جديد</span>
+              <span className="sm:hidden">حجز</span>
             </button>
           </Link>
         ) : (
-          <button onClick={() => setShowGuard(true)} className="btn-gold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
-            <Plus size={16} />
-            حجز جديد | New Booking
+          <button onClick={() => setShowGuard(true)} className="btn-gold px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
+            <Plus size={14} />
+            <span className="hidden sm:inline">حجز جديد</span>
+            <span className="sm:hidden">حجز</span>
           </button>
         )}
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* Summary Cards — 3 cols on mobile, 5 on desktop */}
+      <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         {[
-          { labelAr: "إجمالي الحجوزات", labelEn: "Total", value: bookings.length, display: bookings.length.toString(), color: "#C5A55A" },
-          { labelAr: "نشطة / مؤكدة", labelEn: "Active", value: bookings.filter(b => ["confirmed", "active"].includes(b.status)).length, display: bookings.filter(b => ["confirmed", "active"].includes(b.status)).length.toString(), color: "#4ADE80" },
-          { labelAr: "القيمة الإجمالية", labelEn: "Total Value", value: totalValue, display: `${(totalValue / 1000).toFixed(0)}K`, color: "#C5A55A" },
-          { labelAr: "المدفوع", labelEn: "Paid", value: totalPaid, display: `${(totalPaid / 1000).toFixed(0)}K`, color: "#4ADE80" },
-          { labelAr: "المتبقي", labelEn: "Remaining", value: totalRemaining, display: `${(totalRemaining / 1000).toFixed(0)}K`, color: "#FBBF24" },
+          { labelAr: "الحجوزات", labelEn: "Total", display: bookings.length.toString(), color: "#C5A55A" },
+          { labelAr: "نشطة", labelEn: "Active", display: bookings.filter(b => ["confirmed", "active"].includes(b.status)).length.toString(), color: "#4ADE80" },
+          { labelAr: "القيمة", labelEn: "Value", display: `${(totalValue / 1000).toFixed(0)}K`, color: "#C5A55A" },
+          { labelAr: "المدفوع", labelEn: "Paid", display: `${(totalPaid / 1000).toFixed(0)}K`, color: "#4ADE80" },
+          { labelAr: "المتبقي", labelEn: "Remaining", display: `${(totalRemaining / 1000).toFixed(0)}K`, color: "#FBBF24" },
         ].map((s, i) => (
-          <div key={i} className="glass-card rounded-xl p-3 text-center">
-            <p className="text-xl font-bold font-['Inter']" style={{ color: s.color }}>{s.display}</p>
-            <p className="text-[10px] t-tertiary mt-0.5">{s.labelAr}</p>
-            <p className="text-[8px] t-muted font-['Inter']">{s.labelEn}</p>
+          <div key={i} className={`glass-card rounded-xl p-2 sm:p-3 text-center ${i >= 3 ? "hidden lg:block" : ""}`}>
+            <p className="text-base sm:text-xl font-bold font-['Inter']" style={{ color: s.color }}>{s.display}</p>
+            <p className="text-[9px] sm:text-[10px] t-tertiary mt-0.5">{s.labelAr}</p>
           </div>
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Search + Filter */}
+      <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
         <div className="flex-1 relative">
-          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 t-tertiary" />
+          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-tertiary" />
           <input
             type="text"
-            placeholder="ابحث برقم الحجز، اسم الوحدة، أو المعرض..."
+            placeholder="ابحث برقم الحجز أو المعرض..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full glass-card rounded-xl pr-10 pl-4 py-2.5 text-sm t-primary placeholder:t-muted gold-focus bg-transparent"
+            className="w-full glass-card rounded-xl pr-9 pl-3 py-2.5 text-xs t-primary placeholder:t-muted gold-focus bg-transparent"
           />
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           {["all", ...Object.keys(statusConfig)].map((s) => (
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
-              className={`px-3 py-2 rounded-lg text-[11px] transition-all ${
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${
                 filterStatus === s ? "btn-gold" : "glass-card t-secondary"
               }`}
             >
@@ -179,8 +179,59 @@ export default function Bookings() {
         </div>
       </div>
 
-      {/* Bookings Table */}
-      <div className="glass-card rounded-2xl overflow-hidden">
+      {/* Mobile: Cards View */}
+      <div className="lg:hidden space-y-3">
+        {filtered.map((b, i) => {
+          const sc = statusConfig[b.status] || statusConfig.confirmed;
+          return (
+            <motion.div
+              key={b.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              onClick={() => setSelectedBooking(b)}
+              className="glass-card rounded-xl p-3 active:scale-[0.98] transition-transform cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold t-primary truncate">{b.unitAr}</p>
+                  <p className="text-[10px] t-muted font-['Inter']">{b.id} · Zone {b.zone}</p>
+                </div>
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] shrink-0 mr-2"
+                  style={{ backgroundColor: `${sc.color}15`, color: sc.color, border: `1px solid ${sc.color}25` }}
+                >
+                  <sc.icon size={9} />
+                  {sc.ar}
+                </span>
+              </div>
+              <p className="text-[11px] t-tertiary truncate mb-2">{b.event}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <p className="text-[9px] t-muted">السعر</p>
+                    <p className="text-xs font-semibold t-secondary font-['Inter']">{b.price.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] t-muted">المدفوع</p>
+                    <p className="text-xs font-semibold text-[var(--status-green)] font-['Inter']">{b.paidAmount.toLocaleString()}</p>
+                  </div>
+                  {b.remainingAmount > 0 && (
+                    <div>
+                      <p className="text-[9px] t-muted">المتبقي</p>
+                      <p className="text-xs font-semibold text-[var(--status-yellow)] font-['Inter']">{b.remainingAmount.toLocaleString()}</p>
+                    </div>
+                  )}
+                </div>
+                <Eye size={14} className="t-tertiary" />
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Desktop: Table View */}
+      <div className="hidden lg:block glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -211,40 +262,35 @@ export default function Bookings() {
                       <p className="text-[9px] t-muted font-['Inter'] line-clamp-1">{b.eventEn}</p>
                     </td>
                     <td className="px-4 py-3 text-xs t-secondary font-['Inter']">{b.price.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-xs text-[var(--status-green)]/70 font-['Inter']">{b.paidAmount.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-xs text-[var(--status-green)] font-['Inter']">{b.paidAmount.toLocaleString()}</td>
                     <td className="px-4 py-3 text-xs font-['Inter']">
-                      <span className={b.remainingAmount > 0 ? "text-[var(--status-yellow)]/70" : "text-[var(--status-green)]/70"}>
+                      <span className={b.remainingAmount > 0 ? "text-[var(--status-yellow)]" : "text-[var(--status-green)]"}>
                         {b.remainingAmount.toLocaleString()}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px]"
-                        style={{ backgroundColor: `${sc.color}12`, color: sc.color, border: `1px solid ${sc.color}25` }}
-                      >
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px]"
+                        style={{ backgroundColor: `${sc.color}12`, color: sc.color, border: `1px solid ${sc.color}25` }}>
                         <sc.icon size={10} />
                         {sc.ar}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setSelectedBooking(b)}
-                          className="p-2 rounded-lg hover:bg-[var(--glass-bg)] t-tertiary hover:t-gold transition-colors"
-                          title="عرض التفاصيل"
-                        >
+                        <button onClick={() => setSelectedBooking(b)}
+                          className="p-2 rounded-lg hover:bg-[var(--glass-bg)] t-tertiary hover:t-gold transition-colors" title="عرض التفاصيل">
                           <Eye size={14} />
                         </button>
                         {b.status === "pending_payment" && (
                           <Link href="/payments">
-                            <button className="p-2 rounded-lg hover:bg-[var(--glass-bg)] text-[var(--status-yellow)]/50 hover:text-[var(--status-yellow)] transition-colors" title="الدفع الآن">
+                            <button className="p-2 rounded-lg hover:bg-[var(--glass-bg)] text-[var(--status-yellow)] transition-colors" title="الدفع">
                               <CreditCard size={14} />
                             </button>
                           </Link>
                         )}
                         {b.contractId !== "—" && (
                           <Link href="/contracts">
-                            <button className="p-2 rounded-lg hover:bg-[var(--glass-bg)] t-tertiary hover:text-purple-400 transition-colors" title="عرض العقد">
+                            <button className="p-2 rounded-lg hover:bg-[var(--glass-bg)] t-tertiary hover:text-purple-400 transition-colors" title="العقد">
                               <FileText size={14} />
                             </button>
                           </Link>
@@ -259,7 +305,7 @@ export default function Bookings() {
         </div>
       </div>
 
-      {/* Booking Detail Modal */}
+      {/* Booking Detail Modal — full-screen on mobile */}
       <AnimatePresence>
         {selectedBooking && (
           <>
@@ -271,102 +317,126 @@ export default function Bookings() {
               onClick={() => setSelectedBooking(null)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-2 sm:inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[600px] md:max-h-[85vh] modal-solid rounded-xl sm:rounded-2xl z-50 overflow-y-auto p-3 sm:p-6"
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[560px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
+              style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}
               dir="rtl"
             >
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h3 className="text-base font-bold t-primary">تفاصيل الحجز</h3>
-                  <p className="text-[10px] t-gold font-['Inter']">{selectedBooking.id}</p>
-                </div>
-                <button onClick={() => setSelectedBooking(null)} className="t-tertiary hover:t-secondary">
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Booking Details */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "الوحدة", value: selectedBooking.unitAr },
-                    { label: "المعرض", value: selectedBooking.event },
-                    { label: "نوع الوحدة", value: selectedBooking.boothType },
-                    { label: "المساحة", value: selectedBooking.boothSize },
-                    { label: "المنطقة", value: `Zone ${selectedBooking.zone}` },
-                    { label: "تاريخ الحجز", value: selectedBooking.date },
-                  ].map((d, i) => (
-                    <div key={i} className="p-3 rounded-xl modal-inner">
-                      <p className="text-[9px] t-tertiary mb-1">{d.label}</p>
-                      <p className="text-xs t-secondary">{d.value}</p>
-                    </div>
-                  ))}
+              <div style={{ background: "var(--modal-bg)" }}>
+                {/* Drag handle on mobile */}
+                <div className="flex justify-center pt-3 pb-1 sm:hidden">
+                  <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
                 </div>
 
-                {/* Financial Summary */}
-                <div className="modal-inner rounded-xl p-4">
-                  <h4 className="text-xs font-bold t-secondary mb-3">الملخص المالي | Financial Summary</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="t-tertiary">السعر الإجمالي</span>
-                      <span className="t-secondary font-['Inter']">{selectedBooking.price.toLocaleString()} ر.س</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="t-tertiary">العربون (5%)</span>
-                      <span className="t-secondary font-['Inter']">{selectedBooking.deposit.toLocaleString()} ر.س</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="t-tertiary">المدفوع</span>
-                      <span className="text-[var(--status-green)]/70 font-['Inter']">{selectedBooking.paidAmount.toLocaleString()} ر.س</span>
-                    </div>
-                    <div className="flex justify-between text-xs pt-2 border-t border-[var(--glass-border)]">
-                      <span className="t-secondary font-bold">المتبقي</span>
-                      <span className={`font-bold font-['Inter'] ${selectedBooking.remainingAmount > 0 ? "text-[var(--status-yellow)]" : "text-[var(--status-green)]"}`}>
-                        {selectedBooking.remainingAmount.toLocaleString()} ر.س
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Services */}
-                {selectedBooking.services.length > 0 && (
+                <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10" style={{ background: "var(--modal-bg)", borderBottom: "1px solid var(--glass-border)" }}>
                   <div>
-                    <p className="text-[10px] t-tertiary mb-2">الخدمات المشمولة</p>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {selectedBooking.services.map((s, i) => (
-                        <span key={i} className="px-2 py-1 rounded-lg bg-[var(--glass-bg)] text-[10px] t-secondary">{s}</span>
+                    <h3 className="text-base font-bold t-primary">تفاصيل الحجز</h3>
+                    <p className="text-[10px] t-gold font-['Inter']">{selectedBooking.id}</p>
+                  </div>
+                  <button onClick={() => setSelectedBooking(null)} className="p-2 rounded-lg t-tertiary" style={{ background: "var(--glass-bg)" }}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="px-4 sm:px-6 py-4 space-y-4">
+                  {/* Unit + Status */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-bold t-primary">{selectedBooking.unitAr}</p>
+                      <p className="text-[10px] t-muted font-['Inter']">{selectedBooking.unitEn} · Zone {selectedBooking.zone}</p>
+                      <p className="text-xs t-tertiary mt-1">{selectedBooking.event}</p>
+                    </div>
+                    {(() => {
+                      const sc = statusConfig[selectedBooking.status] || statusConfig.confirmed;
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] shrink-0"
+                          style={{ backgroundColor: `${sc.color}15`, color: sc.color, border: `1px solid ${sc.color}25` }}>
+                          <sc.icon size={10} />
+                          {sc.ar}
+                        </span>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Details Grid — 2 cols */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: "نوع الوحدة", value: selectedBooking.boothType },
+                      { label: "المساحة", value: selectedBooking.boothSize },
+                      { label: "تاريخ الحجز", value: selectedBooking.date },
+                      { label: "العقد", value: selectedBooking.contractId },
+                    ].map((d, i) => (
+                      <div key={i} className="p-2.5 rounded-xl" style={{ background: "var(--modal-inner-bg)", border: "1px solid var(--glass-border)" }}>
+                        <p className="text-[9px] t-muted mb-0.5">{d.label}</p>
+                        <p className="text-xs t-secondary font-medium">{d.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Financial Summary */}
+                  <div className="rounded-xl p-3" style={{ background: "var(--modal-inner-bg)", border: "1px solid var(--glass-border)" }}>
+                    <h4 className="text-[11px] font-bold t-secondary mb-2">الملخص المالي</h4>
+                    <div className="space-y-1.5">
+                      {[
+                        { label: "السعر الإجمالي", value: `${selectedBooking.price.toLocaleString()} ر.س`, color: "var(--text-secondary)" },
+                        { label: "العربون (5%)", value: `${selectedBooking.deposit.toLocaleString()} ر.س`, color: "var(--text-secondary)" },
+                        { label: "المدفوع", value: `${selectedBooking.paidAmount.toLocaleString()} ر.س`, color: "var(--status-green)" },
+                      ].map((f, i) => (
+                        <div key={i} className="flex justify-between text-xs">
+                          <span className="t-tertiary">{f.label}</span>
+                          <span className="font-['Inter']" style={{ color: f.color }}>{f.value}</span>
+                        </div>
                       ))}
+                      <div className="flex justify-between text-xs pt-1.5 mt-1.5" style={{ borderTop: "1px solid var(--glass-border)" }}>
+                        <span className="t-secondary font-bold">المتبقي</span>
+                        <span className={`font-bold font-['Inter'] ${selectedBooking.remainingAmount > 0 ? "text-[var(--status-yellow)]" : "text-[var(--status-green)]"}`}>
+                          {selectedBooking.remainingAmount.toLocaleString()} ر.س
+                        </span>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                {/* Actions */}
-                <div className="flex gap-3 pt-3">
-                  {selectedBooking.remainingAmount > 0 && (
-                    <Link href="/payments" className="flex-1">
-                      <button className="w-full btn-gold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2">
-                        <CreditCard size={14} />
-                        الدفع الآن
-                      </button>
-                    </Link>
+                  {/* Services */}
+                  {selectedBooking.services.length > 0 && (
+                    <div>
+                      <p className="text-[10px] t-tertiary mb-1.5">الخدمات المشمولة</p>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {selectedBooking.services.map((s, i) => (
+                          <span key={i} className="px-2 py-1 rounded-lg text-[10px] t-secondary" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>{s}</span>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  {selectedBooking.contractId !== "—" && (
-                    <Link href="/contracts">
-                      <button className="glass-card px-4 py-2.5 rounded-xl text-xs t-secondary hover:t-gold flex items-center gap-1.5 transition-colors">
-                        <FileText size={14} />
-                        العقد
-                      </button>
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => { toast.success("تم تحميل تفاصيل الحجز"); setSelectedBooking(null); }}
-                    className="glass-card px-4 py-2.5 rounded-xl text-xs t-secondary hover:t-secondary flex items-center gap-1.5 transition-colors"
-                  >
-                    <Download size={14} />
-                    تحميل
-                  </button>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-2 pb-2">
+                    {selectedBooking.remainingAmount > 0 && (
+                      <Link href="/payments" className="flex-1">
+                        <button className="w-full btn-gold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5">
+                          <CreditCard size={14} />
+                          الدفع الآن
+                        </button>
+                      </Link>
+                    )}
+                    {selectedBooking.contractId !== "—" && (
+                      <Link href="/contracts">
+                        <button className="glass-card px-3 py-2.5 rounded-xl text-xs t-secondary flex items-center gap-1.5">
+                          <FileText size={13} />
+                          العقد
+                        </button>
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { toast.success("تم تحميل تفاصيل الحجز"); setSelectedBooking(null); }}
+                      className="glass-card px-3 py-2.5 rounded-xl text-xs t-secondary flex items-center gap-1.5"
+                    >
+                      <Download size={13} />
+                      تحميل
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -374,7 +444,6 @@ export default function Bookings() {
         )}
       </AnimatePresence>
 
-      {/* Booking Guard — blocks booking without KYC */}
       <BookingGuard isOpen={showGuard} onClose={() => setShowGuard(false)} onProceedToKYC={() => setShowGuard(false)} />
     </div>
   );
