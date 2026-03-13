@@ -461,7 +461,7 @@ export default function ExpoDetail() {
               <div className="glass-card rounded-xl p-4 mb-4 text-center">
                 <p className="text-[10px] t-tertiary mb-1">السعر الإجمالي | Total Price</p>
                 <p className="text-2xl font-bold text-[#C5A55A] font-['Inter']">
-                  {selectedBooth.price.toLocaleString()} <span className="text-sm t-tertiary">SAR</span>
+                  {selectedBooth.price.toLocaleString()} <span className="text-sm t-tertiary">ر.س</span>
                 </p>
                 <p className="text-[10px] t-muted mt-1">شامل ضريبة القيمة المضافة 15%</p>
               </div>
@@ -493,7 +493,7 @@ export default function ExpoDetail() {
                       أقر بأنني أوافق على شروط وأحكام منصة مهام إكسبو، وأن أي محاولة للتواصل المباشر مع المستثمر خارج المنصة ستعرضني لغرامة مالية قدرها 50,000 ريال سعودي.
                     </p>
                     <p className="text-[9px] t-muted font-['Inter'] mt-1">
-                      I acknowledge that any attempt to bypass the platform will result in a SAR 50,000 penalty.
+                      I acknowledge that any attempt to bypass the platform will result in a 50,000 ر.س penalty.
                     </p>
                   </div>
                   <button
@@ -519,15 +519,15 @@ export default function ExpoDetail() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
                         <span className="t-tertiary">سعر الوحدة</span>
-                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.87).toLocaleString()} SAR</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.87).toLocaleString()} ر.س</span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="t-tertiary">ضريبة القيمة المضافة (15%)</span>
-                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} SAR</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} ر.س</span>
                       </div>
                       <div className="flex justify-between text-xs pt-2 border-t border-[var(--glass-border)]">
                         <span className="t-secondary font-bold">العربون (5%)</span>
-                        <span className="text-[#C5A55A] font-bold font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} SAR</span>
+                        <span className="text-[#C5A55A] font-bold font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} ر.س</span>
                       </div>
                     </div>
                   </div>
@@ -548,7 +548,7 @@ export default function ExpoDetail() {
                     className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 size={14} />
-                    تأكيد الدفع — {(selectedBooth.price * 0.05).toLocaleString()} SAR
+                    تأكيد الدفع — {(selectedBooth.price * 0.05).toLocaleString()} ر.س
                   </button>
                   <p className="text-[9px] t-muted text-center">
                     العربون غير مسترد | Deposit is non-refundable

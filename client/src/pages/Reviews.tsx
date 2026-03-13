@@ -211,7 +211,7 @@ export default function Reviews() {
                 className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3"
               >
                 <div>
-                  <label className="text-[9px] t-tertiary block mb-1">الإيرادات (SAR)</label>
+                  <label className="text-[9px] t-tertiary block mb-1">الإيرادات (ر.س)</label>
                   <input
                     type="number"
                     value={roiData.revenue}

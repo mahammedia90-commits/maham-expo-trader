@@ -38,7 +38,7 @@ const aiResponses: Record<string, { ar: string; en: string }> = {
   },
   "units": {
     ar: "حالياً لدينا ٦ وحدات متاحة للحجز:\n• بوث رئيسي A1 (٦×٦ م) — ٤٥,٠٠٠ ريال\n• بوث A3 (٣×٣ م) — ١٨,٠٠٠ ريال\n• محل تجاري B2 (٦×٤ م) — ٤٢,٠٠٠ ريال\n• كشك B3 (٢×٢ م) — ١٢,٠٠٠ ريال\n• جناح C2 (٨×٦ م) — ٨٥,٠٠٠ ريال\n• منطقة F&B D1 (٥×٥ م) — ٥٥,٠٠٠ ريال\n\nأنصحك بالمنطقة A إذا كنت تبحث عن أعلى حركة زوار.",
-    en: "Currently we have 6 units available for booking:\n• Main Booth A1 (6×6m) — SAR 45,000\n• Booth A3 (3×3m) — SAR 18,000\n• Shop B2 (6×4m) — SAR 42,000\n• Kiosk B3 (2×2m) — SAR 12,000\n• Wing C2 (8×6m) — SAR 85,000\n• F&B Area D1 (5×5m) — SAR 55,000\n\nI recommend Zone A for highest foot traffic."
+    en: "Currently we have 6 units available for booking:\n• Main Booth A1 (6×6m) — 45,000 ر.س\n• Booth A3 (3×3m) — 18,000 ر.س\n• Shop B2 (6×4m) — 42,000 ر.س\n• Kiosk B3 (2×2m) — 12,000 ر.س\n• Wing C2 (8×6m) — 85,000 ر.س\n• F&B Area D1 (5×5m) — 55,000 ر.س\n\nI recommend Zone A for highest foot traffic."
   },
   "bookings": {
     ar: "لديك حالياً ٣ حجوزات نشطة:\n✅ BK-2025-001 — بوث A1 (مؤكد)\n⏳ BK-2025-002 — محل B2 (بانتظار الدفع)\n✅ BK-2025-003 — جناح VIP C1 (مؤكد)\n\nالحجز BK-2025-002 يحتاج لسداد العربون خلال ٤٨ ساعة.",
@@ -46,7 +46,7 @@ const aiResponses: Record<string, { ar: string; en: string }> = {
   },
   "food": {
     ar: "بناءً على تحليل بيانات الزوار، المنطقة D هي الأفضل للأغذية والمشروبات:\n• أعلى حركة مرور في أوقات الذروة (١٢-٢ ظهراً و ٧-٩ مساءً)\n• قربها من مناطق الترفيه والمسرح الرئيسي\n• متوسط إنفاق الزائر: ٤٥ ريال\n\nالوحدة D1 (٥×٥ م) متاحة بسعر ٥٥,٠٠٠ ريال — موقع استراتيجي ممتاز.",
-    en: "Based on visitor data analysis, Zone D is best for F&B:\n• Highest foot traffic during peak hours (12-2 PM & 7-9 PM)\n• Close to entertainment areas and main stage\n• Average visitor spend: SAR 45\n\nUnit D1 (5×5m) is available at SAR 55,000 — excellent strategic location."
+    en: "Based on visitor data analysis, Zone D is best for F&B:\n• Highest foot traffic during peak hours (12-2 PM & 7-9 PM)\n• Close to entertainment areas and main stage\n• Average visitor spend: 45 ر.س\n\nUnit D1 (5×5m) is available at 55,000 ر.س — excellent strategic location."
   },
   "permit": {
     ar: "لتقديم طلب تصريح تشغيل:\n١. اذهب إلى قسم 'العمليات' من القائمة الجانبية\n٢. اضغط على 'طلب خدمة'\n٣. اختر 'تصريح تشغيل'\n٤. أرفق المستندات المطلوبة (سجل تجاري، رخصة بلدية)\n٥. سيتم مراجعة الطلب خلال ٣-٥ أيام عمل\n\nالخدمة مجانية ومشمولة في عقد الإيجار.",

@@ -12,7 +12,7 @@ import {
   LayoutDashboard, Map, CalendarCheck, FileText, CreditCard,
   Settings2, BarChart3, Bot, User, ChevronLeft, ChevronRight,
   Menu, X, Building2, MessageSquare, Star, Bell,
-  Shield, HelpCircle, Sun, Moon, LogOut
+  Shield, HelpCircle, Sun, Moon, LogOut, Phone, Mail
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/mahamexpologo_4057b50b.webp";
@@ -100,8 +100,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-center py-6 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
-          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-8" : "h-11"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
+        <div className="flex flex-col items-center justify-center py-5 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
+          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-8" : "h-12"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
+          {!collapsed && (
+            <>
+              <p className="text-[8px] t-muted mt-1.5 text-center leading-tight">شركة مهام إكسبو لتنظيم المعارض والمؤتمرات</p>
+              <p className="text-[7px] t-muted text-center leading-tight font-['Inter']" style={{ opacity: 0.6 }}>Maham Expo for Exhibitions & Conferences</p>
+              <p className="text-[7px] t-muted text-center leading-tight" style={{ opacity: 0.5 }}>فرع من شركة مهام للخدمات وتقنية المعلومات</p>
+            </>
+          )}
         </div>
 
         {/* Nav Items */}
@@ -162,6 +169,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
           {!collapsed && (
             <>
+              {/* Contact Info */}
+              <div className="px-4 py-2 border-t" style={{ borderColor: "var(--glass-border)" }}>
+                <p className="text-[8px] t-muted mb-1">تواصل معنا</p>
+                <a href="tel:+966535555900" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
+                  <Phone size={10} className="t-gold" style={{ opacity: 0.6 }} />
+                  +966 53 555 5900
+                </a>
+                <a href="tel:+966534778899" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
+                  <Phone size={10} className="t-gold" style={{ opacity: 0.6 }} />
+                  +966 53 477 8899
+                </a>
+                <a href="mailto:info@mahamexpo.sa" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
+                  <Mail size={10} className="t-gold" style={{ opacity: 0.6 }} />
+                  info@mahamexpo.sa
+                </a>
+                <a href="mailto:rent@mahamexpo.sa" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
+                  <Mail size={10} className="t-gold" style={{ opacity: 0.6 }} />
+                  rent@mahamexpo.sa
+                </a>
+              </div>
               <button
                 onClick={toggleTheme}
                 className="w-full flex items-center gap-3 px-5 py-2.5 transition-colors"

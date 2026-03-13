@@ -8,10 +8,10 @@ import { FileText, Download, Eye, PenLine, Shield, CheckCircle, Clock, AlertTria
 import { toast } from "sonner";
 
 const contracts = [
-  { id: "CT-2025-001", titleAr: "عقد إيجار بوث A1 — معرض الرياض الدولي", titleEn: "Lease Contract Booth A1 — Riyadh Intl Expo", booking: "BK-2025-001", value: "45,000 ريال", status: "signed", dateCreated: "2025-03-15", dateExpiry: "2025-06-15", parties: "مهام إكسبو ↔ التاجر" },
-  { id: "CT-2025-002", titleAr: "عقد إيجار جناح VIP C1 — معرض الأغذية", titleEn: "Lease Contract VIP Wing C1 — Food Exhibition", booking: "BK-2025-003", value: "120,000 ريال", status: "signed", dateCreated: "2025-03-10", dateExpiry: "2025-09-10", parties: "مهام إكسبو ↔ التاجر" },
-  { id: "CT-2025-003", titleAr: "عقد إيجار محل B2 — مؤتمر التقنية", titleEn: "Lease Contract Shop B2 — Tech Conference", booking: "BK-2025-002", value: "42,000 ريال", status: "pending_signature", dateCreated: "2025-03-12", dateExpiry: "—", parties: "مهام إكسبو ↔ التاجر" },
-  { id: "CT-2025-004", titleAr: "عقد إيجار بوث A3 — مؤتمر AI السعودي", titleEn: "Lease Contract Booth A3 — Saudi AI Conf", booking: "BK-2025-006", value: "18,000 ريال", status: "draft", dateCreated: "2025-02-28", dateExpiry: "—", parties: "مهام إكسبو ↔ التاجر" },
+  { id: "CT-2025-001", titleAr: "عقد إيجار بوث A1 — معرض الرياض الدولي", titleEn: "Lease Contract Booth A1 — Riyadh Intl Expo", booking: "BK-2025-001", value: "45,000 ريال", status: "signed", dateCreated: "2025-03-15", dateExpiry: "2025-06-15", parties: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات ↔ التاجر" },
+  { id: "CT-2025-002", titleAr: "عقد إيجار جناح VIP C1 — معرض الأغذية", titleEn: "Lease Contract VIP Wing C1 — Food Exhibition", booking: "BK-2025-003", value: "120,000 ريال", status: "signed", dateCreated: "2025-03-10", dateExpiry: "2025-09-10", parties: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات ↔ التاجر" },
+  { id: "CT-2025-003", titleAr: "عقد إيجار محل B2 — مؤتمر التقنية", titleEn: "Lease Contract Shop B2 — Tech Conference", booking: "BK-2025-002", value: "42,000 ريال", status: "pending_signature", dateCreated: "2025-03-12", dateExpiry: "—", parties: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات ↔ التاجر" },
+  { id: "CT-2025-004", titleAr: "عقد إيجار بوث A3 — مؤتمر AI السعودي", titleEn: "Lease Contract Booth A3 — Saudi AI Conf", booking: "BK-2025-006", value: "18,000 ريال", status: "draft", dateCreated: "2025-02-28", dateExpiry: "—", parties: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات ↔ التاجر" },
 ];
 
 const statusMap: Record<string, { ar: string; en: string; color: string; icon: typeof CheckCircle }> = {
@@ -148,7 +148,7 @@ export default function Contracts() {
               جميع العقود محمية بموجب أنظمة المملكة العربية السعودية. أي محاولة للالتفاف حول المنصة تعرّض الطرف المخالف لغرامة مالية قدرها ٥٠,٠٠٠ ريال سعودي.
             </p>
             <p className="text-[9px] t-muted font-['Inter'] mt-2">
-              All contracts are protected under Saudi Arabian regulations. Any attempt to bypass the platform subjects the violating party to a fine of SAR 50,000.
+              All contracts are protected under Saudi Arabian regulations. Any attempt to bypass the platform subjects the violating party to a fine of 50,000 ر.س.
             </p>
           </div>
         </div>

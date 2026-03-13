@@ -443,7 +443,7 @@ export default function Home() {
             <div>
               <img src={LOGO_URL} alt="Maham Expo" className="h-10 mb-3 object-contain" style={{ filter: isDark ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
               <p className="text-xs t-tertiary leading-relaxed">
-                منصة مهام إكسبو — الحل المتكامل لإدارة المعارض والمؤتمرات والفعاليات في المملكة العربية السعودية
+                شركة مهام إكسبو لتنظيم المعارض والمؤتمرات — فرع من شركة مهام للخدمات وتقنية المعلومات. الحل المتكامل لإدارة المعارض والمؤتمرات والفعاليات في المملكة العربية السعودية
               </p>
             </div>
             <div>
@@ -467,11 +467,19 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Mail size={12} className="t-gold" />
-                  <p className="text-[11px] t-tertiary font-['Inter']">info@mahamexpo.com</p>
+                  <p className="text-[11px] t-tertiary font-['Inter']">info@mahamexpo.sa</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail size={12} className="t-gold" />
+                  <p className="text-[11px] t-tertiary font-['Inter']">rent@mahamexpo.sa</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone size={12} className="t-gold" />
-                  <p className="text-[11px] t-tertiary font-['Inter']" dir="ltr">+966 50 000 0000</p>
+                  <p className="text-[11px] t-tertiary font-['Inter']" dir="ltr">+966 53 555 5900</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone size={12} className="t-gold" />
+                  <p className="text-[11px] t-tertiary font-['Inter']" dir="ltr">+966 53 477 8899</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={12} className="t-gold" />
@@ -482,7 +490,7 @@ export default function Home() {
           </div>
           <div className="pt-6 text-center" style={{ borderTop: "1px solid var(--glass-border)" }}>
             <p className="text-[10px] t-muted">
-              © 2025 Maham Expo — Powered by MAHAM AI | جميع الحقوق محفوظة
+              © 2025 شركة مهام إكسبو لتنظيم المعارض والمؤتمرات — فرع من شركة مهام للخدمات وتقنية المعلومات | جميع الحقوق محفوظة
             </p>
             <p className="text-[9px] t-muted font-['Inter'] mt-1" style={{ opacity: isDark ? 0.5 : 0.7 }}>
               Exhibitions · Conferences · Events · Crowd Management · F&B · Retail · Real Estate · Technology

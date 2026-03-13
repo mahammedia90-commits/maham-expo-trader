@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="glass-card rounded-lg px-3 py-2 border border-[var(--glass-border)]">
         <p className="text-[11px] t-secondary">{label}</p>
-        <p className="text-sm font-bold t-gold">{payload[0].value?.toLocaleString()} SAR</p>
+        <p className="text-sm font-bold t-gold">{payload[0].value?.toLocaleString()} ر.س</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function Analytics() {
           className="lg:col-span-2 glass-card rounded-2xl p-6"
         >
           <h3 className="text-sm font-bold t-primary mb-1">الإيرادات الشهرية</h3>
-          <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Monthly Revenue (SAR)</p>
+          <p className="text-[10px] t-gold/50 font-['Inter'] mb-4">Monthly Revenue (ر.س)</p>
           <div style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyRevenue}>

@@ -230,7 +230,7 @@ export default function ExpoMap() {
                     <p className="text-xs t-secondary">{b.nameAr}</p>
                     <p className="text-[9px] t-tertiary font-['Inter']">{b.size}</p>
                   </div>
-                  <span className="text-xs t-gold font-['Inter']">{b.price} SAR</span>
+                  <span className="text-xs t-gold font-['Inter']">{b.price} ر.س</span>
                 </button>
               ))}
             </div>

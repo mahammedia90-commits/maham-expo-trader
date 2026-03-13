@@ -334,11 +334,11 @@ export default function ExpoList() {
                 </div>
                 <div>
                   <label className="text-[10px] t-tertiary mb-1.5 block">السعر من | Price From</label>
-                  <input type="number" placeholder="0 SAR" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
+                  <input type="number" placeholder="0 ر.س" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
                 <div>
                   <label className="text-[10px] t-tertiary mb-1.5 block">السعر إلى | Price To</label>
-                  <input type="number" placeholder="200,000 SAR" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
+                  <input type="number" placeholder="200,000 ر.س" className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus" />
                 </div>
                 <div>
                   <label className="text-[10px] t-tertiary mb-1.5 block">التاريخ | Date</label>
@@ -447,7 +447,7 @@ export default function ExpoList() {
                 <div>
                   <p className="text-[10px] t-tertiary">يبدأ من | Starting from</p>
                   <p className="text-base font-bold text-[#C5A55A] font-['Inter']">
-                    {expo.priceFrom.toLocaleString()} <span className="text-xs t-tertiary">SAR</span>
+                    {expo.priceFrom.toLocaleString()} <span className="text-xs t-tertiary">ر.س</span>
                   </p>
                 </div>
                 <div className="text-left">

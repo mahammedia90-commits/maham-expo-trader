@@ -41,7 +41,7 @@ const expos: Expo[] = [
     totalUnits: 200, availableUnits: 47, priceRange: "12,000 - 120,000", category: "تقنية",
     rating: 4.8, featured: true, status: "open",
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop",
-    organizer: "Maham Expo Group",
+    organizer: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات",
   },
   {
     id: "EX-002", nameAr: "مؤتمر التقنية والابتكار", nameEn: "Tech & Innovation Conference",
@@ -59,7 +59,7 @@ const expos: Expo[] = [
     totalUnits: 150, availableUnits: 89, priceRange: "15,000 - 180,000", category: "أغذية",
     rating: 4.9, featured: true, status: "open",
     image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
-    organizer: "Maham Expo Group",
+    organizer: "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات",
   },
   {
     id: "EX-004", nameAr: "مؤتمر الذكاء الاصطناعي السعودي", nameEn: "Saudi AI Conference",
@@ -248,7 +248,7 @@ export default function BrowseExpos() {
                     </p>
                   </div>
                   <div className="text-left">
-                    <p className="text-[9px] t-muted">نطاق الأسعار (SAR)</p>
+                    <p className="text-[9px] t-muted">نطاق الأسعار (ر.س)</p>
                     <p className="text-xs t-gold font-['Inter']">{expo.priceRange}</p>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export default function BrowseExpos() {
                     { icon: Building2, label: "المنظم", value: selectedExpo.organizer },
                     { icon: Star, label: "التصنيف", value: selectedExpo.category },
                     { icon: Building2, label: "الوحدات المتاحة", value: `${selectedExpo.availableUnits} / ${selectedExpo.totalUnits}` },
-                    { icon: CreditCard, label: "نطاق الأسعار", value: `${selectedExpo.priceRange} SAR` },
+                    { icon: CreditCard, label: "نطاق الأسعار", value: `${selectedExpo.priceRange} ر.س` },
                   ].map((d, i) => (
                     <div key={i} className="p-3 rounded-xl modal-inner">
                       <div className="flex items-center gap-1.5 mb-1">

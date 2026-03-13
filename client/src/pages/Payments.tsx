@@ -9,9 +9,33 @@ import { Link } from "wouter";
 import {
   CreditCard, Download, ArrowUpRight, ArrowDownRight, CheckCircle,
   Clock, XCircle, Wallet, Receipt, Shield, Lock, Zap, AlertTriangle,
-  ChevronDown, X, Smartphone, Building2, Globe, FileText, Sparkles
+  ChevronDown, X, Smartphone, Building2, Globe, FileText, Sparkles, DollarSign
 } from "lucide-react";
 import { toast } from "sonner";
+
+// World currencies with symbols
+const CURRENCIES = [
+  { code: "SAR", symbol: "\u0631.\u0633", nameAr: "\u0631\u064a\u0627\u0644 \u0633\u0639\u0648\u062f\u064a", nameEn: "Saudi Riyal", rate: 1 },
+  { code: "USD", symbol: "$", nameAr: "\u062f\u0648\u0644\u0627\u0631 \u0623\u0645\u0631\u064a\u0643\u064a", nameEn: "US Dollar", rate: 0.2667 },
+  { code: "EUR", symbol: "\u20ac", nameAr: "\u064a\u0648\u0631\u0648", nameEn: "Euro", rate: 0.2450 },
+  { code: "GBP", symbol: "\u00a3", nameAr: "\u062c\u0646\u064a\u0647 \u0625\u0633\u062a\u0631\u0644\u064a\u0646\u064a", nameEn: "British Pound", rate: 0.2120 },
+  { code: "AED", symbol: "\u062f.\u0625", nameAr: "\u062f\u0631\u0647\u0645 \u0625\u0645\u0627\u0631\u0627\u062a\u064a", nameEn: "UAE Dirham", rate: 0.9793 },
+  { code: "KWD", symbol: "\u062f.\u0643", nameAr: "\u062f\u064a\u0646\u0627\u0631 \u0643\u0648\u064a\u062a\u064a", nameEn: "Kuwaiti Dinar", rate: 0.0819 },
+  { code: "BHD", symbol: "\u062f.\u0628", nameAr: "\u062f\u064a\u0646\u0627\u0631 \u0628\u062d\u0631\u064a\u0646\u064a", nameEn: "Bahraini Dinar", rate: 0.1005 },
+  { code: "QAR", symbol: "\u0631.\u0642", nameAr: "\u0631\u064a\u0627\u0644 \u0642\u0637\u0631\u064a", nameEn: "Qatari Riyal", rate: 0.9707 },
+  { code: "OMR", symbol: "\u0631.\u0639", nameAr: "\u0631\u064a\u0627\u0644 \u0639\u0645\u0627\u0646\u064a", nameEn: "Omani Rial", rate: 0.1027 },
+  { code: "EGP", symbol: "\u062c.\u0645", nameAr: "\u062c\u0646\u064a\u0647 \u0645\u0635\u0631\u064a", nameEn: "Egyptian Pound", rate: 13.07 },
+  { code: "TRY", symbol: "\u20ba", nameAr: "\u0644\u064a\u0631\u0629 \u062a\u0631\u0643\u064a\u0629", nameEn: "Turkish Lira", rate: 9.60 },
+  { code: "CNY", symbol: "\u00a5", nameAr: "\u064a\u0648\u0627\u0646 \u0635\u064a\u0646\u064a", nameEn: "Chinese Yuan", rate: 1.9360 },
+  { code: "JPY", symbol: "\u00a5", nameAr: "\u064a\u0646 \u064a\u0627\u0628\u0627\u0646\u064a", nameEn: "Japanese Yen", rate: 39.87 },
+  { code: "INR", symbol: "\u20b9", nameAr: "\u0631\u0648\u0628\u064a\u0629 \u0647\u0646\u062f\u064a\u0629", nameEn: "Indian Rupee", rate: 22.40 },
+  { code: "CAD", symbol: "C$", nameAr: "\u062f\u0648\u0644\u0627\u0631 \u0643\u0646\u062f\u064a", nameEn: "Canadian Dollar", rate: 0.3640 },
+  { code: "AUD", symbol: "A$", nameAr: "\u062f\u0648\u0644\u0627\u0631 \u0623\u0633\u062a\u0631\u0627\u0644\u064a", nameEn: "Australian Dollar", rate: 0.4100 },
+  { code: "CHF", symbol: "CHF", nameAr: "\u0641\u0631\u0646\u0643 \u0633\u0648\u064a\u0633\u0631\u064a", nameEn: "Swiss Franc", rate: 0.2340 },
+  { code: "SGD", symbol: "S$", nameAr: "\u062f\u0648\u0644\u0627\u0631 \u0633\u0646\u063a\u0627\u0641\u0648\u0631\u064a", nameEn: "Singapore Dollar", rate: 0.3560 },
+  { code: "MYR", symbol: "RM", nameAr: "\u0631\u064a\u0646\u063a\u064a\u062a \u0645\u0627\u0644\u064a\u0632\u064a", nameEn: "Malaysian Ringgit", rate: 1.1840 },
+  { code: "JOD", symbol: "\u062f.\u0623", nameAr: "\u062f\u064a\u0646\u0627\u0631 \u0623\u0631\u062f\u0646\u064a", nameEn: "Jordanian Dinar", rate: 0.1893 },
+];
 
 const transactions = [
   { id: "TX-001", descAr: "عربون حجز بوث A21", descEn: "Deposit for Booth A21", amount: 2250, type: "deposit", status: "completed", date: "2025-03-15", method: "مدى", booking: "BK-2025-001" },
@@ -49,6 +73,15 @@ export default function Payments() {
   const [selectedPayment, setSelectedPayment] = useState<PendingPayment | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("mada");
   const [processing, setProcessing] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState("SAR");
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+
+  const currentCurrency = CURRENCIES.find(c => c.code === selectedCurrency) || CURRENCIES[0];
+  const convertAmount = (amountSAR: number) => {
+    const converted = amountSAR * currentCurrency.rate;
+    return converted < 100 ? converted.toFixed(2) : Math.round(converted).toLocaleString();
+  };
+  const currencyLabel = currentCurrency.code === "SAR" ? "\u0631.\u0633" : currentCurrency.symbol;
 
   const totalPaid = transactions.filter(t => t.status === "completed" && t.type !== "refund").reduce((a, t) => a + t.amount, 0);
   const totalPending = pendingPayments.reduce((a, p) => a + p.amount, 0);
@@ -69,18 +102,56 @@ export default function Payments() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold t-primary">المدفوعات والفواتير</h2>
           <p className="text-xs t-gold/50 font-['Inter']">Payments, Invoices & Revenue Split</p>
         </div>
-        <button
-          onClick={() => toast.success("جاري تحميل كشف الحساب...")}
-          className="glass-card px-4 py-2 rounded-xl text-xs t-secondary hover:t-gold flex items-center gap-2 transition-colors"
-        >
-          <Download size={14} />
-          كشف الحساب
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Currency Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowCurrencyPicker(!showCurrencyPicker)}
+              className="glass-card px-3 py-2 rounded-xl text-xs t-secondary hover:t-gold flex items-center gap-2 transition-colors"
+            >
+              <Globe size={14} />
+              <span className="font-['Inter']">{currentCurrency.code}</span>
+              <span className="text-[10px] t-muted">{currentCurrency.symbol}</span>
+              <ChevronDown size={12} />
+            </button>
+            {showCurrencyPicker && (
+              <div className="absolute left-0 top-full mt-1 modal-solid rounded-xl shadow-2xl z-50 w-72 max-h-80 overflow-y-auto" dir="rtl">
+                <div className="p-2 border-b border-[var(--glass-border)]">
+                  <p className="text-[10px] t-muted px-2 py-1">اختر العملة | Select Currency</p>
+                </div>
+                <div className="p-1">
+                  {CURRENCIES.map((c) => (
+                    <button
+                      key={c.code}
+                      onClick={() => { setSelectedCurrency(c.code); setShowCurrencyPicker(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors ${
+                        selectedCurrency === c.code ? "bg-gold-subtle t-gold" : "t-secondary hover:bg-[var(--glass-bg)]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-['Inter'] font-bold w-8">{c.symbol}</span>
+                        <span>{c.nameAr}</span>
+                      </div>
+                      <span className="font-['Inter'] text-[10px] t-muted">{c.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => toast.success("جاري تحميل كشف الحساب...")}
+            className="glass-card px-4 py-2 rounded-xl text-xs t-secondary hover:t-gold flex items-center gap-2 transition-colors"
+          >
+            <Download size={14} />
+            كشف الحساب
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -104,7 +175,8 @@ export default function Payments() {
               </div>
             </div>
             <p className="text-xl font-bold t-primary font-['Inter']">
-              {typeof s.value === "number" ? s.value.toLocaleString() : s.value}
+              {typeof s.value === "number" ? convertAmount(s.value) : s.value}
+              {typeof s.value === "number" && <span className="text-xs t-muted mr-1">{currencyLabel}</span>}
             </p>
             <p className="text-xs t-secondary mt-1">{s.labelAr}</p>
             <p className="text-[9px] t-muted font-['Inter']">{s.labelEn}</p>
@@ -137,7 +209,7 @@ export default function Payments() {
                   </div>
                 </div>
                 <div className="text-left">
-                  <p className="text-base font-bold t-gold font-['Inter']">{pp.amount.toLocaleString()} <span className="text-xs t-tertiary">SAR</span></p>
+                  <p className="text-base font-bold t-gold font-['Inter']">{convertAmount(pp.amount)} <span className="text-xs t-tertiary">{currencyLabel}</span></p>
                   <button
                     onClick={() => handlePay(pp)}
                     className="btn-gold px-4 py-1.5 rounded-lg text-[10px] mt-1"
@@ -190,7 +262,7 @@ export default function Payments() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[var(--glass-border)]">
-                {["رقم المعاملة", "الوصف", "المبلغ (SAR)", "طريقة الدفع", "الحجز", "الحالة", "التاريخ", ""].map((h, i) => (
+                {["رقم المعاملة", "الوصف", `المبلغ (${currencyLabel})`, "طريقة الدفع", "الحجز", "الحالة", "التاريخ", ""].map((h, i) => (
                   <th key={i} className="text-right px-4 py-3 text-[11px] t-tertiary font-medium">{h}</th>
                 ))}
               </tr>
@@ -212,7 +284,7 @@ export default function Payments() {
                       <p className="text-[9px] t-muted font-['Inter']">{t.descEn}</p>
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold font-['Inter'] text-[var(--status-green)]">
-                      {t.amount.toLocaleString()}
+                      {convertAmount(t.amount)}
                     </td>
                     <td className="px-4 py-3 text-[11px] t-tertiary">{t.method}</td>
                     <td className="px-4 py-3 text-[11px] t-gold/50 font-['Inter']">{t.booking}</td>
@@ -289,7 +361,7 @@ export default function Payments() {
               <div className="modal-inner rounded-xl p-4 mb-5">
                 <p className="text-xs t-secondary">{selectedPayment.descAr}</p>
                 <p className="text-2xl font-bold t-gold font-['Inter'] mt-2">
-                  {selectedPayment.amount.toLocaleString()} <span className="text-sm t-tertiary">SAR</span>
+                  {convertAmount(selectedPayment.amount)} <span className="text-sm t-tertiary">{currencyLabel}</span>
                 </p>
                 <p className="text-[9px] t-muted font-['Inter'] mt-1">Ref: {selectedPayment.bookingId}</p>
               </div>
@@ -350,7 +422,7 @@ export default function Payments() {
                 ) : (
                   <>
                     <Lock size={14} />
-                    تأكيد الدفع — {selectedPayment.amount.toLocaleString()} SAR
+                    تأكيد الدفع — {convertAmount(selectedPayment.amount)} {currencyLabel}
                   </>
                 )}
               </button>

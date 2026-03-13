@@ -95,14 +95,18 @@ export default function HelpCenter() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { icon: MessageSquare, label: "محادثة مباشرة", labelEn: "Live Chat", color: "text-[var(--status-blue)]", bg: "bg-[var(--status-blue)]/10" },
-          { icon: Phone, label: "اتصل بنا", labelEn: "Call Us", color: "text-[var(--status-green)]", bg: "bg-[var(--status-green)]/10" },
-          { icon: Mail, label: "بريد إلكتروني", labelEn: "Email", color: "text-purple-400", bg: "bg-purple-400/10" },
-          { icon: Book, label: "دليل المستخدم", labelEn: "User Guide", color: "t-gold", bg: "bg-gold-subtle" },
+          { icon: MessageSquare, label: "محادثة مباشرة", labelEn: "Live Chat", color: "text-[var(--status-blue)]", bg: "bg-[var(--status-blue)]/10", action: "chat" },
+          { icon: Phone, label: "اتصل بنا", labelEn: "+966 53 555 5900", color: "text-[var(--status-green)]", bg: "bg-[var(--status-green)]/10", action: "phone" },
+          { icon: Mail, label: "بريد إلكتروني", labelEn: "info@mahamexpo.sa", color: "text-purple-400", bg: "bg-purple-400/10", action: "email" },
+          { icon: Book, label: "دليل المستخدم", labelEn: "User Guide", color: "t-gold", bg: "bg-gold-subtle", action: "guide" },
         ].map((action, i) => (
           <button
             key={i}
-            onClick={() => toast.info("سيتم تفعيل هذه الخدمة قريباً | Coming soon")}
+            onClick={() => {
+              if (action.action === "phone") window.open("tel:+966535555900", "_self");
+              else if (action.action === "email") window.open("mailto:info@mahamexpo.sa", "_self");
+              else toast.info("سيتم تفعيل هذه الخدمة قريباً | Coming soon");
+            }}
             className="glass-card rounded-xl p-4 text-center hover:bg-[var(--glass-bg)] transition-colors"
           >
             <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center mx-auto mb-2`}>

@@ -12,7 +12,7 @@ import {
 const stats = [
   { icon: CalendarCheck, valueAr: "12", labelAr: "حجز نشط", labelEn: "Active Bookings", color: "var(--status-green)" },
   { icon: FileText, valueAr: "8", labelAr: "عقد موقّع", labelEn: "Signed Contracts", color: "var(--gold-accent)" },
-  { icon: CreditCard, valueAr: "٤٥٠,٠٠٠", labelAr: "ريال مدفوع", labelEn: "SAR Paid", color: "var(--status-blue)" },
+  { icon: CreditCard, valueAr: "٤٥٠,٠٠٠", labelAr: "ريال مدفوع", labelEn: "ر.س مدفوع", color: "var(--status-blue)" },
   { icon: TrendingUp, valueAr: "٩٢%", labelAr: "نسبة الإشغال", labelEn: "Occupancy Rate", color: "var(--gold-light)" },
 ];
 

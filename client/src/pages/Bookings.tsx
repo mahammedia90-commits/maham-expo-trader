@@ -311,20 +311,20 @@ export default function Bookings() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">
                       <span className="t-tertiary">السعر الإجمالي</span>
-                      <span className="t-secondary font-['Inter']">{selectedBooking.price.toLocaleString()} SAR</span>
+                      <span className="t-secondary font-['Inter']">{selectedBooking.price.toLocaleString()} ر.س</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="t-tertiary">العربون (5%)</span>
-                      <span className="t-secondary font-['Inter']">{selectedBooking.deposit.toLocaleString()} SAR</span>
+                      <span className="t-secondary font-['Inter']">{selectedBooking.deposit.toLocaleString()} ر.س</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="t-tertiary">المدفوع</span>
-                      <span className="text-[var(--status-green)]/70 font-['Inter']">{selectedBooking.paidAmount.toLocaleString()} SAR</span>
+                      <span className="text-[var(--status-green)]/70 font-['Inter']">{selectedBooking.paidAmount.toLocaleString()} ر.س</span>
                     </div>
                     <div className="flex justify-between text-xs pt-2 border-t border-[var(--glass-border)]">
                       <span className="t-secondary font-bold">المتبقي</span>
                       <span className={`font-bold font-['Inter'] ${selectedBooking.remainingAmount > 0 ? "text-[var(--status-yellow)]" : "text-[var(--status-green)]"}`}>
-                        {selectedBooking.remainingAmount.toLocaleString()} SAR
+                        {selectedBooking.remainingAmount.toLocaleString()} ر.س
                       </span>
                     </div>
                   </div>
