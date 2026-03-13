@@ -1,18 +1,16 @@
 /**
  * KYC — Know Your Customer Verification
- * Design: Professional legal-grade verification with comprehensive legal declaration
- * Based on: Actual MAHAM Group contracts and Saudi/GCC legal standards
- * Features: 5-step verification, comprehensive legal declaration, mandatory agreement
- * Security: Required before any booking — full audit trail
+ * Updated: Removed municipal license & GOSI, national address optional, bank in KYC only
  */
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 import {
   Shield, Upload, CheckCircle2, AlertTriangle, User,
   Building2, CreditCard, FileText, Lock,
   ChevronLeft, ChevronRight, Globe, Phone, Mail,
   MapPin, Calendar, Hash, Award, Info, Scale,
-  BookOpen, Stamp, Eye, BadgeCheck, FileWarning, Gavel
+  BookOpen, Stamp, Eye, BadgeCheck, FileWarning, Gavel, ArrowRight
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
@@ -59,7 +57,8 @@ export default function KYC() {
     bankName: "", iban: "", accountHolder: "", accountNumber: ""
   });
 
-  const { trader } = useAuth();
+  const { trader, completeKYC } = useAuth();
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     if (trader) {
@@ -72,6 +71,12 @@ export default function KYC() {
     }
   }, [trader]);
 
+  useEffect(() => {
+    if (trader?.kycStatus === "verified") {
+      setCurrentStep("complete");
+    }
+  }, [trader]);
+
   const allAgreed = agreedTerms && agreedPrivacy && agreedIP && agreedPenalty;
 
   useEffect(() => {
@@ -80,8 +85,6 @@ export default function KYC() {
       setAgreedPrivacy(true);
       setAgreedIP(true);
       setAgreedPenalty(true);
-    } else if (!agreedAll && allAgreed) {
-      // don't uncheck individual ones
     }
   }, [agreedAll]);
 
@@ -105,6 +108,7 @@ export default function KYC() {
       setCurrentStep(steps[currentIndex + 1].id);
       toast.success("تم حفظ البيانات بنجاح");
     } else {
+      if (completeKYC) completeKYC();
       setCurrentStep("complete");
       toast.success("تم إكمال التحقق من الهوية بنجاح! حسابك الآن موثق.");
     }
@@ -123,11 +127,14 @@ export default function KYC() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const InputField = ({ label, placeholder, icon: Icon, field, type = "text" }: {
-    label: string; placeholder: string; icon: any; field: keyof FormData; type?: string;
+  const InputField = ({ label, placeholder, icon: Icon, field, type = "text", optional = false }: {
+    label: string; placeholder: string; icon: any; field: keyof FormData; type?: string; optional?: boolean;
   }) => (
     <div>
-      <label className="text-[11px] t-tertiary mb-1.5 block font-medium">{label}</label>
+      <label className="text-[11px] t-tertiary mb-1.5 block font-medium">
+        {label}
+        {optional && <span className="text-[9px] t-muted mr-1"> (غير مشروط — اختياري)</span>}
+      </label>
       <div className="relative">
         <Icon size={14} className="absolute right-3 top-1/2 -translate-y-1/2 t-muted" />
         <input
@@ -143,10 +150,15 @@ export default function KYC() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto px-1">
-      {/* Header */}
-      <div>
-        <h2 className="text-lg sm:text-xl font-bold t-primary">التحقق من الهوية (KYC)</h2>
-        <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Know Your Customer — Required before booking</p>
+      {/* Header with back */}
+      <div className="flex items-center gap-3">
+        <button onClick={() => navigate("/dashboard")} className="p-2 rounded-lg glass-card t-tertiary hover:t-gold transition-colors flex-shrink-0">
+          <ArrowRight size={18} />
+        </button>
+        <div>
+          <h2 className="text-lg sm:text-xl font-bold t-primary">التحقق من الهوية (KYC)</h2>
+          <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Know Your Customer — Required before booking</p>
+        </div>
       </div>
 
       {/* Company Info Banner */}
@@ -169,45 +181,29 @@ export default function KYC() {
           <div className="flex items-center justify-between mb-3 sm:mb-4 overflow-x-auto">
             {steps.map((step, i) => (
               <div key={step.id} className="flex items-center flex-shrink-0">
-                <div className={`flex items-center gap-1 sm:gap-2 ${
-                  step.id === currentStep ? "t-gold" :
-                  step.completed ? "text-[var(--status-green)]" : "t-muted"
-                }`}>
-                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold border ${
-                    step.id === currentStep ? "border-[#C5A55A] bg-gold-subtle" :
-                    step.completed ? "border-green-400/50 bg-[var(--status-green)]/10" : "border-[var(--glass-border)] bg-[var(--glass-bg)]"
-                  }`}>
+                <div className={`flex items-center gap-1 sm:gap-2 ${step.id === currentStep ? "t-gold" : step.completed ? "text-[var(--status-green)]" : "t-muted"}`}>
+                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold border ${step.id === currentStep ? "border-[#C5A55A] bg-gold-subtle" : step.completed ? "border-green-400/50 bg-[var(--status-green)]/10" : "border-[var(--glass-border)] bg-[var(--glass-bg)]"}`}>
                     {step.completed ? <CheckCircle2 size={12} /> : i + 1}
                   </div>
                   <span className="hidden lg:block text-[10px]">{step.labelAr}</span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className={`w-4 sm:w-8 lg:w-16 h-px mx-1 sm:mx-2 ${
-                    step.completed ? "bg-[var(--status-green)]/30" : "bg-[var(--glass-bg)]"
-                  }`} />
+                  <div className={`w-4 sm:w-8 lg:w-16 h-px mx-1 sm:mx-2 ${step.completed ? "bg-[var(--status-green)]/30" : "bg-[var(--glass-bg)]"}`} />
                 )}
               </div>
             ))}
           </div>
           <div className="h-1.5 rounded-full bg-[var(--glass-bg)]">
-            <div
-              className="h-full rounded-full bg-gradient-to-l from-[#C5A55A] to-[#E8D5A3] transition-all duration-500"
-              style={{ width: `${((completedSteps.length) / steps.length) * 100}%` }}
-            />
+            <div className="h-full rounded-full bg-gradient-to-l from-[#C5A55A] to-[#E8D5A3] transition-all duration-500" style={{ width: `${((completedSteps.length) / steps.length) * 100}%` }} />
           </div>
         </div>
       )}
 
       {/* Step Content */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6"
-        >
-          {/* ===== STEP 1: Personal Info ===== */}
+        <motion.div key={currentStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6">
+
+          {/* STEP 1: Personal Info */}
           {currentStep === "personal" && (
             <div>
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
@@ -229,12 +225,12 @@ export default function KYC() {
                 <InputField label="تاريخ الميلاد | Date of Birth" placeholder="YYYY-MM-DD" icon={Calendar} field="dob" type="date" />
                 <InputField label="الجنسية | Nationality" placeholder="سعودي" icon={Globe} field="nationality" />
                 <InputField label="المدينة | City" placeholder="الرياض" icon={MapPin} field="city" />
-                <InputField label="العنوان الوطني | National Address" placeholder="العنوان الوطني الكامل" icon={MapPin} field="address" />
+                <InputField label="العنوان الوطني | National Address" placeholder="العنوان الوطني الكامل" icon={MapPin} field="address" optional={true} />
               </div>
             </div>
           )}
 
-          {/* ===== STEP 2: Business Info ===== */}
+          {/* STEP 2: Business Info */}
           {currentStep === "business" && (
             <div>
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
@@ -247,11 +243,7 @@ export default function KYC() {
                 <InputField label="رقم السجل التجاري | CR Number" placeholder="XXXXXXXXXX" icon={Hash} field="crNumber" />
                 <div>
                   <label className="text-[11px] t-tertiary mb-1.5 block font-medium">نوع النشاط | Business Type</label>
-                  <select
-                    value={formData.businessType}
-                    onChange={(e) => updateField("businessType", e.target.value)}
-                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-sm t-secondary focus:outline-none focus:border-[var(--gold-border)] transition-colors"
-                  >
+                  <select value={formData.businessType} onChange={(e) => updateField("businessType", e.target.value)} className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-sm t-secondary focus:outline-none focus:border-[var(--gold-border)] transition-colors">
                     <option value="">اختر النشاط</option>
                     <option value="food_beverage">أغذية ومشروبات (F&B)</option>
                     <option value="retail">تجارة وبيع بالتجزئة (Retail)</option>
@@ -267,14 +259,14 @@ export default function KYC() {
                 </div>
                 <InputField label="سنة التأسيس | Founded" placeholder="2020" icon={Calendar} field="founded" />
                 <InputField label="الرقم الضريبي (VAT) | VAT Number" placeholder="3XXXXXXXXXXXXX003" icon={Hash} field="vatNumber" />
-                <InputField label="العنوان الوطني للمنشأة | National Address" placeholder="العنوان الوطني" icon={MapPin} field="nationalAddress" />
+                <InputField label="العنوان الوطني للمنشأة | National Address" placeholder="العنوان الوطني" icon={MapPin} field="nationalAddress" optional={true} />
                 <InputField label="عدد الموظفين | Employees" placeholder="10-50" icon={User} field="employees" />
                 <InputField label="الموقع الإلكتروني | Website" placeholder="www.example.com" icon={Globe} field="website" />
               </div>
             </div>
           )}
 
-          {/* ===== STEP 3: Bank Account ===== */}
+          {/* STEP 3: Bank Account */}
           {currentStep === "bank" && (
             <div>
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
@@ -300,7 +292,7 @@ export default function KYC() {
             </div>
           )}
 
-          {/* ===== STEP 4: Documents ===== */}
+          {/* STEP 4: Documents — UPDATED: removed municipal & GOSI */}
           {currentStep === "documents" && (
             <div>
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
@@ -311,7 +303,7 @@ export default function KYC() {
               <div className="bg-[var(--status-red)]/5 border border-[var(--status-red)]/10 rounded-lg p-3 mb-4">
                 <div className="flex items-start gap-2">
                   <FileWarning size={12} className="text-[var(--status-red)] flex-shrink-0 mt-0.5" />
-                  <p className="text-[10px] sm:text-xs t-tertiary">جميع المستندات مطلوبة لإتمام التحقق. يجب تقديمها خلال 10 أيام من تاريخ التسجيل وفقاً لشروط العقد.</p>
+                  <p className="text-[10px] sm:text-xs t-tertiary">المستندات المطلوبة لإتمام التحقق. يجب تقديمها خلال 10 أيام من تاريخ التسجيل وفقاً لشروط العقد.</p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -320,10 +312,8 @@ export default function KYC() {
                   { id: "cr", label: "السجل التجاري ساري المفعول", labelEn: "Valid Commercial Registration", required: true, desc: "يجب أن يكون ساري المفعول" },
                   { id: "vat_cert", label: "شهادة تسجيل ضريبة القيمة المضافة", labelEn: "VAT Registration Certificate", required: true, desc: "صادرة من هيئة الزكاة والضريبة والجمارك (ZATCA)" },
                   { id: "auth_letter", label: "تفويض / وكالة رسمية", labelEn: "Authorization Letter / Power of Attorney", required: true, desc: "للمفوض بالتوقيع على العقود" },
-                  { id: "national_address", label: "العنوان الوطني", labelEn: "National Address Certificate", required: true, desc: "صادر من البريد السعودي" },
-                  { id: "municipal", label: "رخصة البلدية", labelEn: "Municipal License", required: false, desc: "إن وجدت — مطلوبة قبل بدء التشغيل" },
-                  { id: "gosi", label: "شهادة التأمينات الاجتماعية", labelEn: "GOSI Certificate", required: false, desc: "إن وجدت" },
-                  { id: "bank_letter", label: "خطاب تعريف بنكي", labelEn: "Bank Identification Letter", required: false, desc: "يؤكد بيانات الحساب البنكي" },
+                  { id: "national_address", label: "العنوان الوطني", labelEn: "National Address Certificate", required: false, desc: "صادر من البريد السعودي — غير مشروط (اختياري)" },
+                  { id: "bank_letter", label: "خطاب تعريف بنكي", labelEn: "Bank Identification Letter", required: false, desc: "يؤكد بيانات الحساب البنكي — اختياري" },
                 ].map((doc) => (
                   <div key={doc.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:border-[var(--gold-border)] transition-colors gap-2 sm:gap-0">
                     <div className="flex items-start gap-3 min-w-0">
@@ -340,20 +330,12 @@ export default function KYC() {
                       {doc.required && !uploadedDocs[doc.id] && (
                         <span className="text-[8px] sm:text-[9px] text-[var(--status-red)] bg-[var(--status-red)]/10 px-1.5 py-0.5 rounded flex-shrink-0">مطلوب</span>
                       )}
-                    </div>
-                    <button
-                      onClick={() => handleUpload(doc.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs transition-colors flex-shrink-0 self-end sm:self-auto ${
-                        uploadedDocs[doc.id]
-                          ? "bg-[var(--status-green)]/10 text-[var(--status-green)]"
-                          : "bg-gold-subtle t-gold hover:bg-[#C5A55A]/20"
-                      }`}
-                    >
-                      {uploadedDocs[doc.id] ? (
-                        <><CheckCircle2 size={12} /> تم الرفع</>
-                      ) : (
-                        <><Upload size={12} /> رفع الملف</>
+                      {!doc.required && !uploadedDocs[doc.id] && (
+                        <span className="text-[8px] sm:text-[9px] t-muted bg-[var(--glass-bg)] px-1.5 py-0.5 rounded flex-shrink-0 border border-[var(--glass-border)]">اختياري</span>
                       )}
+                    </div>
+                    <button onClick={() => handleUpload(doc.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs transition-colors flex-shrink-0 self-end sm:self-auto ${uploadedDocs[doc.id] ? "bg-[var(--status-green)]/10 text-[var(--status-green)]" : "bg-gold-subtle t-gold hover:bg-[#C5A55A]/20"}`}>
+                      {uploadedDocs[doc.id] ? (<><CheckCircle2 size={12} /> تم الرفع</>) : (<><Upload size={12} /> رفع الملف</>)}
                     </button>
                   </div>
                 ))}
@@ -361,7 +343,7 @@ export default function KYC() {
             </div>
           )}
 
-          {/* ===== STEP 5: Legal Declaration ===== */}
+          {/* STEP 5: Legal Declaration */}
           {currentStep === "declaration" && (
             <div>
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
@@ -370,7 +352,7 @@ export default function KYC() {
                 <span className="text-[9px] sm:text-[10px] t-muted font-['Inter']">Legal Declaration & Commitment</span>
               </div>
 
-              {/* Section 1: General Declaration */}
+              {/* Section 1 */}
               <div className="solid-modal rounded-xl p-4 sm:p-5 mb-4 border border-[var(--status-red)]/10">
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle size={14} className="text-[var(--status-red)]/70 flex-shrink-0" />
@@ -384,25 +366,25 @@ export default function KYC() {
                 </div>
               </div>
 
-              {/* Section 2: Platform Rules */}
+              {/* Section 2 */}
               <div className="solid-modal rounded-xl p-4 sm:p-5 mb-4 border border-[var(--gold-border)]/10">
                 <div className="flex items-center gap-2 mb-3">
                   <Scale size={14} className="t-gold flex-shrink-0" />
                   <h4 className="text-xs sm:text-sm font-bold t-gold">القسم الثاني: شروط استخدام المنصة والحجز</h4>
                 </div>
                 <div className="space-y-2.5 text-xs sm:text-sm t-secondary leading-relaxed">
-                  <p><strong>4.</strong> ألتزم بعدم التواصل المباشر مع المستثمر أو منظم المعرض أو أي طرف ثالث خارج منصة مهام إكسبو قبل توقيع العقد الإلكتروني الرسمي عبر منصة إيجار.</p>
-                  <p><strong>5.</strong> أي محاولة لتجاوز المنصة أو مشاركة معلومات الاتصال المباشر أو التفاوض خارج النظام تعرضني لغرامة مالية قدرها <strong className="text-[var(--status-red)]">50,000 ريال سعودي</strong> مع حق المنصة في إلغاء جميع حجوزاتي.</p>
-                  <p><strong>6.</strong> العربون المدفوع عند الحجز غير مسترد في حال إلغاء الحجز من طرفي، ويحق للمنظم فرض غرامة إلغاء تصل إلى <strong className="text-[var(--status-red)]">25%</strong> من إجمالي القيمة التعاقدية.</p>
-                  <p><strong>7.</strong> ألتزم بتوثيق العقد عبر منصة إيجار الإلكترونية خلال <strong>48 ساعة</strong> من استلام رسالة التوثيق، وفي حال التأخير يتم فرض غرامة <strong className="text-[var(--status-red)]">350 ريال سعودي</strong> عن كل يوم تأخير.</p>
-                  <p><strong>8.</strong> ألتزم باستخراج جميع التراخيص والتصاريح المطلوبة من البلدية والجهات المختصة لممارسة نشاطي، وأتحمل كامل المسؤولية عن أي مخالفة نظامية.</p>
-                  <p><strong>9.</strong> أوافق على أن جميع عمليات البيع داخل الموقع المتعاقد عليه تتم حصرياً من خلال نظام نقاط البيع (POS) المملوك والمشغّل من قبل شركة مهام أو مزوّد معتمد من قبلها.</p>
-                  <p><strong>10.</strong> نسبة مشاركة الإيرادات تكون وفقاً للعقد المبرم بين الطرفين، ويتم التسوية المالية خلال الفترة من 1-5 من كل شهر ميلادي.</p>
+                  <p><strong>4.</strong> أتعهد بعدم التواصل مع أي مستثمر أو منظم أو طرف آخر خارج منصة مهام إكسبو قبل توقيع العقد الإلكتروني الرسمي. أي محاولة للتواصل المباشر أو التحايل تعرضني لغرامة مالية قدرها 50,000 ر.س (خمسون ألف ريال سعودي).</p>
+                  <p><strong>5.</strong> أقر بأن الحجز المؤقت صالح لمدة 30 دقيقة فقط ويتطلب سداد عربون غير مسترد بنسبة 5-10% من قيمة الإيجار لتأكيد الحجز.</p>
+                  <p><strong>6.</strong> في حال إلغاء الحجز بعد تأكيده، أقر بأن العربون غير قابل للاسترداد، وقد يتم تطبيق رسوم إلغاء تصل إلى 25% من إجمالي قيمة العقد وفقاً لسياسة الإلغاء.</p>
+                  <p><strong>7.</strong> أتعهد بتقديم جميع المستندات المطلوبة (السجل التجاري، شهادة VAT، الهوية) خلال 10 أيام من تاريخ التسجيل.</p>
+                  <p><strong>8.</strong> أقر بعلمي أن توزيع الإيرادات يتم وفق النسب المتفق عليها: 70% لمالك الموقع، 20% للمنظم، 10% للمنصة (قابلة للتعديل حسب العقد).</p>
+                  <p><strong>9.</strong> أتعهد بالالتزام بجميع اشتراطات السلامة والصحة المهنية والدفاع المدني أثناء فترة التشغيل.</p>
+                  <p><strong>10.</strong> أقر بأن المنصة تحتفظ بحق تعليق أو إلغاء حسابي في حال مخالفة أي من هذه الشروط.</p>
                   <p><strong>11.</strong> ألتزم بسداد الرسوم الإدارية ورسوم الكهرباء والماء (إن وجدت) وضريبة القيمة المضافة (15%) وفقاً للفواتير الصادرة.</p>
                 </div>
               </div>
 
-              {/* Section 3: IP & Brand Protection */}
+              {/* Section 3 */}
               <div className="solid-modal rounded-xl p-4 sm:p-5 mb-4 border border-purple-400/10">
                 <div className="flex items-center gap-2 mb-3">
                   <BadgeCheck size={14} className="text-purple-400 flex-shrink-0" />
@@ -417,7 +399,7 @@ export default function KYC() {
                 </div>
               </div>
 
-              {/* Section 4: Privacy */}
+              {/* Section 4 */}
               <div className="solid-modal rounded-xl p-4 sm:p-5 mb-4 border border-[var(--status-blue)]/10">
                 <div className="flex items-center gap-2 mb-3">
                   <Eye size={14} className="text-[var(--status-blue)] flex-shrink-0" />
@@ -431,7 +413,7 @@ export default function KYC() {
                 </div>
               </div>
 
-              {/* Section 5: Governing Law */}
+              {/* Section 5 */}
               <div className="solid-modal rounded-xl p-4 sm:p-5 mb-4 border border-[var(--glass-border)]">
                 <div className="flex items-center gap-2 mb-3">
                   <BookOpen size={14} className="t-tertiary flex-shrink-0" />
@@ -446,20 +428,17 @@ export default function KYC() {
 
               {/* English Summary */}
               <div className="solid-modal rounded-xl p-4 sm:p-5 mb-5 border border-[var(--glass-border)]">
-                <button
-                  onClick={() => setShowFullTerms(!showFullTerms)}
-                  className="flex items-center gap-2 text-xs t-muted hover:t-secondary transition-colors w-full justify-between"
-                >
+                <button onClick={() => setShowFullTerms(!showFullTerms)} className="flex items-center gap-2 text-xs t-muted hover:t-secondary transition-colors w-full justify-between">
                   <span className="font-['Inter'] font-medium">English Legal Summary</span>
                   <ChevronLeft size={14} className={`transition-transform ${showFullTerms ? "rotate-90" : ""}`} />
                 </button>
                 {showFullTerms && (
                   <div className="mt-3 pt-3 border-t border-[var(--glass-border)] text-[10px] sm:text-xs t-muted font-['Inter'] leading-relaxed space-y-2">
                     <p>I hereby declare that all information provided is accurate and matches official government records (Absher/NIC). I accept full legal responsibility for any false information under Saudi anti-forgery laws.</p>
-                    <p>I commit to not contacting investors or organizers outside the MAHAM EXPO platform before e-contract signing. Any bypass attempt will result in a 50,000 ر.س penalty. The deposit is non-refundable upon cancellation, with up to 25% cancellation fee.</p>
-                    <p>I acknowledge that "MAHAM", "MAHAM EXPO", "MAHAM GROUP" and all associated logos are exclusive intellectual property of Maham Company for Services and IT, protected under Saudi trademark and copyright laws. I will not copy, imitate, or create competing platforms during the contract period and 2 years after.</p>
+                    <p>I commit to not contacting investors or organizers outside the MAHAM EXPO platform before e-contract signing. Any bypass attempt will result in a 50,000 SAR penalty. The deposit is non-refundable upon cancellation, with up to 25% cancellation fee.</p>
+                    <p>I acknowledge that "MAHAM", "MAHAM EXPO", "MAHAM GROUP" and all associated logos are exclusive intellectual property of Maham Company for Services and IT, protected under Saudi trademark and copyright laws.</p>
                     <p>I consent to data collection and processing per Saudi Personal Data Protection Law (Royal Decree M/19). All electronic approvals have the same legal weight as handwritten signatures per Saudi E-Transactions Law (Royal Decree M/18).</p>
-                    <p>This declaration is governed by Saudi Arabian law. Disputes shall be resolved amicably within 30 days, otherwise referred to commercial courts in Riyadh, Saudi Arabia.</p>
+                    <p>This declaration is governed by Saudi Arabian law. Disputes shall be resolved amicably within 30 days, otherwise referred to commercial courts in Riyadh.</p>
                   </div>
                 )}
               </div>
@@ -473,7 +452,6 @@ export default function KYC() {
                     <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">I agree to the platform usage and booking terms</p>
                   </div>
                 </label>
-
                 <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
                   <input type="checkbox" checked={agreedPrivacy} onChange={(e) => setAgreedPrivacy(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
                   <div className="min-w-0">
@@ -481,7 +459,6 @@ export default function KYC() {
                     <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">I agree to the privacy policy and data protection terms</p>
                   </div>
                 </label>
-
                 <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
                   <input type="checkbox" checked={agreedIP} onChange={(e) => setAgreedIP(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
                   <div className="min-w-0">
@@ -489,7 +466,6 @@ export default function KYC() {
                     <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">I agree to the IP and trademark protection terms</p>
                   </div>
                 </label>
-
                 <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
                   <input type="checkbox" checked={agreedPenalty} onChange={(e) => setAgreedPenalty(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
                   <div className="min-w-0">
@@ -497,8 +473,6 @@ export default function KYC() {
                     <p className="text-[9px] sm:text-[10px] t-muted font-['Inter']">I acknowledge the penalties for violations</p>
                   </div>
                 </label>
-
-                {/* Select All */}
                 <div className="pt-2 border-t border-[var(--glass-border)]">
                   <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-gold-subtle border border-[var(--gold-border)]/20 cursor-pointer hover:border-[var(--gold-border)] transition-colors">
                     <input type="checkbox" checked={agreedAll} onChange={(e) => setAgreedAll(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-5 h-5 flex-shrink-0" />
@@ -510,7 +484,7 @@ export default function KYC() {
                 </div>
               </div>
 
-              {/* Digital Signature Info */}
+              {/* Digital Signature */}
               <div className="bg-[var(--glass-bg)] rounded-xl p-3 sm:p-4 border border-[var(--glass-border)]">
                 <div className="flex items-center gap-2 mb-2">
                   <Lock size={12} className="t-gold flex-shrink-0" />
@@ -528,7 +502,7 @@ export default function KYC() {
             </div>
           )}
 
-          {/* ===== COMPLETE ===== */}
+          {/* COMPLETE */}
           {currentStep === "complete" && (
             <div className="text-center py-6 sm:py-8">
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}>
@@ -544,28 +518,20 @@ export default function KYC() {
               <div className="mt-4 p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] max-w-sm mx-auto">
                 <p className="text-[10px] sm:text-xs t-muted">تم حفظ ملف التحقق الكامل بما في ذلك: بياناتك الشخصية، بيانات المنشأة، المستندات، والإقرار القانوني الموقّع إلكترونياً مع الطابع الزمني وعنوان IP.</p>
               </div>
-              <a href="/expos" className="inline-block mt-6 btn-gold px-6 py-3 rounded-xl text-sm font-bold">
+              <button onClick={() => navigate("/expos")} className="inline-block mt-6 btn-gold px-6 py-3 rounded-xl text-sm font-bold">
                 تصفح المعارض والحجز الآن
-              </a>
+              </button>
             </div>
           )}
 
-          {/* Navigation Buttons */}
+          {/* Navigation */}
           {currentStep !== "complete" && (
             <div className="flex items-center justify-between mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-[var(--glass-border)]">
-              <button
-                onClick={handlePrev}
-                disabled={currentIndex === 0}
-                className="flex items-center gap-2 text-xs t-tertiary hover:t-secondary disabled:opacity-20 transition-colors"
-              >
+              <button onClick={handlePrev} disabled={currentIndex === 0} className="flex items-center gap-2 text-xs t-tertiary hover:t-secondary disabled:opacity-20 transition-colors">
                 <ChevronRight size={14} />
                 السابق
               </button>
-              <button
-                onClick={handleNext}
-                disabled={currentStep === "declaration" && !allAgreed}
-                className="btn-gold px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 disabled:opacity-30 font-bold"
-              >
+              <button onClick={handleNext} disabled={currentStep === "declaration" && !allAgreed} className="btn-gold px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 disabled:opacity-30 font-bold">
                 {currentIndex === steps.length - 1 ? "تأكيد الإقرار وإكمال التحقق" : "حفظ والتالي"}
                 <ChevronLeft size={14} />
               </button>

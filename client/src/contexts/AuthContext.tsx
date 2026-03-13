@@ -37,6 +37,7 @@ interface AuthContextType {
   completeRegistration: (data: Omit<TraderProfile, "phone" | "kycStatus" | "documentsUploaded" | "accountVerified" | "registeredAt">) => void;
   logout: () => void;
   setAuthStep: (step: AuthStep) => void;
+  completeKYC: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -121,6 +122,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthStep("complete");
   }, [phoneNumber]);
 
+  const completeKYC = useCallback(() => {
+    if (trader) {
+      const updated: TraderProfile = {
+        ...trader,
+        kycStatus: "verified",
+        documentsUploaded: true,
+        accountVerified: true,
+      };
+      setTrader(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    }
+  }, [trader]);
+
   const logout = useCallback(() => {
     setTrader(null);
     setAuthStep("phone");
@@ -145,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sendOTP,
       verifyOTP,
       completeRegistration,
+      completeKYC,
       logout,
       setAuthStep,
     }}>

@@ -1,7 +1,7 @@
 /**
  * DashboardLayout — Sidebar + main content area
  * Supports: Light Mode / Dark Mode with theme toggle
- * All nav items, badges, and buttons are fully functional
+ * Features: Bottom Nav, Back button, Logout in mobile drawer
  */
 import { useState, useCallback } from "react";
 import { useLocation, Link } from "wouter";
@@ -12,8 +12,9 @@ import {
   LayoutDashboard, Map, CalendarCheck, FileText, CreditCard,
   Settings2, BarChart3, Bot, User, ChevronLeft, ChevronRight,
   Menu, X, Building2, MessageSquare, Star, Bell,
-  Shield, HelpCircle, Sun, Moon, LogOut, Phone, Mail
+  Shield, HelpCircle, Sun, Moon, LogOut, Phone, Mail, ArrowRight
 } from "lucide-react";
+import { toast } from "sonner";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/mahamexpologo_4057b50b.webp";
 
@@ -75,11 +76,11 @@ const mobileNavItems: NavItem[] = [
   { path: "/expos", icon: Building2, labelAr: "المعارض", labelEn: "Expos" },
   { path: "/bookings", icon: CalendarCheck, labelAr: "الحجوزات", labelEn: "Bookings" },
   { path: "/messages", icon: MessageSquare, labelAr: "الرسائل", labelEn: "Messages", badge: 3 },
-  { path: "/payments", icon: CreditCard, labelAr: "المدفوعات", labelEn: "Payments" },
+  { path: "/profile", icon: User, labelAr: "حسابي", labelEn: "Account" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -88,8 +89,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const traderCompany = trader?.companyName || "";
 
   const currentItem = allNavItems.find(n => n.path === location) || allNavItems.find(n => location.startsWith(n.path));
+  const isSubPage = location !== "/dashboard";
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    toast.success("تم تسجيل الخروج بنجاح");
+    window.location.href = "/";
+  }, [logout]);
 
   return (
     <div className="min-h-screen flex" dir="rtl">
@@ -198,7 +206,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
               </button>
               <button
-                onClick={() => { logout(); window.location.href = "/"; }}
+                onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-5 py-2.5 transition-colors"
                 style={{ color: "var(--status-red)" }}
               >
@@ -217,8 +225,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 sidebar-glass" style={{ borderTop: "1px solid var(--glass-border)" }}>
+      {/* Mobile Bottom Nav — Always visible */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 sidebar-glass safe-area-bottom" style={{ borderTop: "1px solid var(--glass-border)" }}>
         <div className="flex items-center justify-around py-2 px-1">
           {mobileNavItems.map((item) => {
             const isActive = location === item.path;
@@ -226,13 +234,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link key={item.path} href={item.path}>
                 <div className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-lg transition-all relative"
                   style={{ color: isActive ? "var(--gold-accent)" : "var(--text-tertiary)" }}>
-                  <item.icon size={17} />
-                  <span className="text-[8px]">{item.labelAr}</span>
-                  {item.badge && (
-                    <span className="absolute -top-0.5 right-0.5 w-3 h-3 rounded-full flex items-center justify-center text-[6px] font-bold"
-                      style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
-                      {item.badge}
-                    </span>
+                  <div className="relative">
+                    <item.icon size={18} />
+                    {item.badge && (
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[6px] font-bold"
+                        style={{ backgroundColor: "var(--badge-bg)", color: "var(--badge-text)" }}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-medium">{item.labelAr}</span>
+                  {isActive && (
+                    <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full" style={{ backgroundColor: "var(--gold-accent)" }} />
                   )}
                 </div>
               </Link>
@@ -241,10 +254,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button
             onClick={() => setMobileOpen(true)}
             className="flex flex-col items-center gap-0.5 py-1.5 px-2"
-            style={{ color: "var(--text-tertiary)" }}
+            style={{ color: mobileOpen ? "var(--gold-accent)" : "var(--text-tertiary)" }}
           >
-            <Menu size={17} />
-            <span className="text-[8px]">المزيد</span>
+            <Menu size={18} />
+            <span className="text-[9px] font-medium">المزيد</span>
           </button>
         </div>
       </div>
@@ -266,17 +279,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-0 right-0 h-full w-72 sidebar-glass z-50 p-5 overflow-y-auto"
+              className="lg:hidden fixed top-0 right-0 h-full w-72 sidebar-glass z-50 overflow-y-auto"
             >
-              <div className="flex items-center justify-between mb-6">
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
                 <img src={LOGO_URL} alt="Maham Expo" className="h-9 object-contain" style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
-                <button onClick={closeMobile} style={{ color: "var(--text-tertiary)" }}>
-                  <X size={18} />
+                <button onClick={closeMobile} className="p-2 rounded-lg" style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)" }}>
+                  <X size={16} />
                 </button>
               </div>
-              <nav>
+
+              {/* Trader Info in Drawer */}
+              <div className="p-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: "linear-gradient(135deg, var(--gold-accent), var(--gold-light))" }}>
+                    <User size={16} style={{ color: "var(--btn-gold-text)" }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold t-primary truncate">{traderName}</p>
+                    <p className="text-[10px] t-gold/60 font-['Inter'] truncate">{traderCompany}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nav Sections */}
+              <nav className="p-3">
                 {navSections.map((section, si) => (
-                  <div key={si} className="mb-4">
+                  <div key={si} className="mb-3">
                     <p className="px-2 py-1 text-[9px] t-muted uppercase tracking-wider font-['Inter']">
                       {section.titleAr} · {section.titleEn}
                     </p>
@@ -311,15 +341,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 ))}
               </nav>
-              {/* Theme toggle in mobile */}
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-3 py-3 mt-4 rounded-xl glass-card"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
-              </button>
+
+              {/* Drawer Footer: Theme + Logout */}
+              <div className="p-3 border-t mt-auto" style={{ borderColor: "var(--glass-border)" }}>
+                <button
+                  onClick={toggleTheme}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl glass-card mb-2"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                  <span className="text-xs">{theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+                </button>
+                <button
+                  onClick={() => { closeMobile(); handleLogout(); }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
+                  style={{ color: "var(--status-red)", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.12)" }}
+                >
+                  <LogOut size={16} />
+                  <span className="text-xs font-medium">تسجيل الخروج</span>
+                </button>
+              </div>
             </motion.div>
           </>
         )}
@@ -334,19 +375,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Top Bar */}
         <header className="sticky top-0 z-30 glass-card px-3 sm:px-6 py-2 sm:py-3" style={{ borderBottom: "1px solid var(--glass-border)" }}>
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-sm sm:text-base font-bold text-gold-gradient font-['Inter']">
-                {currentItem?.labelEn || "Dashboard"}
-              </h1>
-              <p className="text-[9px] sm:text-[10px] t-tertiary">
-                {currentItem?.labelAr || "لوحة التحكم"}
-              </p>
+            <div className="flex items-center gap-2">
+              {/* Back Button — shows on all sub-pages */}
+              {isSubPage && (
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="p-2 rounded-lg transition-colors shrink-0"
+                  style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)" }}
+                  title="رجوع للرئيسية"
+                >
+                  <ArrowRight size={16} />
+                </button>
+              )}
+              <div>
+                <h1 className="text-sm sm:text-base font-bold text-gold-gradient font-['Inter']">
+                  {currentItem?.labelEn || "Dashboard"}
+                </h1>
+                <p className="text-[9px] sm:text-[10px] t-tertiary">
+                  {currentItem?.labelAr || "لوحة التحكم"}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Theme Toggle (desktop top bar) */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg transition-colors"
+                className="hidden sm:block p-2 rounded-lg transition-colors"
                 style={{ color: "var(--text-tertiary)" }}
                 title={theme === "dark" ? "Light Mode" : "Dark Mode"}
               >
@@ -359,7 +413,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               </Link>
               <Link href="/messages">
-                <button className="relative p-2 rounded-lg transition-colors" style={{ color: "var(--text-tertiary)" }}>
+                <button className="relative p-2 rounded-lg transition-colors hidden sm:block" style={{ color: "var(--text-tertiary)" }}>
                   <MessageSquare size={16} />
                   <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ backgroundColor: "var(--status-blue)" }} />
                 </button>
