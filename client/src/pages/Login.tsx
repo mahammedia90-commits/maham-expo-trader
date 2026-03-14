@@ -11,7 +11,7 @@ import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import {
   Phone, ArrowLeft, ArrowRight, CheckCircle2, Building2, User, MapPin, Briefcase,
   Sun, Moon, Loader2, ShieldCheck, Lock, Sparkles, Globe, Check, MessageCircle,
-  DollarSign, FileText
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,11 +43,7 @@ const REGIONS = [
   { value: "other", ar: "أخرى", en: "Other", zh: "其他", ru: "Другое", fa: "سایر", tr: "Diğer" },
 ];
 
-const BUDGETS = [
-  { value: "under_10k", ar: "أقل من 10,000 ريال", en: "Less than 10,000 SAR" },
-  { value: "10k_50k", ar: "10,000 – 50,000 ريال", en: "10,000 – 50,000 SAR" },
-  { value: "over_50k", ar: "أكثر من 50,000 ريال", en: "More than 50,000 SAR" },
-];
+
 
 export default function Login() {
   const { authStep, phoneNumber, setPhoneNumber, sendOTP, verifyOTP, completeRegistration, otpCode, setAuthStep } = useAuth();
@@ -71,8 +67,7 @@ export default function Login() {
   const [companyName, setCompanyName] = useState("");
   const [activity, setActivity] = useState("");
   const [region, setRegion] = useState("");
-  const [budget, setBudget] = useState("");
-  const [crNumber, setCrNumber] = useState("");
+
   const [infoSubmitting, setInfoSubmitting] = useState(false);
 
   const BackArrow = isRTL ? ArrowLeft : ArrowRight;
@@ -135,18 +130,13 @@ export default function Login() {
 
   const handleInfoSubmit = useCallback(async () => {
     if (!traderName.trim() || !companyName.trim() || !activity || !region) return;
-    // CR number validation (optional, 10 digits)
-    if (crNumber && !/^\d{10}$/.test(crNumber)) {
-      toast.error(isArabicLike ? "رقم السجل التجاري يجب أن يكون 10 أرقام" : "CR number must be 10 digits");
-      return;
-    }
     setInfoSubmitting(true);
     await new Promise(r => setTimeout(r, 1000));
     completeRegistration({ name: traderName.trim(), companyName: companyName.trim(), activity, region });
     setInfoSubmitting(false);
     toast.success(isArabicLike ? "مرحباً بك!" : "Welcome!");
     navigate("/expos");
-  }, [traderName, companyName, activity, region, crNumber, completeRegistration, navigate, isArabicLike]);
+  }, [traderName, companyName, activity, region, completeRegistration, navigate, isArabicLike]);
 
   const stepVariants = { enter: { opacity: 0, x: isRTL ? -30 : 30 }, center: { opacity: 1, x: 0 }, exit: { opacity: 0, x: isRTL ? 30 : -30 } };
 
@@ -442,42 +432,7 @@ export default function Login() {
                       {REGIONS.map(r => (<option key={r.value} value={r.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(r as any)[lang] || r.en}</option>))}
                     </select>
                   </div>
-                  {/* FEAT-05: Budget field */}
-                  <div>
-                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <DollarSign size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "متوسط الميزانية للمشاركة" : "Average Participation Budget"}
-                    </label>
-                    <div className="space-y-1.5">
-                      {BUDGETS.map(b => (
-                        <label key={b.value} className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all"
-                          style={{
-                            background: budget === b.value ? "var(--gold-bg)" : "var(--glass-bg)",
-                            border: `1px solid ${budget === b.value ? "var(--gold-border)" : "var(--glass-border)"}`,
-                          }}>
-                          <input type="radio" name="budget" value={b.value} checked={budget === b.value}
-                            onChange={(e) => setBudget(e.target.value)} className="sr-only" />
-                          <div className="w-4 h-4 rounded-full flex items-center justify-center"
-                            style={{ border: `2px solid ${budget === b.value ? "var(--gold-accent)" : "var(--glass-border)"}` }}>
-                            {budget === b.value && <div className="w-2 h-2 rounded-full" style={{ background: "var(--gold-accent)" }} />}
-                          </div>
-                          <span className="text-xs font-medium" style={{ color: budget === b.value ? "var(--gold-accent)" : "var(--text-secondary)" }}>
-                            {isArabicLike ? b.ar : b.en}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  {/* FEAT-05: CR Number (optional) */}
-                  <div>
-                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
-                      <FileText size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "رقم السجل التجاري (اختياري)" : "CR Number (Optional)"}
-                    </label>
-                    <input type="text" value={crNumber} onChange={(e) => setCrNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                      placeholder={isArabicLike ? "10 أرقام" : "10 digits"}
-                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-                      style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)", direction: "ltr", textAlign: "left" }}
-                      maxLength={10} />
-                  </div>
+
                 </div>
                 <button onClick={handleInfoSubmit}
                   disabled={infoSubmitting || !traderName.trim() || !companyName.trim() || !activity || !region}

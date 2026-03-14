@@ -525,6 +525,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg transition-all"
+                style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
+                title={theme === "dark" ? "Light Mode" : "Dark Mode"}
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+
               {/* Language Switcher — compact in header */}
               <LanguageSwitcher compact />
 
