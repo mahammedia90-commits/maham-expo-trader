@@ -28,6 +28,7 @@ const Notifications = lazy(() => import("./pages/Notifications"));
 const KYC = lazy(() => import("./pages/KYC"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const BrowseExpos = lazy(() => import("./pages/BrowseExpos"));
+const ExpoDetail = lazy(() => import("./pages/ExpoDetail"));
 
 function PageLoader() {
   return (
@@ -63,6 +64,7 @@ function Router() {
         <Route path="/ai-assistant" component={() => <DashPage><AIAssistant /></DashPage>} />
         <Route path="/profile" component={() => <DashPage><Profile /></DashPage>} />
         <Route path="/expos" component={() => <DashPage><BrowseExpos /></DashPage>} />
+        <Route path="/expos/:id" component={() => <DashPage><Suspense fallback={<PageLoader />}><ExpoDetail /></Suspense></DashPage>} />
         <Route path="/messages" component={() => <DashPage><Messages /></DashPage>} />
         <Route path="/reviews" component={() => <DashPage><Reviews /></DashPage>} />
         <Route path="/notifications" component={() => <DashPage><Notifications /></DashPage>} />

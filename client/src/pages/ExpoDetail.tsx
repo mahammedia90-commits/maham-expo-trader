@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { events2026 } from "@/data/events2026";
 
 type BoothStatus = "available" | "reserved" | "sold" | "my-hold";
 type BoothType = "standard" | "premium" | "corner" | "island" | "kiosk";
@@ -95,8 +97,13 @@ const generateBooths = (): Booth[] => {
 
 export default function ExpoDetail() {
   const { t, lang, isRTL } = useLanguage();
+  const isArabicLike = ["ar", "fa"].includes(lang);
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
+  const { addBooking, addPayment, addNotification, addPendingBooking, canBook } = useAuth();
+
+  // Find the expo from events data
+  const expo = events2026.find(e => e.id === params.id) || events2026[0];
   const [booths, setBooths] = useState<Booth[]>(generateBooths);
   const [selectedBooth, setSelectedBooth] = useState<Booth | null>(null);
   const [holdBooth, setHoldBooth] = useState<Booth | null>(null);
@@ -104,6 +111,7 @@ export default function ExpoDetail() {
   const [zoneFilter, setZoneFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "payment">("select");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const boothTypeLabel = (type: BoothType): string => {
     const map: Record<BoothType, string> = {
@@ -187,14 +195,66 @@ export default function ExpoDetail() {
   };
 
   const handleConfirmPayment = () => {
-    if (!holdBooth) return;
+    if (!holdBooth || !selectedBooth) return;
+
+    // Check if user can book (KYC verified)
+    if (!canBook) {
+      toast.error(t("expoDetail.verifyAccountFirst"));
+      setTimeout(() => navigate("/kyc"), 1500);
+      return;
+    }
+
+    // 1. Create booking via AuthContext
+    const newBooking = addBooking({
+      expoId: expo.id,
+      expoNameAr: expo.nameAr,
+      expoNameEn: expo.nameEn,
+      unitAr: `${t("expoDetail.booth")} ${holdBooth.code} — ${zoneLabel(holdBooth.zone)}`,
+      unitEn: `Booth ${holdBooth.code} — Zone ${holdBooth.zone}`,
+      zone: holdBooth.zone,
+      boothType: holdBooth.type,
+      boothSize: holdBooth.size,
+      price: holdBooth.price,
+      deposit: holdBooth.price * 0.05,
+      services: holdBooth.featureKeys.map(fk => t(fk)),
+      location: expo.location,
+    });
+
+    // 2. Create payment record
+    const depositAmount = holdBooth.price * 0.05;
+    const newPayment = addPayment({
+      bookingId: newBooking.id,
+      amount: depositAmount,
+      method: "Credit Card",
+      type: "deposit",
+      descAr: t("expoDetail.depositDesc").replace("{code}", holdBooth.code).replace("{expo}", expo.nameAr),
+      descEn: `Deposit for Booth ${holdBooth.code} — ${expo.nameEn}`,
+    });
+
+    // 3. Add pending booking count
+    addPendingBooking();
+
+    // 4. Add notification
+    addNotification({
+      type: "booking",
+      titleAr: t("expoDetail.newBookingNotif").replace("{code}", holdBooth.code),
+      titleEn: `New Booking — Booth ${holdBooth.code}`,
+      message: t("expoDetail.bookingCreatedNotif")
+        .replace("{code}", holdBooth.code)
+        .replace("{expo}", isRTL ? expo.nameAr : expo.nameEn)
+        .replace("{id}", newBooking.id),
+      link: "/bookings",
+    });
+
+    // 5. Update local booth state
     setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "sold" as BoothStatus } : b));
     setHoldBooth(null);
     setSelectedBooth(null);
     setCountdown(0);
     setBookingStep("select");
-    toast.success(t("expoDetail.bookingConfirmed"));
-    setTimeout(() => navigate("/contracts"), 2000);
+
+    toast.success(t("expoDetail.bookingCreatedToast").replace("{id}", newBooking.id));
+    setTimeout(() => navigate("/bookings"), 2000);
   };
 
   const handleCancelHold = () => {
@@ -494,10 +554,24 @@ export default function ExpoDetail() {
                     <p className="text-[10px] t-tertiary leading-relaxed">
                       {t("expoDetail.legalText")}
                     </p>
+                    <label className="flex items-start gap-2 mt-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="mt-0.5 accent-[var(--gold-accent)] w-4 h-4 rounded shrink-0"
+                      />
+                      <span className="text-[11px] t-secondary leading-relaxed">
+                        {t("expoDetail.acceptTerms")}
+                      </span>
+                    </label>
                   </div>
                   <button
                     onClick={handleProceedToPayment}
-                    className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
+                    disabled={!termsAccepted}
+                    className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
+                      termsAccepted ? "btn-gold" : "opacity-40 cursor-not-allowed bg-gray-600"
+                    }`}
                   >
                     <CreditCard size={14} />
                     {t("expoDetail.proceedToPayment")}

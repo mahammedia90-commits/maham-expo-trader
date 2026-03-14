@@ -76,23 +76,52 @@ function useNavSections(t: (key: string) => string): { titleKey: string; items: 
 function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const { lang, setLang, t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  // Calculate position when opening
+  useEffect(() => {
+    if (!open || !btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setPos({
+      top: rect.bottom + 8,
+      left: Math.max(8, rect.left - 80),
+    });
+  }, [open]);
 
   // Close on click outside
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      if (btnRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
+  // Close on scroll
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    window.addEventListener('scroll', handler, true);
+    return () => window.removeEventListener('scroll', handler, true);
+  }, [open]);
+
+  const handleSelect = (code: Language) => {
+    setLang(code);
+    setOpen(false);
+    const langName = LANGUAGES.find(l => l.code === code)?.nativeName || code;
+    toast.success(langName);
+  };
+
   return (
-    <div className="relative" ref={containerRef}>
+    <>
       <button
+        ref={btnRef}
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-2 rounded-lg transition-colors ${
           compact ? "p-2" : "w-full px-3 py-3"
@@ -115,56 +144,59 @@ function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
         )}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className={`absolute z-[9999] rounded-xl overflow-hidden shadow-2xl ${
-                compact ? "bottom-full mb-2 left-0" : "bottom-full mb-2 left-0 right-0"
-              }`}
-              style={{
-                background: "var(--sidebar-bg)",
-                backdropFilter: "blur(40px)",
-                border: "1px solid var(--glass-border)",
-                minWidth: compact ? "200px" : undefined,
-              }}
-            >
-              <div className="p-2">
-                <p className="px-2 py-1 text-[9px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                  {t("settings.language")}
-                </p>
-                {LANGUAGES.map((l) => (
-                  <button
-                    key={l.code}
-                    onClick={(e) => { e.stopPropagation(); setLang(l.code); setOpen(false); toast.success(`${l.nativeName}`); }}
-                    onPointerDown={(e) => { e.stopPropagation(); }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                      lang === l.code ? "bg-gold-subtle" : "hover:bg-[var(--glass-bg-hover)]"
-                    }`}
-                    style={lang === l.code ? { border: "1px solid var(--gold-border)" } : { border: "1px solid transparent" }}
-                  >
-                    <span className="text-base">{l.flag}</span>
-                    <div className="flex flex-col items-start flex-1">
-                      <span className="text-xs font-medium" style={{ color: lang === l.code ? "var(--gold-light)" : "var(--text-secondary)" }}>
-                        {l.nativeName}
-                      </span>
-                      <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
-                        {l.name}
-                      </span>
-                    </div>
-                    {lang === l.code && <Check size={14} style={{ color: "var(--gold-accent)" }} />}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+      {open && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0"
+            style={{ zIndex: 99998 }}
+            onClick={() => setOpen(false)}
+          />
+          {/* Dropdown */}
+          <div
+            ref={dropdownRef}
+            className="fixed rounded-xl overflow-hidden shadow-2xl"
+            style={{
+              zIndex: 99999,
+              top: pos.top,
+              left: pos.left,
+              minWidth: "220px",
+              background: "var(--sidebar-bg)",
+              backdropFilter: "blur(40px)",
+              border: "1px solid var(--glass-border)",
+            }}
+          >
+            <div className="p-2">
+              <p className="px-2 py-1 text-[9px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                {t("settings.language")}
+              </p>
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => handleSelect(l.code)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                    lang === l.code ? "bg-gold-subtle" : "hover:bg-[var(--glass-bg-hover)]"
+                  }`}
+                  style={lang === l.code ? { border: "1px solid var(--gold-border)" } : { border: "1px solid transparent" }}
+                >
+                  <span className="text-base">{l.flag}</span>
+                  <div className="flex flex-col items-start flex-1">
+                    <span className="text-xs font-medium" style={{ color: lang === l.code ? "var(--gold-light)" : "var(--text-secondary)" }}>
+                      {l.nativeName}
+                    </span>
+                    <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
+                      {l.name}
+                    </span>
+                  </div>
+                  {lang === l.code && <Check size={14} style={{ color: "var(--gold-accent)" }} />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+    </>
   );
 }
 
@@ -297,21 +329,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
           {!collapsed && (
             <>
-              <div className="px-4 py-2 border-t" style={{ borderColor: "var(--glass-border)" }}>
-                <p className="text-[8px] t-muted mb-1">{t("common.contactUs")}</p>
-                <a href="tel:+966535555900" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
-                  <Phone size={10} className="t-gold" style={{ opacity: 0.6 }} />
-                  +966 53 555 5900
-                </a>
-                <a href="tel:+966534778899" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
-                  <Phone size={10} className="t-gold" style={{ opacity: 0.6 }} />
-                  +966 53 477 8899
-                </a>
-                <a href="mailto:info@mahamexpo.sa" className="flex items-center gap-1.5 text-[9px] t-tertiary hover:t-gold transition-colors py-0.5" dir="ltr">
-                  <Mail size={10} className="t-gold" style={{ opacity: 0.6 }} />
-                  info@mahamexpo.sa
-                </a>
-              </div>
+
               {/* Language Switcher */}
               <div className="px-3 py-1.5">
                 <LanguageSwitcher />
