@@ -1,6 +1,6 @@
 /**
- * Login Page — Smooth 3-Step Trader Registration
- * Fully localized with useLanguage() — v2 updated
+ * Login Page — Smooth Registration with Login/Register Tabs
+ * BUG-05 to BUG-09 fixed, FEAT-05 added
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -10,7 +10,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import {
   Phone, ArrowLeft, ArrowRight, CheckCircle2, Building2, User, MapPin, Briefcase,
-  Sun, Moon, Loader2, ShieldCheck, Lock, Sparkles, Globe, Check
+  Sun, Moon, Loader2, ShieldCheck, Lock, Sparkles, Globe, Check, MessageCircle,
+  DollarSign, FileText
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,18 +35,18 @@ const ACTIVITIES = [
 
 const REGIONS = [
   { value: "riyadh", ar: "الرياض", en: "Riyadh", zh: "利雅得", ru: "Эр-Рияд", fa: "ریاض", tr: "Riyad" },
+  { value: "jeddah", ar: "جدة", en: "Jeddah", zh: "吉达", ru: "Джидда", fa: "جده", tr: "Cidde" },
+  { value: "dammam", ar: "الدمام", en: "Dammam", zh: "达曼", ru: "Даммам", fa: "دمام", tr: "Dammam" },
   { value: "makkah", ar: "مكة المكرمة", en: "Makkah", zh: "麦加", ru: "Мекка", fa: "مکه مکرمه", tr: "Mekke" },
   { value: "madinah", ar: "المدينة المنورة", en: "Madinah", zh: "麦地那", ru: "Медина", fa: "مدینه منوره", tr: "Medine" },
-  { value: "qassim", ar: "القصيم", en: "Qassim", zh: "盖西姆", ru: "Касим", fa: "قصیم", tr: "Kasım" },
   { value: "eastern", ar: "المنطقة الشرقية", en: "Eastern Province", zh: "东部省", ru: "Восточная провинция", fa: "منطقه شرقی", tr: "Doğu Bölgesi" },
-  { value: "asir", ar: "عسير", en: "Asir", zh: "阿西尔", ru: "Асир", fa: "عسیر", tr: "Asir" },
-  { value: "tabuk", ar: "تبوك", en: "Tabuk", zh: "塔布克", ru: "Табук", fa: "تبوک", tr: "Tebük" },
-  { value: "hail", ar: "حائل", en: "Hail", zh: "哈伊勒", ru: "Хаиль", fa: "حائل", tr: "Hail" },
-  { value: "northern", ar: "الحدود الشمالية", en: "Northern Borders", zh: "北部边境", ru: "Северные границы", fa: "مرزهای شمالی", tr: "Kuzey Sınırları" },
-  { value: "jazan", ar: "جازان", en: "Jazan", zh: "吉赞", ru: "Джизан", fa: "جازان", tr: "Cizan" },
-  { value: "najran", ar: "نجران", en: "Najran", zh: "奈季兰", ru: "Наджран", fa: "نجران", tr: "Necran" },
-  { value: "baha", ar: "الباحة", en: "Al-Baha", zh: "巴哈", ru: "Эль-Баха", fa: "الباحه", tr: "El-Baha" },
-  { value: "jawf", ar: "الجوف", en: "Al-Jawf", zh: "焦夫", ru: "Эль-Джауф", fa: "الجوف", tr: "El-Cevf" },
+  { value: "other", ar: "أخرى", en: "Other", zh: "其他", ru: "Другое", fa: "سایر", tr: "Diğer" },
+];
+
+const BUDGETS = [
+  { value: "under_10k", ar: "أقل من 10,000 ريال", en: "Less than 10,000 SAR" },
+  { value: "10k_50k", ar: "10,000 – 50,000 ريال", en: "10,000 – 50,000 SAR" },
+  { value: "over_50k", ar: "أكثر من 50,000 ريال", en: "More than 50,000 SAR" },
 ];
 
 export default function Login() {
@@ -54,6 +55,10 @@ export default function Login() {
   const { t, lang, setLang, isRTL, dir } = useLanguage();
   const [, navigate] = useLocation();
   const [langOpen, setLangOpen] = useState(false);
+  const isArabicLike = ["ar", "fa"].includes(lang);
+
+  // BUG-09: Login vs Register tabs
+  const [mode, setMode] = useState<"login" | "register">("login");
 
   const [phoneInput, setPhoneInput] = useState(phoneNumber || "");
   const [phoneSending, setPhoneSending] = useState(false);
@@ -66,6 +71,8 @@ export default function Login() {
   const [companyName, setCompanyName] = useState("");
   const [activity, setActivity] = useState("");
   const [region, setRegion] = useState("");
+  const [budget, setBudget] = useState("");
+  const [crNumber, setCrNumber] = useState("");
   const [infoSubmitting, setInfoSubmitting] = useState(false);
 
   const BackArrow = isRTL ? ArrowLeft : ArrowRight;
@@ -76,13 +83,13 @@ export default function Login() {
 
   const handlePhoneSubmit = useCallback(async () => {
     const cleaned = phoneInput.replace(/\s/g, "");
-    if (cleaned.length < 9) { toast.error(t("auth.phone.placeholder")); return; }
+    if (cleaned.length < 9) { toast.error(isArabicLike ? "أدخل رقم هاتف صحيح" : "Enter a valid phone number"); return; }
     setPhoneSending(true);
     setPhoneNumber(cleaned);
     const success = await sendOTP(cleaned);
     setPhoneSending(false);
-    if (success) { setResendTimer(60); toast.success(t("auth.sendOtp")); }
-  }, [phoneInput, setPhoneNumber, sendOTP, t]);
+    if (success) { setResendTimer(60); toast.success(isArabicLike ? "تم إرسال رمز التحقق" : "OTP sent successfully"); }
+  }, [phoneInput, setPhoneNumber, sendOTP, isArabicLike]);
 
   const handleOtpInput = useCallback((index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -103,9 +110,19 @@ export default function Login() {
     setOtpVerifying(true);
     const success = await verifyOTP(code);
     setOtpVerifying(false);
-    if (success) { toast.success(t("auth.verify")); }
-    else { setOtpError(true); setOtpDigits(["", "", "", ""]); otpRefs[0].current?.focus(); }
-  }, [verifyOTP, t]);
+    if (success) {
+      toast.success(isArabicLike ? "تم التحقق بنجاح" : "Verified successfully");
+      // In login mode, skip info step and go directly
+      if (mode === "login") {
+        completeRegistration({ name: "تاجر", companyName: "شركة", activity: "other", region: "riyadh" });
+        navigate("/expos");
+      }
+    } else {
+      setOtpError(true);
+      setOtpDigits(["", "", "", ""]);
+      otpRefs[0].current?.focus();
+    }
+  }, [verifyOTP, isArabicLike, mode, completeRegistration, navigate]);
 
   const handleResendOTP = useCallback(async () => {
     if (resendTimer > 0) return;
@@ -118,22 +135,32 @@ export default function Login() {
 
   const handleInfoSubmit = useCallback(async () => {
     if (!traderName.trim() || !companyName.trim() || !activity || !region) return;
+    // CR number validation (optional, 10 digits)
+    if (crNumber && !/^\d{10}$/.test(crNumber)) {
+      toast.error(isArabicLike ? "رقم السجل التجاري يجب أن يكون 10 أرقام" : "CR number must be 10 digits");
+      return;
+    }
     setInfoSubmitting(true);
     await new Promise(r => setTimeout(r, 1000));
     completeRegistration({ name: traderName.trim(), companyName: companyName.trim(), activity, region });
     setInfoSubmitting(false);
-    toast.success(t("auth.welcome"));
+    toast.success(isArabicLike ? "مرحباً بك!" : "Welcome!");
     navigate("/expos");
-  }, [traderName, companyName, activity, region, completeRegistration, navigate, t]);
+  }, [traderName, companyName, activity, region, crNumber, completeRegistration, navigate, isArabicLike]);
 
   const stepVariants = { enter: { opacity: 0, x: isRTL ? -30 : 30 }, center: { opacity: 1, x: 0 }, exit: { opacity: 0, x: isRTL ? 30 : -30 } };
 
-  const steps: { key: AuthStep; num: number; label: string }[] = [
-    { key: "phone", num: 1, label: t("auth.phone") },
-    { key: "otp", num: 2, label: t("auth.otp") },
-    { key: "info", num: 3, label: t("auth.name") },
+  // Steps differ based on mode
+  const loginSteps = [
+    { key: "phone" as AuthStep, num: 1, label: isArabicLike ? "رقم الجوال" : "Phone Number" },
+    { key: "otp" as AuthStep, num: 2, label: isArabicLike ? "رمز التحقق" : "Verification Code" },
   ];
-
+  const registerSteps = [
+    { key: "phone" as AuthStep, num: 1, label: isArabicLike ? "رقم الجوال" : "Phone Number" },
+    { key: "otp" as AuthStep, num: 2, label: isArabicLike ? "رمز التحقق" : "Verification Code" },
+    { key: "info" as AuthStep, num: 3, label: isArabicLike ? "بيانات نشاطك" : "Business Info" },
+  ];
+  const steps = mode === "login" ? loginSteps : registerSteps;
   const currentStepIndex = steps.findIndex(s => s.key === authStep);
 
   return (
@@ -145,7 +172,7 @@ export default function Login() {
           style={{ background: `radial-gradient(circle, var(--gold-accent), transparent)` }} />
       </div>
 
-      {/* Top controls: Theme + Language */}
+      {/* Top controls */}
       <div className={`absolute top-5 ${isRTL ? "left-5" : "right-5"} flex items-center gap-2 z-10`}>
         <button onClick={toggleTheme} className="p-2.5 rounded-xl transition-all"
           style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
@@ -184,32 +211,51 @@ export default function Login() {
         <div className="rounded-xl sm:rounded-2xl p-4 sm:p-8 shadow-2xl"
           style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)" }}>
           
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-5">
             <img src={LOGO_URL} alt="Maham Expo" className="h-14 object-contain" style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
           </div>
 
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>{t("auth.login.title")}</h1>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("auth.welcome")}</p>
+          {/* BUG-09: Login/Register Tabs */}
+          <div className="flex rounded-xl overflow-hidden mb-5" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+            <button
+              onClick={() => { setMode("login"); if (authStep === "info") setAuthStep("phone"); }}
+              className="flex-1 py-2.5 text-sm font-bold transition-all"
+              style={{
+                background: mode === "login" ? "var(--gold-accent)" : "transparent",
+                color: mode === "login" ? "var(--btn-gold-text)" : "var(--text-tertiary)",
+              }}>
+              {isArabicLike ? "دخول" : "Login"}
+            </button>
+            <button
+              onClick={() => setMode("register")}
+              className="flex-1 py-2.5 text-sm font-bold transition-all"
+              style={{
+                background: mode === "register" ? "var(--gold-accent)" : "transparent",
+                color: mode === "register" ? "var(--btn-gold-text)" : "var(--text-tertiary)",
+              }}>
+              {isArabicLike ? "حساب جديد" : "New Account"}
+            </button>
           </div>
 
-          {/* Progress Steps */}
-          <div className="flex items-center justify-center gap-2 mb-8">
+          {/* BUG-08: Progress Steps with labels */}
+          <div className="flex items-center justify-center gap-1 mb-6">
             {steps.map((step, i) => (
-              <div key={step.key} className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                  style={{
-                    background: i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-bg)",
-                    color: i <= currentStepIndex ? "var(--btn-gold-text)" : "var(--text-tertiary)",
-                    border: `1px solid ${i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)"}`,
-                  }}>
-                  {i < currentStepIndex ? <CheckCircle2 size={14} /> : step.num}
+              <div key={step.key} className="flex items-center gap-1">
+                <div className="flex flex-col items-center gap-1">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                    style={{
+                      background: i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-bg)",
+                      color: i <= currentStepIndex ? "var(--btn-gold-text)" : "var(--text-tertiary)",
+                      border: `1px solid ${i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)"}`,
+                    }}>
+                    {i < currentStepIndex ? <CheckCircle2 size={14} /> : step.num}
+                  </div>
+                  <span className="text-[9px] font-medium whitespace-nowrap" style={{ color: i <= currentStepIndex ? "var(--gold-accent)" : "var(--text-muted)" }}>
+                    {step.label}
+                  </span>
                 </div>
-                <span className="text-[10px] hidden sm:block" style={{ color: i <= currentStepIndex ? "var(--gold-accent)" : "var(--text-muted)" }}>
-                  {step.label}
-                </span>
                 {i < steps.length - 1 && (
-                  <div className="w-8 h-[2px] rounded-full" style={{ background: i < currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)" }} />
+                  <div className="w-8 h-[2px] rounded-full mb-4" style={{ background: i < currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)" }} />
                 )}
               </div>
             ))}
@@ -219,10 +265,31 @@ export default function Login() {
             {/* STEP 1: Phone */}
             {authStep === "phone" && (
               <motion.div key="phone" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
+                {/* BUG-05: Value proposition block */}
+                <div className="rounded-xl p-3 mb-5" style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
+                  <p className="text-[11px] font-medium mb-2" style={{ color: "var(--gold-accent)" }}>
+                    {isArabicLike ? "بتسجيلك ستتمكن من:" : "By registering you can:"}
+                  </p>
+                  <div className="space-y-1">
+                    <p className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
+                      <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "تصفح الوحدات المتاحة الآن" : "Browse available units now"}
+                    </p>
+                    <p className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
+                      <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "حجز مكانك بعربون 5% فقط" : "Book your spot with only 5% deposit"}
+                    </p>
+                    <p className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
+                      <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "استلام عقد إلكتروني خلال دقائق" : "Receive an electronic contract within minutes"}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="mb-5">
                   <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
                     <Phone size={14} className={`inline ${isRTL ? "ml-1" : "mr-1"}`} style={{ color: "var(--gold-accent)" }} />
-                    {t("auth.phone")}
+                    {isArabicLike ? "رقم الجوال" : "Phone Number"}
                   </label>
                   <div className="flex gap-2">
                     <div className="flex items-center justify-center px-3 rounded-xl text-sm font-medium"
@@ -231,7 +298,7 @@ export default function Login() {
                     </div>
                     <input type="tel" value={phoneInput} onChange={(e) => setPhoneInput(e.target.value.replace(/[^\d\s]/g, ""))}
                       onKeyDown={(e) => e.key === "Enter" && handlePhoneSubmit()}
-                      placeholder={t("auth.phone.placeholder")}
+                      placeholder={isArabicLike ? "5XXXXXXXX" : "5XXXXXXXX"}
                       className="flex-1 px-4 py-3.5 rounded-xl text-base outline-none"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)", direction: "ltr", textAlign: "left", letterSpacing: "1px" }}
                       autoFocus maxLength={14} />
@@ -239,21 +306,21 @@ export default function Login() {
                 </div>
                 <button onClick={handlePhoneSubmit} disabled={phoneSending || phoneInput.replace(/\s/g, "").length < 9}
                   className="w-full py-3.5 rounded-xl text-base font-semibold btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  {phoneSending ? <><Loader2 size={18} className="animate-spin" /> {t("common.loading")}</> : t("auth.sendOtp")}
+                  {phoneSending ? <><Loader2 size={18} className="animate-spin" /> {isArabicLike ? "جاري الإرسال..." : "Sending..."}</> : isArabicLike ? "إرسال رمز التحقق" : "Send Verification Code"}
                 </button>
-                <div className="flex items-center justify-center gap-4 mt-6 pt-5" style={{ borderTop: "1px solid var(--glass-border)" }}>
-                  <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                    <ShieldCheck size={12} style={{ color: "var(--gold-accent)" }} />
-                    {t("auth.secure")}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                    <Lock size={12} style={{ color: "var(--gold-accent)" }} />
-                    {t("auth.encrypted")}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                    <Sparkles size={12} style={{ color: "var(--gold-accent)" }} />
-                    {t("auth.free")}
-                  </div>
+                {/* BUG-06: Arabic trust signals */}
+                <div className="flex items-center justify-center gap-3 mt-5 pt-4" style={{ borderTop: "1px solid var(--glass-border)" }}>
+                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    {isArabicLike ? "🔒 تشفير بنكي 256-bit" : "🔒 256-bit encryption"}
+                  </span>
+                  <span className="text-[10px]" style={{ color: "var(--glass-border)" }}>·</span>
+                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    {isArabicLike ? "لا رسوم تسجيل" : "No registration fees"}
+                  </span>
+                  <span className="text-[10px]" style={{ color: "var(--glass-border)" }}>·</span>
+                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    {isArabicLike ? "بياناتك محمية" : "Your data is protected"}
+                  </span>
                 </div>
               </motion.div>
             )}
@@ -266,7 +333,7 @@ export default function Login() {
                     style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
                     <ShieldCheck size={24} style={{ color: "var(--gold-accent)" }} />
                   </div>
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("auth.otp.placeholder")}</p>
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{isArabicLike ? "أدخل رمز التحقق المرسل إلى" : "Enter the verification code sent to"}</p>
                   <p className="text-base font-bold mt-1" style={{ color: "var(--text-primary)", direction: "ltr" }}>+966 {phoneInput}</p>
                   <p className="text-[10px] mt-1 px-3 py-1 rounded-full inline-block"
                     style={{ background: "var(--gold-bg)", color: "var(--gold-accent)" }}>
@@ -284,92 +351,145 @@ export default function Login() {
                 {otpVerifying && (
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <Loader2 size={16} className="animate-spin" style={{ color: "var(--gold-accent)" }} />
-                    <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("common.loading")}</span>
+                    <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{isArabicLike ? "جاري التحقق..." : "Verifying..."}</span>
                   </div>
                 )}
-                <div className="text-center mb-4">
+                {/* BUG-07: OTP fallback with countdown + WhatsApp */}
+                <div className="text-center mb-4 space-y-2">
                   {resendTimer > 0 ? (
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                      {t("auth.resendIn")} <span style={{ color: "var(--gold-accent)" }}>{resendTimer}</span>s
-                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                        style={{ background: "var(--gold-bg)", color: "var(--gold-accent)", border: "1px solid var(--gold-border)" }}>
+                        {resendTimer}
+                      </div>
+                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                        {isArabicLike ? "ثانية لإعادة الإرسال" : "seconds to resend"}
+                      </p>
+                    </div>
                   ) : (
-                    <button onClick={handleResendOTP} className="text-xs font-medium" style={{ color: "var(--gold-accent)" }}>
-                      {t("auth.resendCode")}
+                    <button onClick={handleResendOTP} className="text-xs font-bold px-4 py-2 rounded-lg transition-all"
+                      style={{ color: "var(--gold-accent)", background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
+                      {isArabicLike ? "إعادة الإرسال" : "Resend Code"}
                     </button>
                   )}
+                  <div>
+                    <a href="https://wa.me/966535555900?text=%D9%84%D9%85%20%D9%8A%D8%B5%D9%84%20%D8%B1%D9%85%D8%B2%20%D8%A7%D9%84%D8%AA%D8%AD%D9%82%D9%82"
+                      target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-medium transition-colors hover:opacity-80"
+                      style={{ color: "var(--text-muted)" }}>
+                      <MessageCircle size={11} />
+                      {isArabicLike ? "لم يصل الرمز؟ تواصل عبر واتساب" : "Didn't receive code? Contact via WhatsApp"}
+                    </a>
+                  </div>
                 </div>
                 <button onClick={() => { setAuthStep("phone"); setOtpDigits(["", "", "", ""]); }}
                   className="w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
                   style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
                   <BackArrow size={14} />
-                  {t("auth.changePhone")}
+                  {isArabicLike ? "تغيير رقم الهاتف" : "Change Phone Number"}
                 </button>
               </motion.div>
             )}
 
-            {/* STEP 3: Info */}
-            {authStep === "info" && (
+            {/* STEP 3: Info (Register mode only) — FEAT-05 expanded */}
+            {authStep === "info" && mode === "register" && (
               <motion.div key="info" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
-                <div className="text-center mb-5">
-                  <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center"
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center"
                     style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
-                    <User size={24} style={{ color: "var(--gold-accent)" }} />
+                    <User size={20} style={{ color: "var(--gold-accent)" }} />
                   </div>
-                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("auth.complete")}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{isArabicLike ? "أكمل بيانات نشاطك" : "Complete Your Business Info"}</p>
                 </div>
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <User size={12} style={{ color: "var(--gold-accent)" }} /> {t("auth.name")}
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+                      <User size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "الاسم الكامل" : "Full Name"} <span style={{ color: "var(--status-red)" }}>*</span>
                     </label>
                     <input type="text" value={traderName} onChange={(e) => setTraderName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} autoFocus />
                   </div>
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <Building2 size={12} style={{ color: "var(--gold-accent)" }} /> {t("auth.company")}
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+                      <Building2 size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "اسم النشاط التجاري" : "Business Name"} <span style={{ color: "var(--status-red)" }}>*</span>
                     </label>
                     <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} />
                   </div>
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <Briefcase size={12} style={{ color: "var(--gold-accent)" }} /> {t("auth.activity")}
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+                      <Briefcase size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "القطاع" : "Sector"} <span style={{ color: "var(--status-red)" }}>*</span>
                     </label>
                     <select value={activity} onChange={(e) => setActivity(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none appearance-none cursor-pointer"
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none appearance-none cursor-pointer"
                       style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", color: activity ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{t("auth.activity")}</option>
+                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{isArabicLike ? "اختر القطاع" : "Select Sector"}</option>
                       {ACTIVITIES.map(a => (
                         <option key={a.value} value={a.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(a as any)[lang] || a.en}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <MapPin size={12} style={{ color: "var(--gold-accent)" }} /> {t("auth.region")}
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+                      <MapPin size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "المدينة" : "City"} <span style={{ color: "var(--status-red)" }}>*</span>
                     </label>
                     <select value={region} onChange={(e) => setRegion(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none appearance-none cursor-pointer"
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none appearance-none cursor-pointer"
                       style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", color: region ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{t("auth.region")}</option>
+                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{isArabicLike ? "اختر المدينة" : "Select City"}</option>
                       {REGIONS.map(r => (<option key={r.value} value={r.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(r as any)[lang] || r.en}</option>))}
                     </select>
+                  </div>
+                  {/* FEAT-05: Budget field */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+                      <DollarSign size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "متوسط الميزانية للمشاركة" : "Average Participation Budget"}
+                    </label>
+                    <div className="space-y-1.5">
+                      {BUDGETS.map(b => (
+                        <label key={b.value} className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all"
+                          style={{
+                            background: budget === b.value ? "var(--gold-bg)" : "var(--glass-bg)",
+                            border: `1px solid ${budget === b.value ? "var(--gold-border)" : "var(--glass-border)"}`,
+                          }}>
+                          <input type="radio" name="budget" value={b.value} checked={budget === b.value}
+                            onChange={(e) => setBudget(e.target.value)} className="sr-only" />
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center"
+                            style={{ border: `2px solid ${budget === b.value ? "var(--gold-accent)" : "var(--glass-border)"}` }}>
+                            {budget === b.value && <div className="w-2 h-2 rounded-full" style={{ background: "var(--gold-accent)" }} />}
+                          </div>
+                          <span className="text-xs font-medium" style={{ color: budget === b.value ? "var(--gold-accent)" : "var(--text-secondary)" }}>
+                            {isArabicLike ? b.ar : b.en}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  {/* FEAT-05: CR Number (optional) */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+                      <FileText size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "رقم السجل التجاري (اختياري)" : "CR Number (Optional)"}
+                    </label>
+                    <input type="text" value={crNumber} onChange={(e) => setCrNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      placeholder={isArabicLike ? "10 أرقام" : "10 digits"}
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                      style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)", direction: "ltr", textAlign: "left" }}
+                      maxLength={10} />
                   </div>
                 </div>
                 <button onClick={handleInfoSubmit}
                   disabled={infoSubmitting || !traderName.trim() || !companyName.trim() || !activity || !region}
-                  className="w-full py-3.5 rounded-xl text-base font-semibold btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-5">
-                  {infoSubmitting ? <><Loader2 size={18} className="animate-spin" /> {t("common.loading")}</> : t("home.login")}
+                  className="w-full py-3 rounded-xl text-base font-semibold btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4">
+                  {infoSubmitting ? <><Loader2 size={18} className="animate-spin" /> {isArabicLike ? "جاري التسجيل..." : "Registering..."}</> : isArabicLike ? "دخول لوحة التحكم" : "Enter Dashboard"}
                 </button>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
         <p className="text-center text-[10px] mt-4" style={{ color: "var(--text-muted)" }}>
-          © 2025 Maham Expo — All Rights Reserved
+          © {new Date().getFullYear()} Maham Expo for Exhibitions & Conferences
         </p>
       </motion.div>
     </div>

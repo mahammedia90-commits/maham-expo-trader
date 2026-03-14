@@ -44,6 +44,7 @@ function useNavSections(t: (key: string) => string): { titleKey: string; items: 
         { path: "/bookings", icon: CalendarCheck, labelKey: "nav.bookings", badgeKey: "bookings" as const },
         { path: "/contracts", icon: FileText, labelKey: "nav.contracts" },
         { path: "/payments", icon: CreditCard, labelKey: "nav.payments" },
+        { path: "/waitlist", icon: Bell, labelKey: "nav.waitlist" },
       ],
     },
     {

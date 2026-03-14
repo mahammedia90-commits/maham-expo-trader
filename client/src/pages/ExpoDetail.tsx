@@ -700,6 +700,43 @@ export default function ExpoDetail() {
                 <p className="text-[10px] t-muted mt-1">{t("expoDetail.vatIncluded")}</p>
               </div>
 
+              {/* FEAT-08: Booking Steps Indicator */}
+              {bookingStep !== "select" && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    {[
+                      { key: "confirm", ar: "التأكيد", en: "Confirm" },
+                      { key: "contract", ar: "العقد", en: "Contract" },
+                      { key: "review", ar: "المراجعة", en: "Review" },
+                      { key: "payment", ar: "الدفع", en: "Payment" },
+                    ].map((step, i, arr) => {
+                      const stepOrder = ["confirm", "contract", "review", "approved", "payment"];
+                      const currentIdx = stepOrder.indexOf(bookingStep);
+                      const stepIdx = stepOrder.indexOf(step.key);
+                      const isActive = stepIdx <= currentIdx;
+                      const isCurrent = step.key === bookingStep || (bookingStep === "approved" && step.key === "review");
+                      return (
+                        <div key={step.key} className="flex items-center flex-1">
+                          <div className="flex flex-col items-center flex-1">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-all ${
+                              isCurrent ? "bg-[#C5A55A] text-[#0A0A12]" :
+                              isActive ? "bg-green-400/20 text-green-400 border border-green-400/30" :
+                              "bg-[var(--glass-bg)] t-muted border border-[var(--glass-border)]"
+                            }`}>{i + 1}</div>
+                            <span className={`text-[8px] mt-1 ${isCurrent ? "text-[#C5A55A] font-bold" : isActive ? "text-green-400" : "t-muted"}`}>
+                              {isArabicLike ? step.ar : step.en}
+                            </span>
+                          </div>
+                          {i < arr.length - 1 && (
+                            <div className={`h-0.5 flex-1 mx-1 rounded-full transition-all ${stepIdx < currentIdx ? "bg-green-400/30" : "bg-[var(--glass-border)]"}`} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Booking Actions */}
               {bookingStep === "select" && selectedBooth.status === "available" && (
                 <div className="space-y-3">

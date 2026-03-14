@@ -1,6 +1,7 @@
 /**
  * Home — Smart Trader Portal Landing Page
  * Fully localized with useLanguage() — supports 6 languages
+ * Updated: BUG-01 to BUG-04 fixed, FEAT-01/03/04/12 added
  */
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -12,7 +13,8 @@ import {
   CheckCircle, Star, Users, Building2, CreditCard, Lock, Clock,
   TrendingUp, Globe, Award, Utensils, Coffee, ShoppingBag, Landmark,
   Cpu, PartyPopper, MapPin, Phone, Mail, ChevronDown, Sparkles,
-  Eye, MessageSquare, Bell, CalendarCheck, Layers, Target, Rocket, Check
+  Eye, MessageSquare, Bell, CalendarCheck, Layers, Target, Rocket, Check,
+  Calculator, Search, Percent, DollarSign
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663193442903/JD8QXNuzByYQGCbDe4iMyc/mahamexpologo_4057b50b.webp";
@@ -31,14 +33,18 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [langOpen, setLangOpen] = useState(false);
 
+  // ROI Calculator state (FEAT-12)
+  const [roiCost, setRoiCost] = useState(25000);
+  const [roiDays, setRoiDays] = useState(5);
+  const [roiDaily, setRoiDaily] = useState(8000);
+
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
-  const stats = [
-    { value: "500+", label: t("home.stat.exhibitors") },
-    { value: "50+", label: t("home.stat.events") },
-    { value: "10K+", label: t("home.stat.units") },
-    { value: "98%", label: t("home.stat.satisfaction") },
-  ];
+  // ROI calculations
+  const roiTotalRevenue = roiDays * roiDaily;
+  const roiNetProfit = roiTotalRevenue - roiCost;
+  const roiBreakeven = roiDaily > 0 ? Math.ceil(roiCost / roiDaily) : 0;
+  const roiPercent = roiCost > 0 ? Math.round((roiNetProfit / roiCost) * 100) : 0;
 
   const sectors = [
     { icon: Utensils, name: t("home.sector.restaurants") },
@@ -50,11 +56,31 @@ export default function Home() {
   ];
 
   const howItWorks = [
-    { step: "01", title: t("home.step.browse"), icon: Building2 },
-    { step: "02", title: t("home.step.select"), icon: MapPin },
-    { step: "03", title: t("home.step.book"), icon: CreditCard },
-    { step: "04", title: t("home.step.sign"), icon: FileText },
-    { step: "05", title: t("home.step.launch"), icon: Rocket },
+    {
+      step: "01", title: isArabicLike ? "تصفح المعارض" : "Browse Exhibitions", icon: Search,
+      desc: isArabicLike ? "ابحث بالموقع أو القطاع أو السعر. خريطة تفاعلية تُظهر المتاح والمحجوز." : "Search by location, sector, or price. Interactive map shows available and booked units.",
+      time: isArabicLike ? "دقيقتان" : "2 minutes"
+    },
+    {
+      step: "02", title: isArabicLike ? "اختر وحدتك" : "Select Your Unit", icon: MapPin,
+      desc: isArabicLike ? "قارن بين الوحدات واستشر مساعد MAHAM AI لأفضل توصية تناسب نشاطك." : "Compare units and consult MAHAM AI assistant for the best recommendation for your business.",
+      time: isArabicLike ? "5 دقائق" : "5 minutes"
+    },
+    {
+      step: "03", title: isArabicLike ? "احجز وادفع" : "Book & Pay", icon: CreditCard,
+      desc: isArabicLike ? "عربون 5% فقط لتأكيد مكانك. الباقي قبل 30 يوماً من الفعالية." : "Only 5% deposit to confirm your spot. Remaining due 30 days before the event.",
+      time: isArabicLike ? "أقل من 5 دقائق" : "Less than 5 minutes"
+    },
+    {
+      step: "04", title: isArabicLike ? "وقّع العقد" : "Sign Contract", icon: FileText,
+      desc: isArabicLike ? "عقد إلكتروني معتمد يُولَّد تلقائياً. وقّع رقمياً واستلم نسختك فوراً." : "An approved electronic contract is auto-generated. Sign digitally and receive your copy instantly.",
+      time: isArabicLike ? "دقيقة واحدة" : "1 minute"
+    },
+    {
+      step: "05", title: isArabicLike ? "جهّز وانطلق" : "Prepare & Launch", icon: Rocket,
+      desc: isArabicLike ? "تلقَّ إشعارات موعد التجهيز وتابع أداءك عبر لوحة التحكم الذكية." : "Receive setup date notifications and track your performance via the smart dashboard.",
+      time: isArabicLike ? "مستمر" : "Ongoing"
+    },
   ];
 
   const features = [
@@ -70,32 +96,24 @@ export default function Home() {
     { q: t("home.faq.q1"), a: t("home.faq.a1") },
     { q: t("home.faq.q2"), a: t("home.faq.a2") },
     { q: t("home.faq.q3"), a: t("home.faq.a3") },
-    { q: isArabicLike ? "\u0645\u0627 \u0647\u064a \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0625\u0644\u063a\u0627\u0621 \u0648\u0627\u0644\u0627\u0633\u062a\u0631\u062f\u0627\u062f\u061f" : "What is the cancellation and refund policy?", a: isArabicLike ? "\u0627\u0644\u0639\u0631\u0628\u0648\u0646 (5%) \u063a\u064a\u0631 \u0645\u0633\u062a\u0631\u062f. \u0627\u0644\u0625\u0644\u063a\u0627\u0621 \u0642\u0628\u0644 15 \u064a\u0648\u0645\u0627\u064b \u0623\u0648 \u0623\u0643\u062b\u0631 \u0645\u0646 \u0627\u0644\u0645\u0639\u0631\u0636: \u0627\u0633\u062a\u0631\u062f\u0627\u062f 50% \u0645\u0646 \u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0645\u062a\u0628\u0642\u064a. \u0627\u0644\u0625\u0644\u063a\u0627\u0621 \u0642\u0628\u0644 \u0623\u0642\u0644 \u0645\u0646 15 \u064a\u0648\u0645\u0627\u064b: \u0644\u0627 \u064a\u0648\u062c\u062f \u0627\u0633\u062a\u0631\u062f\u0627\u062f." : "The deposit (5%) is non-refundable. Cancellation 15+ days before the exhibition: 50% refund of remaining amount. Less than 15 days: no refund." },
-    { q: isArabicLike ? "\u0647\u0644 \u064a\u0645\u0643\u0646\u0646\u064a \u0627\u062e\u062a\u064a\u0627\u0631 \u0645\u0648\u0642\u0639 \u0627\u0644\u062c\u0646\u0627\u062d \u0628\u0646\u0641\u0633\u064a\u061f" : "Can I choose my booth location?", a: isArabicLike ? "\u0646\u0639\u0645\u060c \u0627\u0644\u0645\u0646\u0635\u0629 \u062a\u0648\u0641\u0631 \u062e\u0631\u064a\u0637\u0629 \u062a\u0641\u0627\u0639\u0644\u064a\u0629 \u0644\u0643\u0644 \u0645\u0639\u0631\u0636 \u062a\u0639\u0631\u0636 \u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u062c\u0646\u062d\u0629 \u0627\u0644\u0645\u062a\u0627\u062d\u0629 \u0645\u0639 \u0623\u0633\u0639\u0627\u0631\u0647\u0627 \u0648\u0645\u0633\u0627\u062d\u0627\u062a\u0647\u0627. \u064a\u0645\u0643\u0646\u0643 \u0627\u062e\u062a\u064a\u0627\u0631 \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u0646\u0627\u0633\u0628 \u0648\u062a\u062b\u0628\u064a\u062a\u0647 \u0644\u0645\u062f\u0629 30 \u062f\u0642\u064a\u0642\u0629." : "Yes, the platform provides an interactive map for each exhibition showing all available booths with prices and sizes. You can choose your preferred location and hold it for 30 minutes." },
-    { q: isArabicLike ? "\u0645\u0627 \u0647\u064a \u0627\u0644\u062e\u062f\u0645\u0627\u062a \u0627\u0644\u062a\u0634\u063a\u064a\u0644\u064a\u0629 \u0627\u0644\u0645\u062a\u0627\u062d\u0629\u061f" : "What operational services are available?", a: isArabicLike ? "\u0646\u0648\u0641\u0631 \u062e\u062f\u0645\u0627\u062a \u0634\u0627\u0645\u0644\u0629: \u062a\u0635\u0645\u064a\u0645 \u0627\u0644\u0628\u0648\u062b\u060c \u0643\u0647\u0631\u0628\u0627\u0621 \u0648\u062a\u0643\u064a\u064a\u0641\u060c \u0625\u0646\u062a\u0631\u0646\u062a \u0648\u0627\u062a\u0635\u0627\u0644\u0627\u062a\u060c \u0644\u0648\u062c\u0633\u062a\u064a\u0627\u062a \u0648\u0646\u0642\u0644\u060c \u0637\u0628\u0627\u0639\u0629 \u0648\u0644\u0627\u0641\u062a\u0627\u062a\u060c \u0623\u0645\u0646 \u0648\u0633\u0644\u0627\u0645\u0629\u060c \u062a\u0646\u0638\u064a\u0641 \u0648\u0635\u064a\u0627\u0646\u0629\u060c \u0648\u062a\u0642\u0646\u064a\u0629 \u0648\u0634\u0627\u0634\u0627\u062a. \u062c\u0645\u064a\u0639\u0647\u0627 \u062a\u064f\u0637\u0644\u0628 \u0648\u062a\u064f\u062f\u0641\u0639 \u0639\u0628\u0631 \u0627\u0644\u0645\u0646\u0635\u0629." : "We provide comprehensive services: booth design, electricity & AC, internet & telecom, logistics & transport, printing & signage, security, cleaning & maintenance, and tech & AV. All ordered and paid through the platform." },
-    { q: isArabicLike ? "\u0647\u0644 \u064a\u0648\u062c\u062f \u0639\u0642\u062f \u0631\u0633\u0645\u064a\u061f" : "Is there an official contract?", a: isArabicLike ? "\u0646\u0639\u0645\u060c \u064a\u062a\u0645 \u0625\u0646\u0634\u0627\u0621 \u0639\u0642\u062f \u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a \u0631\u0633\u0645\u064a \u064a\u062a\u0636\u0645\u0646 \u062c\u0645\u064a\u0639 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u0627\u0644\u064a\u0629 \u0648\u0627\u0644\u0642\u0627\u0646\u0648\u0646\u064a\u0629. \u064a\u062c\u0628 \u0639\u0644\u0649 \u0627\u0644\u062a\u0627\u062c\u0631 \u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u0639\u0642\u062f \u0648\u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u064a\u0647 \u0642\u0628\u0644 \u0627\u0644\u062f\u0641\u0639. \u064a\u0645\u0643\u0646 \u062a\u062d\u0645\u064a\u0644 \u0646\u0633\u062e\u0629 PDF \u0641\u064a \u0623\u064a \u0648\u0642\u062a." : "Yes, an official electronic contract is generated with all financial and legal terms. The trader must review and accept the contract before payment. A PDF copy can be downloaded anytime." },
-    { q: isArabicLike ? "\u0643\u064a\u0641 \u0623\u062a\u0648\u0627\u0635\u0644 \u0645\u0639 \u0627\u0644\u062f\u0639\u0645\u061f" : "How do I contact support?", a: isArabicLike ? "\u064a\u0645\u0643\u0646\u0643 \u0627\u0644\u062a\u0648\u0627\u0635\u0644 \u0639\u0628\u0631 \u0627\u0644\u0628\u0631\u064a\u062f: info@mahamexpo.sa \u0623\u0648 rent@mahamexpo.sa\u060c \u0623\u0648 \u0627\u0644\u0647\u0627\u062a\u0641: +966535555900 \u0623\u0648 +966534778899\u060c \u0623\u0648 \u0639\u0628\u0631 \u0627\u0644\u0645\u0633\u0627\u0639\u062f \u0627\u0644\u0630\u0643\u064a \u062f\u0627\u062e\u0644 \u0627\u0644\u0645\u0646\u0635\u0629." : "Contact us via email: info@mahamexpo.sa or rent@mahamexpo.sa, phone: +966535555900 or +966534778899, or through the AI assistant inside the platform." },
+    { q: isArabicLike ? "ما هي سياسة الإلغاء والاسترداد؟" : "What is the cancellation and refund policy?", a: isArabicLike ? "العربون (5%) غير مسترد. الإلغاء قبل 15 يوماً أو أكثر من المعرض: استرداد 50% من المبلغ المتبقي. الإلغاء قبل أقل من 15 يوماً: لا يوجد استرداد." : "The deposit (5%) is non-refundable. Cancellation 15+ days before the exhibition: 50% refund of remaining amount. Less than 15 days: no refund." },
+    { q: isArabicLike ? "هل يمكنني اختيار موقع الجناح بنفسي؟" : "Can I choose my booth location?", a: isArabicLike ? "نعم، المنصة توفر خريطة تفاعلية لكل معرض تعرض جميع الأجنحة المتاحة مع أسعارها ومساحاتها. يمكنك اختيار الموقع المناسب وتثبيته لمدة 30 دقيقة." : "Yes, the platform provides an interactive map for each exhibition showing all available booths with prices and sizes. You can choose your preferred location and hold it for 30 minutes." },
+    { q: isArabicLike ? "ما هي الخدمات التشغيلية المتاحة؟" : "What operational services are available?", a: isArabicLike ? "نوفر خدمات شاملة: تصميم البوث، كهرباء وتكييف، إنترنت واتصالات، لوجستيات ونقل، طباعة ولافتات، أمن وسلامة، تنظيف وصيانة، وتقنية وشاشات. جميعها تُطلب وتُدفع عبر المنصة." : "We provide comprehensive services: booth design, electricity & AC, internet & telecom, logistics & transport, printing & signage, security, cleaning & maintenance, and tech & AV. All ordered and paid through the platform." },
+    { q: isArabicLike ? "هل يوجد عقد رسمي؟" : "Is there an official contract?", a: isArabicLike ? "نعم، يتم إنشاء عقد إلكتروني رسمي يتضمن جميع البنود المالية والقانونية. يجب على التاجر مراجعة العقد والموافقة عليه قبل الدفع. يمكن تحميل نسخة PDF في أي وقت." : "Yes, an official electronic contract is generated with all financial and legal terms. The trader must review and accept the contract before payment. A PDF copy can be downloaded anytime." },
+    { q: isArabicLike ? "كيف أتواصل مع الدعم؟" : "How do I contact support?", a: isArabicLike ? "يمكنك التواصل عبر البريد: info@mahamexpo.sa أو rent@mahamexpo.sa، أو الهاتف: +966535555900 أو +966534778899، أو عبر المساعد الذكي داخل المنصة." : "Contact us via email: info@mahamexpo.sa or rent@mahamexpo.sa, phone: +966535555900 or +966534778899, or through the AI assistant inside the platform." },
+    // 3 new FAQs (FEAT-04)
+    { q: isArabicLike ? "ماذا لو كانت الفعالية مخيّبة للتوقعات؟" : "What if the event doesn't meet expectations?", a: isArabicLike ? "نسعى دائماً لضمان أعلى معايير الجودة في الفعاليات التي نتعاون معها. في حال لم تلبِّ الفعالية التوقعات، نُتيح التواصل المباشر مع المنظّم عبر المنصة لمناقشة التعويض. كما يمكنك تقييم تجربتك لمساعدة التجار الآخرين." : "We always strive to ensure the highest quality standards in the events we partner with. If the event doesn't meet expectations, we facilitate direct communication with the organizer through the platform to discuss compensation. You can also rate your experience to help other traders." },
+    { q: isArabicLike ? "هل يوجد ضمان لحد أدنى من الزوار؟" : "Is there a minimum visitor guarantee?", a: isArabicLike ? "لا تضمن مهام إكسبو عدداً محدداً من الزوار، إذ تعتمد الزيارة على الجهة المنظّمة للفعالية. لكننا نُوفّر إحصائيات الإقبال من النسخ السابقة لكل فعالية لمساعدتك في اتخاذ قرار مدروس قبل الحجز." : "Maham Expo does not guarantee a specific number of visitors, as attendance depends on the event organizer. However, we provide attendance statistics from previous editions of each event to help you make an informed decision before booking." },
+    { q: isArabicLike ? "كيف تتم تسوية النزاعات بين التاجر والمنظّم؟" : "How are disputes between traders and organizers resolved?", a: isArabicLike ? "في حال نشأ خلاف، تتدخل مهام إكسبو كوسيط محايد بين الطرفين. العقد الإلكتروني الموقّع يُشكّل المرجع القانوني للنزاع. للحالات المعقدة، يمكن رفع تذكرة دعم رسمية يُتابعها فريقنا القانوني." : "In case of a dispute, Maham Expo intervenes as a neutral mediator between both parties. The signed electronic contract serves as the legal reference for the dispute. For complex cases, a formal support ticket can be raised and followed up by our legal team." },
   ];
 
   const whyMaham = [
-    { icon: Shield, title: isArabicLike ? "\u062d\u0645\u0627\u064a\u0629 \u0643\u0627\u0645\u0644\u0629" : "Full Protection", desc: isArabicLike ? "\u0639\u0642\u0648\u062f \u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a\u0629 \u0645\u0639\u062a\u0645\u062f\u0629 + \u0628\u0646\u062f \u0639\u062f\u0645 \u0627\u0644\u0627\u0644\u062a\u0641\u0627\u0641" : "Certified e-contracts + anti-circumvention clause" },
-    { icon: Globe, title: isArabicLike ? "\u0648\u0635\u0648\u0644 \u0639\u0627\u0644\u0645\u064a" : "Global Reach", desc: isArabicLike ? "\u0645\u0639\u0627\u0631\u0636 \u0641\u064a 6 \u062f\u0648\u0644 + \u062f\u0639\u0645 6 \u0644\u063a\u0627\u062a" : "Exhibitions in 6 countries + 6 language support" },
-    { icon: Zap, title: isArabicLike ? "\u062d\u062c\u0632 \u0641\u0648\u0631\u064a" : "Instant Booking", desc: isArabicLike ? "\u0627\u062e\u062a\u0631 \u062c\u0646\u0627\u062d\u0643 \u0645\u0646 \u0627\u0644\u062e\u0631\u064a\u0637\u0629 \u0648\u0627\u062d\u062c\u0632 \u0641\u064a \u062f\u0642\u0627\u0626\u0642" : "Choose from map & book in minutes" },
-    { icon: BarChart3, title: isArabicLike ? "\u062a\u062d\u0644\u064a\u0644\u0627\u062a \u0630\u0643\u064a\u0629" : "Smart Analytics", desc: isArabicLike ? "\u0644\u0648\u062d\u0629 \u062a\u062d\u0643\u0645 \u0645\u062a\u0642\u062f\u0645\u0629 \u0645\u0639 \u0645\u0633\u0627\u0639\u062f AI" : "Advanced dashboard with AI assistant" },
-    { icon: CreditCard, title: isArabicLike ? "\u062f\u0641\u0639 \u0645\u0631\u0646" : "Flexible Payment", desc: isArabicLike ? "\u0639\u0631\u0628\u0648\u0646 5% + \u0623\u0642\u0633\u0627\u0637 \u0645\u0631\u064a\u062d\u0629" : "5% deposit + comfortable installments" },
-    { icon: Target, title: isArabicLike ? "\u062e\u062f\u0645\u0627\u062a \u0645\u062a\u0643\u0627\u0645\u0644\u0629" : "Integrated Services", desc: isArabicLike ? "\u062a\u0635\u0645\u064a\u0645 + \u0643\u0647\u0631\u0628\u0627\u0621 + \u0644\u0648\u062c\u0633\u062a\u064a\u0627\u062a + \u0637\u0628\u0627\u0639\u0629" : "Design + electricity + logistics + printing" },
-  ];
-
-  const successStories = [
-    { name: isArabicLike ? "\u0634\u0631\u0643\u0629 \u0627\u0644\u0646\u062e\u0628\u0629 \u0644\u0644\u0623\u063a\u0630\u064a\u0629" : "Al Nukhba Foods Co.", result: isArabicLike ? "\u0632\u064a\u0627\u062f\u0629 \u0627\u0644\u0645\u0628\u064a\u0639\u0627\u062a 340%" : "340% sales increase", desc: isArabicLike ? "\u0634\u0627\u0631\u0643\u062a \u0641\u064a 3 \u0645\u0639\u0627\u0631\u0636 \u0639\u0628\u0631 \u0627\u0644\u0645\u0646\u0635\u0629 \u0648\u062d\u0642\u0642\u062a \u0646\u0645\u0648\u0627\u064b \u0627\u0633\u062a\u062b\u0646\u0627\u0626\u064a\u0627\u064b \u0641\u064a \u0627\u0644\u0645\u0628\u064a\u0639\u0627\u062a \u0648\u0627\u0644\u0639\u0645\u0644\u0627\u0621 \u0627\u0644\u062c\u062f\u062f" : "Participated in 3 expos via the platform and achieved exceptional growth in sales and new clients", icon: TrendingUp },
-    { name: isArabicLike ? "\u0645\u062c\u0645\u0648\u0639\u0629 \u0627\u0644\u0648\u0627\u062d\u0629 \u0627\u0644\u062a\u0642\u0646\u064a\u0629" : "Oasis Tech Group", result: isArabicLike ? "47 \u0639\u0642\u062f \u062c\u062f\u064a\u062f" : "47 new contracts", desc: isArabicLike ? "\u0627\u0633\u062a\u062e\u062f\u0645\u062a \u0627\u0644\u0645\u0633\u0627\u0639\u062f \u0627\u0644\u0630\u0643\u064a \u0644\u0627\u062e\u062a\u064a\u0627\u0631 \u0623\u0641\u0636\u0644 \u0645\u0648\u0642\u0639 \u0648\u062d\u0642\u0642\u062a 47 \u0639\u0642\u062f\u0627\u064b \u062c\u062f\u064a\u062f\u0627\u064b \u0641\u064a \u0645\u0639\u0631\u0636 \u0648\u0627\u062d\u062f" : "Used AI assistant to choose the best location and secured 47 new contracts in a single expo", icon: Award },
-    { name: isArabicLike ? "\u0645\u0642\u0647\u0649 \u0627\u0644\u0631\u064a\u062d\u0627\u0646\u0629" : "Al Rayhana Cafe", result: isArabicLike ? "\u0639\u0627\u0626\u062f \u0627\u0633\u062a\u062b\u0645\u0627\u0631 850%" : "850% ROI", desc: isArabicLike ? "\u0628\u062f\u0623\u062a \u0628\u062c\u0646\u0627\u062d \u0635\u063a\u064a\u0631 \u0648\u0627\u0644\u0622\u0646 \u062a\u062d\u062c\u0632 3 \u0623\u062c\u0646\u062d\u0629 \u0641\u064a \u0643\u0644 \u0645\u0639\u0631\u0636 \u0628\u0641\u0636\u0644 \u0627\u0644\u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0627\u0633\u062a\u062b\u0646\u0627\u0626\u064a\u0629" : "Started with a small booth, now books 3 booths per expo thanks to exceptional results", icon: Rocket },
-  ];
-
-  const testimonials = [
-    { name: t("home.testimonial.name1"), role: t("home.testimonial.role1"), text: t("home.testimonial.text1") },
-    { name: t("home.testimonial.name2"), role: t("home.testimonial.role2"), text: t("home.testimonial.text2") },
-    { name: t("home.testimonial.name3"), role: t("home.testimonial.role3"), text: t("home.testimonial.text3") },
+    { icon: Shield, title: isArabicLike ? "حماية كاملة" : "Full Protection", desc: isArabicLike ? "عقود إلكترونية معتمدة + بند عدم الالتفاف" : "Certified e-contracts + anti-circumvention clause" },
+    { icon: Globe, title: isArabicLike ? "وصول عالمي" : "Global Reach", desc: isArabicLike ? "معارض في 6 دول + دعم 6 لغات" : "Exhibitions in 6 countries + 6 language support" },
+    { icon: Zap, title: isArabicLike ? "حجز فوري" : "Instant Booking", desc: isArabicLike ? "اختر جناحك من الخريطة واحجز في دقائق" : "Choose from map & book in minutes" },
+    { icon: BarChart3, title: isArabicLike ? "تحليلات ذكية" : "Smart Analytics", desc: isArabicLike ? "لوحة تحكم متقدمة مع مساعد AI" : "Advanced dashboard with AI assistant" },
+    { icon: CreditCard, title: isArabicLike ? "دفع مرن" : "Flexible Payment", desc: isArabicLike ? "عربون 5% + أقساط مريحة" : "5% deposit + comfortable installments" },
+    { icon: Target, title: isArabicLike ? "خدمات متكاملة" : "Integrated Services", desc: isArabicLike ? "تصميم + كهرباء + لوجستيات + طباعة" : "Design + electricity + logistics + printing" },
   ];
 
   return (
@@ -173,31 +191,22 @@ export default function Home() {
             </p>
           </motion.div>
 
+          {/* CTA Buttons — FEAT-01: added guest browse */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link href="/login">
               <button className="btn-gold px-8 py-3.5 rounded-xl text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0">
-                {t("home.login")}
+                <Sparkles size={18} />
+                {isArabicLike ? "احجز وحدتك الآن" : "Book Your Unit Now"}
                 <ArrowIcon size={18} />
               </button>
             </Link>
-            <Link href="/login">
-              <button className="glass-card px-8 py-3.5 rounded-xl text-sm t-secondary flex items-center gap-2 mx-auto sm:mx-0">
-                <Building2 size={16} />
-                {t("home.browse")}
+            <Link href="/browse">
+              <button className="glass-card px-8 py-3.5 rounded-xl text-sm t-secondary flex items-center gap-2 mx-auto sm:mx-0 hover:border-[var(--gold-border)] transition-all">
+                <Eye size={16} />
+                {isArabicLike ? "استعرض المعارض بدون تسجيل" : "Browse Exhibitions Without Registration"}
               </button>
             </Link>
-          </motion.div>
-
-          {/* Stats Bar */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {stats.map((s, i) => (
-              <div key={i} className="text-center">
-                <p className="text-2xl sm:text-3xl font-bold text-gold-gradient font-['Inter']">{s.value}</p>
-                <p className="text-[11px] mt-1 font-medium" style={{ color: isDark ? 'var(--text-secondary)' : '#1A1A30' }}>{s.label}</p>
-              </div>
-            ))}
           </motion.div>
         </div>
 
@@ -231,7 +240,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ HOW IT WORKS ═══════ */}
+      {/* ═══════ HOW IT WORKS — FEAT-03 ═══════ */}
       <section className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
@@ -250,6 +259,11 @@ export default function Home() {
                   <div className="flex items-center gap-2 mb-1">
                     <h.icon size={16} className="t-gold" style={{ opacity: 0.7 }} />
                     <h3 className="text-sm font-bold t-primary">{h.title}</h3>
+                  </div>
+                  <p className="text-xs t-tertiary leading-relaxed mb-2">{h.desc}</p>
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={11} style={{ color: "var(--gold-accent)", opacity: 0.6 }} />
+                    <span className="text-[10px] font-medium" style={{ color: "var(--gold-accent)", opacity: 0.8 }}>{h.time}</span>
                   </div>
                 </div>
               </motion.div>
@@ -280,36 +294,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ TESTIMONIALS ═══════ */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div {...fadeUp} className="text-center mb-14">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {t("home.sectionTitle.testimonials")}
-            </h2>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {testimonials.map((tm, i) => (
-              <motion.div key={i} {...fadeUp} transition={{ delay: i * 0.1 }}
-                className="glass-card rounded-2xl p-5">
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Star key={j} size={14} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
-                  ))}
-                </div>
-                <p className="text-sm t-secondary leading-relaxed mb-4">"{tm.text}"</p>
-                <div>
-                  <p className="text-xs font-bold t-primary">{tm.name}</p>
-                  <p className="text-[10px] t-muted">{tm.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ═══════ WHY MAHAM EXPO ═══════ */}
-      <section className="py-20 px-6" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.02)" }}>
+      <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
@@ -334,36 +320,111 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ SUCCESS STORIES ═══════ */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div {...fadeUp} className="text-center mb-14">
+      {/* ═══════ ROI CALCULATOR — FEAT-12 ═══════ */}
+      <section className="py-20 px-6" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.02)" }}>
+        <div className="max-w-4xl mx-auto">
+          <motion.div {...fadeUp} className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
-              {isArabicLike ? "قصص نجاح" : "Success Stories"}
+              {isArabicLike ? "حاسبة العائد على الاستثمار" : "ROI Calculator"}
             </h2>
+            <p className="text-sm max-w-2xl mx-auto" style={{ color: isDark ? 'var(--text-tertiary)' : '#4A4A65' }}>
+              {isArabicLike ? "احسب العائد المتوقع من مشاركتك في المعرض" : "Calculate the expected return from your exhibition participation"}
+            </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {successStories.map((s, i) => (
-              <motion.div key={i} {...fadeUp} transition={{ delay: i * 0.1 }}
-                className="glass-card rounded-2xl p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-gold-subtle flex items-center justify-center">
-                    <s.icon size={18} className="t-gold" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold t-primary">{s.name}</h4>
-                    <p className="text-lg font-bold text-gold-gradient font-['Inter']">{s.result}</p>
-                  </div>
-                </div>
-                <p className="text-[11px] t-tertiary leading-relaxed">{s.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          <motion.div {...fadeUp} className="glass-card rounded-2xl p-6 sm:p-8">
+            {/* Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-bold t-primary mb-2">
+                  <DollarSign size={13} className="t-gold" />
+                  {isArabicLike ? "تكلفة الوحدة (ريال)" : "Unit Cost (SAR)"}
+                </label>
+                <input type="number" value={roiCost} onChange={e => setRoiCost(Number(e.target.value) || 0)}
+                  className="w-full px-4 py-3 rounded-xl text-sm font-bold outline-none"
+                  style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} />
+                <input type="range" min={5000} max={200000} step={1000} value={roiCost} onChange={e => setRoiCost(Number(e.target.value))}
+                  className="w-full mt-2 accent-[var(--gold-accent)]" />
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-bold t-primary mb-2">
+                  <CalendarCheck size={13} className="t-gold" />
+                  {isArabicLike ? "عدد أيام الفعالية" : "Event Days"}
+                </label>
+                <input type="number" value={roiDays} onChange={e => setRoiDays(Number(e.target.value) || 1)}
+                  className="w-full px-4 py-3 rounded-xl text-sm font-bold outline-none"
+                  style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} />
+                <input type="range" min={1} max={30} step={1} value={roiDays} onChange={e => setRoiDays(Number(e.target.value))}
+                  className="w-full mt-2 accent-[var(--gold-accent)]" />
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-bold t-primary mb-2">
+                  <TrendingUp size={13} className="t-gold" />
+                  {isArabicLike ? "إيراد يومي متوقع (ريال)" : "Expected Daily Revenue (SAR)"}
+                </label>
+                <input type="number" value={roiDaily} onChange={e => setRoiDaily(Number(e.target.value) || 0)}
+                  className="w-full px-4 py-3 rounded-xl text-sm font-bold outline-none"
+                  style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} />
+                <input type="range" min={500} max={100000} step={500} value={roiDaily} onChange={e => setRoiDaily(Number(e.target.value))}
+                  className="w-full mt-2 accent-[var(--gold-accent)]" />
+              </div>
+            </div>
+            {/* Results */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="rounded-xl p-4 text-center" style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
+                <p className="text-[10px] font-medium mb-1" style={{ color: "var(--gold-accent)" }}>{isArabicLike ? "إجمالي الإيراد" : "Total Revenue"}</p>
+                <p className="text-lg font-bold text-gold-gradient font-['Inter']">{roiTotalRevenue.toLocaleString()}</p>
+                <p className="text-[9px] t-muted">{isArabicLike ? "ريال" : "SAR"}</p>
+              </div>
+              <div className="rounded-xl p-4 text-center" style={{ background: roiNetProfit >= 0 ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)", border: `1px solid ${roiNetProfit >= 0 ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}` }}>
+                <p className="text-[10px] font-medium mb-1" style={{ color: roiNetProfit >= 0 ? "#22c55e" : "#ef4444" }}>{isArabicLike ? "صافي الربح" : "Net Profit"}</p>
+                <p className="text-lg font-bold font-['Inter']" style={{ color: roiNetProfit >= 0 ? "#22c55e" : "#ef4444" }}>{roiNetProfit.toLocaleString()}</p>
+                <p className="text-[9px] t-muted">{isArabicLike ? "ريال" : "SAR"}</p>
+              </div>
+              <div className="rounded-xl p-4 text-center" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+                <p className="text-[10px] font-medium mb-1 t-tertiary">{isArabicLike ? "نقطة التعادل" : "Break-even"}</p>
+                <p className="text-lg font-bold t-primary font-['Inter']">{isArabicLike ? `اليوم ${roiBreakeven}` : `Day ${roiBreakeven}`}</p>
+                <p className="text-[9px] t-muted">{isArabicLike ? "من أيام الفعالية" : "of event days"}</p>
+              </div>
+              <div className="rounded-xl p-4 text-center" style={{ background: roiPercent >= 0 ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)", border: `1px solid ${roiPercent >= 0 ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}` }}>
+                <p className="text-[10px] font-medium mb-1" style={{ color: roiPercent >= 0 ? "#22c55e" : "#ef4444" }}>{isArabicLike ? "العائد على الاستثمار" : "ROI"}</p>
+                <p className="text-lg font-bold font-['Inter']" style={{ color: roiPercent >= 0 ? "#22c55e" : "#ef4444" }}>{roiPercent}%</p>
+              </div>
+            </div>
+            <p className="text-[10px] t-muted text-center mt-4">
+              {isArabicLike ? "هذا تقدير استرشادي — الأداء الفعلي يعتمد على طبيعة نشاطك" : "This is an indicative estimate — actual performance depends on your business nature"}
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════ CTA — BUG-04: replaced success stories with CTA ═══════ */}
+      <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div {...fadeUp}>
+            <div className="glass-card rounded-2xl p-8 sm:p-12" style={{ border: "1px solid var(--gold-border)" }}>
+              <div className="w-16 h-16 rounded-2xl bg-gold-subtle flex items-center justify-center mx-auto mb-6">
+                <Rocket size={28} className="t-gold" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
+                {isArabicLike ? "كن أول قصة نجاح" : "Be the First Success Story"}
+              </h2>
+              <p className="text-sm max-w-xl mx-auto mb-8" style={{ color: isDark ? 'var(--text-tertiary)' : '#4A4A65' }}>
+                {isArabicLike ? "احجز وحدتك اليوم وابدأ رحلتك معنا" : "Book your unit today and start your journey with us"}
+              </p>
+              <Link href="/login">
+                <button className="btn-gold px-10 py-4 rounded-xl text-base font-semibold flex items-center gap-2 mx-auto">
+                  <Sparkles size={18} />
+                  {isArabicLike ? "ابدأ الآن" : "Start Now"}
+                  <ArrowIcon size={18} />
+                </button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ═══════ POLICIES ═══════ */}
-      <section className="py-16 px-6">
+      <section className="py-16 px-6" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.02)" }}>
         <div className="max-w-5xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
@@ -408,8 +469,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ FAQ ═══════ */}
-      <section className="py-20 px-6" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.02)" }}>
+      {/* ═══════ FAQ — FEAT-04 ═══════ */}
+      <section className="py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-3">
@@ -437,8 +498,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════ CTA ═══════ */}
-      <section className="py-20 px-6">
+      {/* ═══════ FINAL CTA ═══════ */}
+      <section className="py-20 px-6" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.02)" }}>
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeUp}>
             <h2 className="text-2xl sm:text-3xl font-bold text-gold-gradient mb-4">
@@ -451,12 +512,18 @@ export default function Home() {
                   {t("home.cta.button")}
                 </button>
               </Link>
+              <Link href="/browse">
+                <button className="glass-card px-8 py-3.5 rounded-xl text-sm t-secondary flex items-center gap-2 mx-auto sm:mx-0 hover:border-[var(--gold-border)] transition-all">
+                  <Eye size={16} />
+                  {isArabicLike ? "تصفح بدون تسجيل" : "Browse Without Registration"}
+                </button>
+              </Link>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ═══════ FOOTER ═══════ */}
+      {/* ═══════ FOOTER — BUG-02 + BUG-03 fixed ═══════ */}
       <footer className="py-10 px-6" style={{ borderTop: "1px solid var(--glass-border)" }}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
@@ -469,9 +536,11 @@ export default function Home() {
             <div>
               <h4 className="text-xs font-bold t-primary mb-3">{t("common.services")}</h4>
               <div className="space-y-2">
-                {[t("nav.bookings"), t("nav.contracts"), t("nav.operations"), t("nav.analytics")].map((s, i) => (
-                  <p key={i} className="text-[11px] t-tertiary">{s}</p>
-                ))}
+                {/* BUG-03: Made footer links real <Link> tags */}
+                <Link href="/expos"><span className="text-[11px] t-tertiary hover:text-[var(--gold-accent)] transition-colors cursor-pointer block">{t("nav.bookings")}</span></Link>
+                <Link href="/expos"><span className="text-[11px] t-tertiary hover:text-[var(--gold-accent)] transition-colors cursor-pointer block">{t("nav.contracts")}</span></Link>
+                <Link href="/expos"><span className="text-[11px] t-tertiary hover:text-[var(--gold-accent)] transition-colors cursor-pointer block">{t("nav.operations")}</span></Link>
+                <Link href="/expos"><span className="text-[11px] t-tertiary hover:text-[var(--gold-accent)] transition-colors cursor-pointer block">{t("nav.analytics")}</span></Link>
               </div>
             </div>
             <div>
@@ -481,11 +550,19 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Mail size={12} className="t-gold" />
-                  <p className="text-[11px] t-tertiary font-['Inter']">info@mahamexpo.sa</p>
+                  <a href="mailto:info@mahamexpo.sa" className="text-[11px] t-tertiary font-['Inter'] hover:text-[var(--gold-accent)] transition-colors">info@mahamexpo.sa</a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail size={12} className="t-gold" />
+                  <a href="mailto:rent@mahamexpo.sa" className="text-[11px] t-tertiary font-['Inter'] hover:text-[var(--gold-accent)] transition-colors">rent@mahamexpo.sa</a>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone size={12} className="t-gold" />
-                  <p className="text-[11px] t-tertiary font-['Inter']" dir="ltr">+966 53 555 5900</p>
+                  <a href="tel:+966535555900" className="text-[11px] t-tertiary font-['Inter'] hover:text-[var(--gold-accent)] transition-colors" dir="ltr">+966 53 555 5900</a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone size={12} className="t-gold" />
+                  <a href="tel:+966534778899" className="text-[11px] t-tertiary font-['Inter'] hover:text-[var(--gold-accent)] transition-colors" dir="ltr">+966 53 477 8899</a>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={12} className="t-gold" />
@@ -497,8 +574,9 @@ export default function Home() {
             </div>
           </div>
           <div className="pt-6 text-center" style={{ borderTop: "1px solid var(--glass-border)" }}>
+            {/* BUG-02: Dynamic year */}
             <p className="text-[10px] t-muted">
-              © 2025 Maham Expo for Exhibitions & Conferences — All Rights Reserved
+              © {new Date().getFullYear()} Maham Expo for Exhibitions & Conferences — All Rights Reserved
             </p>
           </div>
         </div>

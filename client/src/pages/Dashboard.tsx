@@ -12,10 +12,11 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { events2026, eventStats } from "@/data/events2026";
+import { Sparkles, Rocket, Eye } from "lucide-react";
 
 const statusIcon = (s: string) => {
   if (s === "confirmed" || s === "active") return <CheckCircle size={13} style={{ color: "var(--status-green)" }} />;
-  if (s === "pending_payment") return <AlertTriangle size={13} style={{ color: "var(--status-yellow)" }} />;
+  if (s === "pending_payment" || s === "pending_review") return <AlertTriangle size={13} style={{ color: "var(--status-yellow)" }} />;
   return <XCircle size={13} style={{ color: "var(--status-red)" }} />;
 };
 
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const { bookings, contracts, payments, trader } = useAuth();
   const { t, lang, isRTL } = useLanguage();
   const isArabicLike = lang === "ar" || lang === "fa";
+  const isFirstVisit = bookings.length === 0 && contracts.length === 0;
 
   const totalPaid = payments.filter(p => p.status === "completed").reduce((a, p) => a + p.amount, 0);
   const activeBookings = bookings.filter(b => b.status !== "cancelled").length;
@@ -62,8 +64,41 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* FEAT-06: Welcome Screen for first-time users */}
+      {isFirstVisit && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center"
+          style={{ background: "linear-gradient(135deg, rgba(197,165,90,0.08), rgba(197,165,90,0.02))", border: "1px solid var(--gold-border)" }}>
+          <div className="w-14 h-14 rounded-2xl bg-gold-subtle flex items-center justify-center mx-auto mb-4">
+            <Sparkles size={24} className="t-gold" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold t-primary mb-2">
+            {isArabicLike ? `مرحباً ${trader?.name || ''}!` : `Welcome ${trader?.name || ''}!`}
+          </h2>
+          <p className="text-xs sm:text-sm t-tertiary mb-5 max-w-md mx-auto">
+            {isArabicLike ? 'ابدأ رحلتك مع Maham Expo — تصفح المعارض واحجز وحدتك في دقائق' : 'Start your journey with Maham Expo — browse exhibitions and book your unit in minutes'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/expos">
+              <button className="btn-gold px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 mx-auto sm:mx-0">
+                <Rocket size={14} />
+                {isArabicLike ? 'تصفح المعارض والفعاليات' : 'Browse Exhibitions & Events'}
+              </button>
+            </Link>
+            {needsVerification && (
+              <Link href="/kyc">
+                <button className="glass-card px-6 py-2.5 rounded-xl text-xs font-medium t-secondary flex items-center gap-2 mx-auto sm:mx-0 hover:border-[var(--gold-border)] transition-all">
+                  <Eye size={14} />
+                  {isArabicLike ? 'وثّق حسابك أولاً' : 'Verify Your Account First'}
+                </button>
+              </Link>
+            )}
+          </div>
+        </motion.div>
+      )}
+
       {/* KYC Verification Banner */}
-      {needsVerification && (
+      {needsVerification && !isFirstVisit && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           className="rounded-xl sm:rounded-2xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
           style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))", border: "1px solid var(--gold-border)" }}>

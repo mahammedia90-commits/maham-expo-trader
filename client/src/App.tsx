@@ -31,6 +31,8 @@ const BrowseExpos = lazy(() => import("./pages/BrowseExpos"));
 const ExpoDetail = lazy(() => import("./pages/ExpoDetail"));
 const TeamManagement = lazy(() => import("./pages/TeamManagement"));
 const ExhibitorServices = lazy(() => import("./pages/ExhibitorServices"));
+const Browse = lazy(() => import("./pages/Browse"));
+const Waitlist = lazy(() => import("./pages/Waitlist"));
 
 function PageLoader() {
   return (
@@ -56,6 +58,7 @@ function Router() {
       <Switch>
         <Route path="/" component={() => <Suspense fallback={<PageLoader />}><Home /></Suspense>} />
         <Route path="/login" component={() => <Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+        <Route path="/browse" component={() => <Suspense fallback={<PageLoader />}><Browse /></Suspense>} />
         <Route path="/dashboard" component={() => <DashPage><Dashboard /></DashPage>} />
         <Route path="/map" component={() => <DashPage><ExpoMap /></DashPage>} />
         <Route path="/bookings" component={() => <DashPage><Bookings /></DashPage>} />
@@ -74,6 +77,7 @@ function Router() {
         <Route path="/help" component={() => <DashPage><HelpCenter /></DashPage>} />
         <Route path="/team" component={() => <DashPage><TeamManagement /></DashPage>} />
         <Route path="/services" component={() => <DashPage><ExhibitorServices /></DashPage>} />
+        <Route path="/waitlist" component={() => <DashPage><Waitlist /></DashPage>} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
