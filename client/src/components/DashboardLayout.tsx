@@ -51,6 +51,7 @@ function useNavSections(t: (key: string) => string): { titleKey: string; items: 
       items: [
         { path: "/operations", icon: Settings2, labelKey: "nav.operations" },
         { path: "/crm", icon: Users, labelKey: "crm.title" },
+        { path: "/team", icon: Users, labelKey: "nav.team" },
         { path: "/analytics", icon: BarChart3, labelKey: "nav.analytics" },
         { path: "/ai-assistant", icon: Bot, labelKey: "nav.ai" },
       ],

@@ -26,6 +26,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function Analytics() {
   const { t, lang, isRTL } = useLanguage();
+  const isAr = ["ar", "fa"].includes(lang);
   const { trader, bookings, payments, contracts } = useAuth();
 
   const totalPaid = payments.filter(p => p.status === "completed").reduce((a, p) => a + p.amount, 0);
@@ -159,6 +160,32 @@ export default function Analytics() {
               <Bar dataKey="value" fill="#C5A55A" radius={[4, 4, 0, 0]} barSize={24} />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      </motion.div>
+
+      {/* Revenue Breakdown */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+        className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-6">
+        <h3 className="text-xs sm:text-sm font-bold t-primary mb-3">{isAr ? "تفاصيل الإيرادات" : "Revenue Breakdown"}</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: isAr ? "حجوزات الأجنحة" : "Booth Bookings", value: `${(totalBookingValue / 1000).toFixed(0)}K`, pct: "65%", color: "#C5A55A" },
+            { label: isAr ? "خدمات تشغيلية" : "Operations", value: "12K", pct: "18%", color: "#4ADE80" },
+            { label: isAr ? "رعايات" : "Sponsorships", value: "8K", pct: "12%", color: "#60A5FA" },
+            { label: isAr ? "خدمات إضافية" : "Add-ons", value: "3K", pct: "5%", color: "#F472B6" },
+          ].map((r, i) => (
+            <div key={i} className="p-3 rounded-xl" style={{ backgroundColor: "var(--glass-bg)" }}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: r.color }} />
+                <span className="text-[10px] t-tertiary">{r.label}</span>
+              </div>
+              <p className="text-base font-bold t-primary font-['Inter']">{r.value}</p>
+              <div className="w-full h-1 rounded-full mt-2" style={{ backgroundColor: "var(--glass-bg)" }}>
+                <div className="h-full rounded-full" style={{ width: r.pct, backgroundColor: r.color }} />
+              </div>
+              <p className="text-[9px] t-muted mt-1 font-['Inter']">{r.pct}</p>
+            </div>
+          ))}
         </div>
       </motion.div>
 

@@ -10,12 +10,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, ArrowLeft, MapPin, Calendar, Users, Star, Clock, Shield,
   CheckCircle2, Lock, Sparkles, Building2, Ruler, Zap, Eye,
-  CreditCard, Timer, Info, Flame, Globe, AlertTriangle, Tag
+  CreditCard, Timer, Info, Flame, Globe, AlertTriangle, Tag, FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { events2026 } from "@/data/events2026";
+import ContractPreview from "@/components/ContractPreview";
 
 type BoothStatus = "available" | "reserved" | "sold" | "my-hold";
 type BoothType = "standard" | "premium" | "corner" | "island" | "kiosk";
@@ -110,7 +111,7 @@ export default function ExpoDetail() {
   const [countdown, setCountdown] = useState(0);
   const [zoneFilter, setZoneFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "payment">("select");
+  const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "contract" | "payment">("select");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const boothTypeLabel = (type: BoothType): string => {
@@ -190,8 +191,17 @@ export default function ExpoDetail() {
     toast.success(t("expoDetail.unitHeld"));
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToContract = () => {
+    setBookingStep("contract");
+  };
+
+  const handleContractAccepted = () => {
     setBookingStep("payment");
+    toast.success(isArabicLike ? "تم قبول العقد بنجاح" : "Contract accepted successfully");
+  };
+
+  const handleBackToConfirm = () => {
+    setBookingStep("confirm");
   };
 
   const handleConfirmPayment = () => {
@@ -602,14 +612,14 @@ export default function ExpoDetail() {
                     </label>
                   </div>
                   <button
-                    onClick={handleProceedToPayment}
+                    onClick={handleProceedToContract}
                     disabled={!termsAccepted}
                     className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
                       termsAccepted ? "btn-gold" : "opacity-40 cursor-not-allowed bg-gray-600"
                     }`}
                   >
-                    <CreditCard size={14} />
-                    {t("expoDetail.proceedToPayment")}
+                    <FileText size={14} />
+                    {isArabicLike ? "معاينة العقد والمتابعة" : "Review Contract & Continue"}
                   </button>
                   <button
                     onClick={handleCancelHold}
@@ -620,8 +630,35 @@ export default function ExpoDetail() {
                 </div>
               )}
 
+              {bookingStep === "contract" && selectedBooth && (
+                <ContractPreview
+                  boothCode={selectedBooth.code}
+                  boothType={boothTypeLabel(selectedBooth.type)}
+                  boothSize={selectedBooth.size}
+                  boothSizeM2={selectedBooth.sizeM2}
+                  boothZone={`${t("expoDetail.zone")} ${selectedBooth.zone} — ${zoneLabel(selectedBooth.zone)}`}
+                  boothPrice={selectedBooth.price}
+                  depositAmount={selectedBooth.price * 0.05}
+                  expoNameAr={expo.nameAr}
+                  expoNameEn={expo.nameEn}
+                  expoLocation={expo.location}
+                  expoDate={`${expo.dateStart} — ${expo.dateEnd}`}
+                  onAccept={handleContractAccepted}
+                  onBack={handleBackToConfirm}
+                />
+              )}
+
               {bookingStep === "payment" && (
                 <div className="space-y-4">
+                  {/* Contract Accepted Badge */}
+                  <div className="flex items-center gap-2 p-3 rounded-xl" style={{ backgroundColor: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)" }}>
+                    <CheckCircle2 size={14} className="text-green-400" />
+                    <span className="text-[10px] text-green-400 font-semibold">
+                      {isArabicLike ? "\u062a\u0645 \u0642\u0628\u0648\u0644 \u0627\u0644\u0639\u0642\u062f \u0628\u0646\u062c\u0627\u062d — \u064a\u0645\u0643\u0646\u0643 \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0644\u0644\u062f\u0641\u0639" : "Contract accepted — proceed to payment"}
+                    </span>
+                  </div>
+
+                  {/* Enhanced Payment Summary */}
                   <div className="glass-card rounded-xl p-4">
                     <h4 className="text-xs font-bold t-secondary mb-3">{t("expoDetail.paymentSummary")}</h4>
                     <div className="space-y-2">
@@ -634,9 +671,33 @@ export default function ExpoDetail() {
                         <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.13).toLocaleString()} {t("common.sar")}</span>
                       </div>
                       <div className="flex justify-between text-xs pt-2 border-t border-[var(--glass-border)]">
-                        <span className="t-secondary font-bold">{t("expoDetail.deposit")} (5%)</span>
-                        <span className="text-[#C5A55A] font-bold font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} {t("common.sar")}</span>
+                        <span className="t-secondary font-bold">{isArabicLike ? "\u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a" : "Total"}</span>
+                        <span className="t-secondary font-bold font-['Inter']">{selectedBooth.price.toLocaleString()} {t("common.sar")}</span>
                       </div>
+                    </div>
+                    <div className="mt-3 p-2.5 rounded-lg text-center" style={{ backgroundColor: "rgba(197,165,90,0.05)", border: "1px solid rgba(197,165,90,0.15)" }}>
+                      <p className="text-[9px] t-tertiary mb-1">{isArabicLike ? "\u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0645\u0637\u0644\u0648\u0628 \u0627\u0644\u0622\u0646" : "Amount Due Now"}</p>
+                      <p className="text-lg font-bold text-[#C5A55A] font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} <span className="text-xs">{t("common.sar")}</span></p>
+                      <p className="text-[8px] t-muted">{isArabicLike ? "\u0639\u0631\u0628\u0648\u0646 \u063a\u064a\u0631 \u0645\u0633\u062a\u0631\u062f (5%)" : "Non-refundable deposit (5%)"}</p>
+                    </div>
+                    <div className="mt-2 p-2 rounded-lg" style={{ backgroundColor: "var(--glass-bg)" }}>
+                      <div className="flex justify-between text-[9px]">
+                        <span className="t-tertiary">{isArabicLike ? "\u0627\u0644\u0645\u062a\u0628\u0642\u064a (\u064a\u064f\u062f\u0641\u0639 \u0642\u0628\u0644 30 \u064a\u0648\u0645\u0627\u064b \u0645\u0646 \u0627\u0644\u0645\u0639\u0631\u0636)" : "Remaining (due 30 days before expo)"}</span>
+                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.95).toLocaleString()} {t("common.sar")}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cancellation Policy */}
+                  <div className="p-3 rounded-xl" style={{ backgroundColor: "rgba(251,191,36,0.03)", border: "1px solid rgba(251,191,36,0.1)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle size={10} className="text-yellow-400" />
+                      <span className="text-[9px] font-bold text-yellow-400">{isArabicLike ? "\u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0625\u0644\u063a\u0627\u0621" : "Cancellation Policy"}</span>
+                    </div>
+                    <div className="space-y-1 text-[8px] t-muted">
+                      <p>{isArabicLike ? "\u2022 \u0627\u0644\u0639\u0631\u0628\u0648\u0646 \u063a\u064a\u0631 \u0645\u0633\u062a\u0631\u062f \u0641\u064a \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0627\u0644\u0627\u062a" : "\u2022 Deposit is non-refundable"}</p>
+                      <p>{isArabicLike ? "\u2022 \u0625\u0644\u063a\u0627\u0621 \u0642\u0628\u0644 15+ \u064a\u0648\u0645\u0627\u064b: \u0627\u0633\u062a\u0631\u062f\u0627\u062f 50% \u0645\u0646 \u0627\u0644\u0645\u062a\u0628\u0642\u064a" : "\u2022 Cancel 15+ days before: 50% refund of remaining"}</p>
+                      <p>{isArabicLike ? "\u2022 \u0625\u0644\u063a\u0627\u0621 \u0642\u0628\u0644 \u0623\u0642\u0644 \u0645\u0646 15 \u064a\u0648\u0645\u0627\u064b: \u0644\u0627 \u064a\u0648\u062c\u062f \u0627\u0633\u062a\u0631\u062f\u0627\u062f" : "\u2022 Cancel <15 days: no refund"}</p>
                     </div>
                   </div>
 
