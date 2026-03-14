@@ -1207,6 +1207,7 @@ const allTranslations: Record<Language, Record<string, string>> = {
     "sponsor.startup": "جناح الشركات الناشئة",
     "sponsor.startupDesc": "مساحة عرض مخصصة للشركات الناشئة مع فرص تواصل",
     "sponsor.title": "فرص الرعاية",
+    "payments.fullPayment": "دفعة كاملة",
   },
   // ─── English ───
   en: {
@@ -2341,6 +2342,7 @@ const allTranslations: Record<Language, Record<string, string>> = {
     "sponsor.startup": "Startup Pavilion",
     "sponsor.startupDesc": "Dedicated exhibition space for startups with networking opportunities",
     "sponsor.title": "Sponsorship Opportunities",
+    "payments.fullPayment": "Full Payment",
   },
   // ─── Chinese (中文) ───
   zh: {
@@ -3481,6 +3483,7 @@ const allTranslations: Record<Language, Record<string, string>> = {
     "sponsor.startup": "创业展区",
     "sponsor.startupDesc": "为创业公司提供专属展示空间和社交机会",
     "sponsor.title": "赞助机会",
+    "payments.fullPayment": "全额付款",
   },
   // ─── Russian (Русский) ───
   ru: {
@@ -4621,6 +4624,7 @@ const allTranslations: Record<Language, Record<string, string>> = {
     "sponsor.startup": "Павильон стартапов",
     "sponsor.startupDesc": "Выделенное выставочное пространство для стартапов с возможностями нетворкинга",
     "sponsor.title": "Возможности спонсорства",
+    "payments.fullPayment": "Полная оплата",
   },
   // ─── Persian (فارسی) ───
   fa: {
@@ -5761,6 +5765,7 @@ const allTranslations: Record<Language, Record<string, string>> = {
     "sponsor.startup": "غرفه استارتاپ‌ها",
     "sponsor.startupDesc": "فضای نمایشگاهی اختصاصی برای استارتاپ‌ها با فرصت‌های شبکه‌سازی",
     "sponsor.title": "فرصت‌های حمایت مالی",
+    "payments.fullPayment": "پرداخت کامل",
   },
   // ─── Turkish (Türkçe) ───
   tr: {
@@ -6885,5 +6890,6 @@ const allTranslations: Record<Language, Record<string, string>> = {
     "sponsor.startup": "Startup Pavilyonu",
     "sponsor.startupDesc": "Startuplar için özel sergi alanı ve networking fırsatları",
     "sponsor.title": "Sponsorluk Fırsatları",
+    "payments.fullPayment": "Tam Ödeme",
   },
 };

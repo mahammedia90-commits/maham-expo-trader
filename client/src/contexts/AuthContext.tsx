@@ -60,7 +60,7 @@ export interface BookingRecord {
   deposit: number;
   paidAmount: number;
   remainingAmount: number;
-  status: "pending_payment" | "confirmed" | "active" | "cancelled";
+  status: "pending_review" | "approved" | "pending_payment" | "confirmed" | "active" | "cancelled" | "rejected";
   paymentStatus: "unpaid" | "deposit_paid" | "fully_paid";
   contractGenerated: boolean;
   contractId: string | null;

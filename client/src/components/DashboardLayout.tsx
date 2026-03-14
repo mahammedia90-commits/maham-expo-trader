@@ -327,41 +327,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* Bottom: Language + Theme Toggle + Logout + Collapse */}
+        {/* Bottom: Collapse Only */}
         <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
-          {!collapsed && (
-            <>
-
-              {/* Language Switcher */}
-              <div className="px-3 py-1.5">
-                <LanguageSwitcher />
-              </div>
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-5 py-2.5 transition-colors"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                <span className="text-xs">{theme === "dark" ? t("settings.light") : t("settings.dark")}</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-5 py-2.5 transition-colors"
-                style={{ color: "var(--status-red)" }}
-              >
-                <LogOut size={16} />
-                <span className="text-xs">{t("nav.logout")}</span>
-              </button>
-            </>
-          )}
-          {collapsed && (
-            <div className="flex flex-col items-center gap-2 py-2">
-              <LanguageSwitcher compact />
-              <button onClick={toggleTheme} className="p-2 rounded-lg" style={{ color: "var(--text-tertiary)" }}>
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
-            </div>
-          )}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex items-center justify-center w-full py-3 transition-colors"
@@ -515,28 +482,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 ))}
               </nav>
 
-              {/* Drawer Footer */}
+              {/* Drawer Footer — Clean */}
               <div className="p-3 border-t mt-auto" style={{ borderColor: "var(--glass-border)" }}>
-                {/* Language Switcher */}
-                <div className="mb-2">
-                  <LanguageSwitcher />
-                </div>
-                <button
-                  onClick={toggleTheme}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl mb-2"
-                  style={{ color: "var(--text-secondary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
-                >
-                  {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                  <span className="text-xs">{theme === "dark" ? t("settings.light") : t("settings.dark")}</span>
-                </button>
-                <button
-                  onClick={() => { closeMobile(); handleLogout(); }}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
-                  style={{ color: "var(--status-red)", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.12)" }}
-                >
-                  <LogOut size={16} />
-                  <span className="text-xs font-medium">{t("nav.logout")}</span>
-                </button>
+                <p className="text-[9px] t-muted text-center">
+                  {isRTL ? "مهام إكسبو — بوابة التاجر" : "Maham Expo — Trader Portal"}
+                </p>
               </div>
             </motion.div>
           </>
@@ -577,14 +527,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Language Switcher — compact in header */}
               <LanguageSwitcher compact />
-              <button
-                onClick={toggleTheme}
-                className="hidden sm:block p-2 rounded-lg transition-colors"
-                style={{ color: "var(--text-tertiary)" }}
-                title={theme === "dark" ? t("settings.light") : t("settings.dark")}
-              >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
+
               <Link href="/notifications">
                 <button className="relative p-2 rounded-lg transition-colors" style={{ color: "var(--text-tertiary)" }}>
                   <Bell size={16} />

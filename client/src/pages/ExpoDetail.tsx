@@ -10,7 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, ArrowLeft, MapPin, Calendar, Users, Star, Clock, Shield,
   CheckCircle2, Lock, Sparkles, Building2, Ruler, Zap, Eye,
-  CreditCard, Timer, Info, Flame, Globe, AlertTriangle, Tag, FileText
+  CreditCard, Timer, Info, Flame, Globe, AlertTriangle, Tag, FileText, Phone, Mail,
+  Image, Layers, BarChart3, ChevronLeft, ChevronRight, Maximize2, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -35,7 +36,37 @@ interface Booth {
   h: number;
   zone: string;
   featureKeys: string[];
+  faces: number; // number of open faces/frontage
+  dimensions: string; // e.g. "3m x 3m"
 }
+
+// Booth gallery images by type (Unsplash)
+const boothGallery: Record<BoothType, { url: string; label: string; labelEn: string }[]> = {
+  standard: [
+    { url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop", label: "واجهة البوث", labelEn: "Front View" },
+    { url: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=300&fit=crop", label: "منظر داخلي", labelEn: "Interior" },
+    { url: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=300&fit=crop", label: "أثناء التشغيل", labelEn: "During Operation" },
+  ],
+  premium: [
+    { url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop&q=80", label: "واجهة البوث", labelEn: "Front View" },
+    { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop", label: "منظر داخلي", labelEn: "Interior" },
+    { url: "https://images.unsplash.com/photo-1559223607-a43c990c692c?w=400&h=300&fit=crop", label: "أثناء التشغيل", labelEn: "During Operation" },
+  ],
+  corner: [
+    { url: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=300&fit=crop", label: "واجهة البوث", labelEn: "Front View" },
+    { url: "https://images.unsplash.com/photo-1560439514-4e9645039924?w=400&h=300&fit=crop", label: "منظر جانبي", labelEn: "Side View" },
+    { url: "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=400&h=300&fit=crop", label: "أثناء التشغيل", labelEn: "During Operation" },
+  ],
+  island: [
+    { url: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop", label: "منظر علوي", labelEn: "Top View" },
+    { url: "https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=300&fit=crop", label: "منظر داخلي", labelEn: "Interior" },
+    { url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=300&fit=crop", label: "أثناء التشغيل", labelEn: "During Operation" },
+  ],
+  kiosk: [
+    { url: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&h=300&fit=crop", label: "واجهة الكشك", labelEn: "Kiosk Front" },
+    { url: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop", label: "منظر داخلي", labelEn: "Interior" },
+  ],
+};
 
 const boothColors: Record<BoothStatus, string> = {
   available: "rgba(74, 222, 128, 0.4)",
@@ -60,11 +91,11 @@ const generateBooths = (): Booth[] => {
     { name: "D", startX: 440, startY: 260 },
   ];
 
-  const types: { type: BoothType; w: number; h: number; price: number; size: string; sizeM2: number; featureKeys: string[] }[] = [
-    { type: "standard", w: 55, h: 45, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"] },
-    { type: "premium", w: 70, h: 45, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"] },
-    { type: "corner", w: 70, h: 55, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"] },
-    { type: "island", w: 85, h: 65, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"] },
+  const types: { type: BoothType; w: number; h: number; price: number; size: string; sizeM2: number; featureKeys: string[]; faces: number; dimensions: string }[] = [
+    { type: "standard", w: 55, h: 45, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"], faces: 1, dimensions: "3m × 3m" },
+    { type: "premium", w: 70, h: 45, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"], faces: 1, dimensions: "4m × 3m" },
+    { type: "corner", w: 70, h: 55, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"], faces: 2, dimensions: "4m × 4m" },
+    { type: "island", w: 85, h: 65, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"], faces: 4, dimensions: "6m × 4m" },
   ];
 
   const statuses: BoothStatus[] = ["available", "available", "available", "reserved", "sold", "available"];
@@ -89,6 +120,8 @@ const generateBooths = (): Booth[] => {
           h: tp.h,
           zone: zone.name,
           featureKeys: tp.featureKeys,
+          faces: tp.faces,
+          dimensions: tp.dimensions,
         });
       }
     }
@@ -111,8 +144,15 @@ export default function ExpoDetail() {
   const [countdown, setCountdown] = useState(0);
   const [zoneFilter, setZoneFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "contract" | "payment">("select");
+  const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "contract" | "review" | "approved" | "rejected" | "payment">("select");
+  const [reviewStatus, setReviewStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [reviewTimer, setReviewTimer] = useState(0);
+  const [rejectionReason, setRejectionReason] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIdx, setGalleryIdx] = useState(0);
+  const [compareList, setCompareList] = useState<Booth[]>([]);
+  const [showCompare, setShowCompare] = useState(false);
 
   const boothTypeLabel = (type: BoothType): string => {
     const map: Record<BoothType, string> = {
@@ -196,8 +236,71 @@ export default function ExpoDetail() {
   };
 
   const handleContractAccepted = () => {
+    setBookingStep("review");
+    setReviewStatus("pending");
+    setReviewTimer(0);
+    toast.success(isArabicLike ? "تم إرسال طلبك للمشرف — بانتظار الموافقة" : "Request sent to supervisor — awaiting approval");
+  };
+
+  // Simulate admin review process (10-15 seconds)
+  useEffect(() => {
+    if (bookingStep !== "review" || reviewStatus !== "pending") return;
+    const timer = setInterval(() => {
+      setReviewTimer(prev => {
+        const next = prev + 1;
+        // Simulate approval after 10-15 seconds (90% approval rate)
+        if (next >= 10 + Math.floor(Math.random() * 5)) {
+          clearInterval(timer);
+          const approved = Math.random() > 0.1; // 90% approval
+          if (approved) {
+            setReviewStatus("approved");
+            setBookingStep("approved");
+            toast.success(isArabicLike ? "تمت الموافقة على طلبك! يمكنك الدفع الآن" : "Your request has been approved! You can pay now");
+            addNotification({
+              type: "booking",
+              titleAr: "تمت الموافقة على طلب الحجز",
+              titleEn: "Booking Request Approved",
+              message: isArabicLike
+                ? `تمت الموافقة على حجز الجناح ${holdBooth?.code || ""} — يرجى إتمام الدفع خلال 30 دقيقة`
+                : `Booth ${holdBooth?.code || ""} booking approved — please complete payment within 30 minutes`,
+              link: "/bookings",
+            });
+          } else {
+            setReviewStatus("rejected");
+            setBookingStep("rejected");
+            setRejectionReason(isArabicLike ? "لا يتوافق النشاط التجاري مع فئة المعرض" : "Business activity does not match expo category");
+            toast.error(isArabicLike ? "تم رفض الطلب — يرجى مراجعة السبب" : "Request rejected — please review the reason");
+            addNotification({
+              type: "system",
+              titleAr: "تم رفض طلب الحجز",
+              titleEn: "Booking Request Rejected",
+              message: isArabicLike
+                ? `تم رفض حجز الجناح ${holdBooth?.code || ""} — السبب: لا يتوافق النشاط التجاري مع فئة المعرض`
+                : `Booth ${holdBooth?.code || ""} booking rejected — Reason: Business activity does not match expo category`,
+              link: "/bookings",
+            });
+          }
+        }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [bookingStep, reviewStatus, holdBooth, addNotification, isArabicLike]);
+
+  const handleProceedToPayment = () => {
     setBookingStep("payment");
-    toast.success(isArabicLike ? "تم قبول العقد بنجاح" : "Contract accepted successfully");
+  };
+
+  const handleRetryAfterRejection = () => {
+    if (!holdBooth) return;
+    setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "available" as BoothStatus } : b));
+    setHoldBooth(null);
+    setSelectedBooth(null);
+    setCountdown(0);
+    setBookingStep("select");
+    setReviewStatus("pending");
+    setRejectionReason("");
+    toast.info(isArabicLike ? "يمكنك اختيار وحدة أخرى" : "You can select another unit");
   };
 
   const handleBackToConfirm = () => {
@@ -540,6 +643,53 @@ export default function ExpoDetail() {
                 </span>
               </div>
 
+              {/* Booth Gallery */}
+              {bookingStep === "select" && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Image size={12} className="t-gold" />
+                      <span className="text-[10px] font-bold t-secondary">{isArabicLike ? "صور الوحدة" : "Unit Gallery"}</span>
+                    </div>
+                    <button onClick={() => { setGalleryOpen(true); setGalleryIdx(0); }} className="text-[9px] t-gold hover:underline">
+                      {isArabicLike ? "عرض الكل" : "View All"}
+                    </button>
+                  </div>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {boothGallery[selectedBooth.type]?.map((img, i) => (
+                      <button key={i} onClick={() => { setGalleryOpen(true); setGalleryIdx(i); }}
+                        className="shrink-0 w-20 h-14 rounded-lg overflow-hidden border border-[var(--glass-border)] hover:border-[#C5A55A] transition-colors">
+                        <img src={img.url} alt={isArabicLike ? img.label : img.labelEn} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery Lightbox */}
+              <AnimatePresence>
+                {galleryOpen && selectedBooth && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.9)" }}
+                    onClick={() => setGalleryOpen(false)}>
+                    <div className="relative max-w-lg w-full" onClick={e => e.stopPropagation()}>
+                      <img src={boothGallery[selectedBooth.type]?.[galleryIdx]?.url} className="w-full rounded-xl" alt="" />
+                      <p className="text-center text-xs t-secondary mt-2">
+                        {isArabicLike ? boothGallery[selectedBooth.type]?.[galleryIdx]?.label : boothGallery[selectedBooth.type]?.[galleryIdx]?.labelEn}
+                      </p>
+                      <div className="flex justify-center gap-3 mt-3">
+                        <button onClick={() => setGalleryIdx(prev => Math.max(0, prev - 1))} className="glass-card p-2 rounded-full"><ChevronLeft size={16} className="t-secondary" /></button>
+                        <span className="text-xs t-muted self-center font-['Inter']">{galleryIdx + 1} / {boothGallery[selectedBooth.type]?.length}</span>
+                        <button onClick={() => setGalleryIdx(prev => Math.min((boothGallery[selectedBooth.type]?.length || 1) - 1, prev + 1))} className="glass-card p-2 rounded-full"><ChevronRight size={16} className="t-secondary" /></button>
+                      </div>
+                      <button onClick={() => setGalleryOpen(false)} className="absolute top-2 right-2 glass-card p-1.5 rounded-full">
+                        <X size={14} className="t-secondary" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Booth Details */}
               <div className="space-y-3 mb-5">
                 <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
@@ -549,6 +699,14 @@ export default function ExpoDetail() {
                 <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
                   <span className="text-xs t-tertiary flex items-center gap-2"><Ruler size={12} /> {t("expoDetail.area")}</span>
                   <span className="text-xs t-secondary font-['Inter']">{selectedBooth.sizeM2} m² ({selectedBooth.size})</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Maximize2 size={12} /> {isArabicLike ? "الأبعاد" : "Dimensions"}</span>
+                  <span className="text-xs t-secondary font-['Inter']">{selectedBooth.dimensions}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
+                  <span className="text-xs t-tertiary flex items-center gap-2"><Layers size={12} /> {isArabicLike ? "الواجهات" : "Frontage"}</span>
+                  <span className="text-xs t-secondary font-['Inter']">{selectedBooth.faces} {isArabicLike ? "واجهة" : "face(s)"}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-[var(--glass-border)]">
                   <span className="text-xs t-tertiary flex items-center gap-2"><MapPin size={12} /> {t("expoDetail.zone")}</span>
@@ -583,6 +741,38 @@ export default function ExpoDetail() {
                     <Lock size={14} />
                     {t("expoDetail.holdUnitMinutes")}
                   </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (compareList.find(b => b.id === selectedBooth.id)) {
+                          setCompareList(prev => prev.filter(b => b.id !== selectedBooth.id));
+                        } else if (compareList.length < 3) {
+                          setCompareList(prev => [...prev, selectedBooth]);
+                        } else {
+                          toast.info(isArabicLike ? "الحد الأقصى 3 وحدات للمقارنة" : "Max 3 booths to compare");
+                        }
+                      }}
+                      className={`flex-1 py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 border transition-colors ${
+                        compareList.find(b => b.id === selectedBooth.id)
+                          ? "border-[#C5A55A] bg-[#C5A55A]/10 text-[#C5A55A]"
+                          : "border-[var(--glass-border)] t-tertiary hover:border-[#C5A55A]/50"
+                      }`}
+                    >
+                      <BarChart3 size={12} />
+                      {compareList.find(b => b.id === selectedBooth.id)
+                        ? (isArabicLike ? "تمت الإضافة ✓" : "Added ✓")
+                        : (isArabicLike ? "أضف للمقارنة" : "Compare")}
+                    </button>
+                    {compareList.length >= 2 && (
+                      <button
+                        onClick={() => setShowCompare(true)}
+                        className="flex-1 py-2 rounded-xl text-[11px] btn-gold flex items-center justify-center gap-1.5"
+                      >
+                        <BarChart3 size={12} />
+                        {isArabicLike ? `قارن (${compareList.length})` : `Compare (${compareList.length})`}
+                      </button>
+                    )}
+                  </div>
                   <p className="text-[9px] t-muted text-center flex items-center justify-center gap-1">
                     <Info size={10} /> {t("expoDetail.holdUnitNote")}
                   </p>
@@ -646,6 +836,157 @@ export default function ExpoDetail() {
                   onAccept={handleContractAccepted}
                   onBack={handleBackToConfirm}
                 />
+              )}
+
+              {/* Admin Review Step */}
+              {bookingStep === "review" && (
+                <div className="space-y-4">
+                  <div className="glass-card rounded-xl p-5 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "rgba(251,191,36,0.1)", border: "2px solid rgba(251,191,36,0.2)" }}>
+                      <Clock size={28} className="text-yellow-400 animate-spin" style={{ animationDuration: "3s" }} />
+                    </div>
+                    <h4 className="text-sm font-bold t-secondary mb-2">
+                      {isArabicLike ? "بانتظار موافقة المشرف" : "Awaiting Supervisor Approval"}
+                    </h4>
+                    <p className="text-[10px] t-tertiary leading-relaxed mb-3">
+                      {isArabicLike
+                        ? "تم إرسال طلبك للمشرف لمراجعة ملفك التجاري والتحقق من توافق نشاطك مع فئة المعرض. ستتلقى إشعاراً بالنتيجة خلال دقائق."
+                        : "Your request has been sent to the supervisor to review your business profile and verify compatibility with the expo category. You will receive a notification shortly."}
+                    </p>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                      <span className="text-[11px] text-yellow-400 font-['Inter']">
+                        {isArabicLike ? `جاري المراجعة... (${reviewTimer}s)` : `Reviewing... (${reviewTimer}s)`}
+                      </span>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--glass-bg)" }}>
+                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(reviewTimer * 8, 95)}%`, background: "linear-gradient(90deg, var(--gold-accent), var(--status-yellow))" }} />
+                    </div>
+                    <p className="text-[8px] t-muted mt-2">
+                      {isArabicLike ? "المراجعة تتم عادة خلال 1-5 دقائق" : "Review usually takes 1-5 minutes"}
+                    </p>
+                  </div>
+
+                  {/* What's being reviewed */}
+                  <div className="glass-card rounded-xl p-3">
+                    <p className="text-[9px] t-muted mb-2">{isArabicLike ? "ما يتم مراجعته:" : "What's being reviewed:"}</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { ar: "الملف التجاري والسجل التجاري", en: "Business profile & commercial registration", done: reviewTimer > 3 },
+                        { ar: "توافق النشاط مع فئة المعرض", en: "Activity compatibility with expo category", done: reviewTimer > 6 },
+                        { ar: "التحقق من بيانات KYC", en: "KYC data verification", done: reviewTimer > 8 },
+                        { ar: "الموافقة النهائية", en: "Final approval", done: false },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          {item.done ? (
+                            <CheckCircle2 size={12} className="text-green-400 shrink-0" />
+                          ) : (
+                            <div className="w-3 h-3 rounded-full border border-[var(--glass-border)] shrink-0" />
+                          )}
+                          <span className={`text-[10px] ${item.done ? "t-secondary" : "t-muted"}`}>
+                            {isArabicLike ? item.ar : item.en}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleCancelHold}
+                    className="w-full glass-card py-2.5 rounded-xl text-xs text-red-400/60 hover:text-red-400 transition-colors"
+                  >
+                    {t("expoDetail.cancelHold")}
+                  </button>
+                </div>
+              )}
+
+              {/* Approved — Proceed to Payment */}
+              {bookingStep === "approved" && (
+                <div className="space-y-4">
+                  <div className="glass-card rounded-xl p-5 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "rgba(74,222,128,0.1)", border: "2px solid rgba(74,222,128,0.2)" }}>
+                      <CheckCircle2 size={28} className="text-green-400" />
+                    </div>
+                    <h4 className="text-sm font-bold text-green-400 mb-2">
+                      {isArabicLike ? "تمت الموافقة على طلبك!" : "Your Request is Approved!"}
+                    </h4>
+                    <p className="text-[10px] t-tertiary leading-relaxed mb-3">
+                      {isArabicLike
+                        ? "تمت الموافقة على طلبك من قبل المشرف. يمكنك الآن إتمام الدفع لتأكيد الحجز. سيتم إرسال رابط الدفع أيضاً عبر SMS والبريد الإلكتروني."
+                        : "Your request has been approved by the supervisor. You can now complete the payment to confirm your booking. A payment link will also be sent via SMS and email."}
+                    </p>
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(74,222,128,0.08)" }}>
+                        <Phone size={10} className="text-green-400" />
+                        <span className="text-[8px] text-green-400">SMS</span>
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(74,222,128,0.08)" }}>
+                        <Mail size={10} className="text-green-400" />
+                        <span className="text-[8px] text-green-400">Email</span>
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(74,222,128,0.08)" }}>
+                        <CreditCard size={10} className="text-green-400" />
+                        <span className="text-[8px] text-green-400">Apple Pay</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleProceedToPayment}
+                    className="w-full btn-gold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 font-bold"
+                  >
+                    <CreditCard size={14} />
+                    {isArabicLike ? `ادفع الآن — ${(selectedBooth!.price * 0.05).toLocaleString()} ${t("common.sar")}` : `Pay Now — ${(selectedBooth!.price * 0.05).toLocaleString()} ${t("common.sar")}`}
+                  </button>
+                  <p className="text-[8px] t-muted text-center">
+                    {isArabicLike ? "يجب إتمام الدفع خلال فترة التثبيت المؤقت" : "Payment must be completed within the hold period"}
+                  </p>
+                </div>
+              )}
+
+              {/* Rejected */}
+              {bookingStep === "rejected" && (
+                <div className="space-y-4">
+                  <div className="glass-card rounded-xl p-5 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "rgba(239,68,68,0.1)", border: "2px solid rgba(239,68,68,0.2)" }}>
+                      <AlertTriangle size={28} className="text-red-400" />
+                    </div>
+                    <h4 className="text-sm font-bold text-red-400 mb-2">
+                      {isArabicLike ? "تم رفض الطلب" : "Request Rejected"}
+                    </h4>
+                    <p className="text-[10px] t-tertiary leading-relaxed mb-3">
+                      {isArabicLike
+                        ? "نأسف، تم رفض طلبك من قبل الجهة المشغلة. يمكنك التواصل مع الدعم أو اختيار وحدة أخرى."
+                        : "Sorry, your request has been rejected by the operator. You can contact support or select another unit."}
+                    </p>
+                    {rejectionReason && (
+                      <div className="p-2.5 rounded-lg mb-3" style={{ backgroundColor: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                        <p className="text-[9px] t-muted mb-1">{isArabicLike ? "سبب الرفض:" : "Reason:"}</p>
+                        <p className="text-[10px] text-red-400">{rejectionReason}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-center gap-2 text-[9px] t-muted">
+                      <Phone size={10} />
+                      <span>00966535555900</span>
+                      <span>|</span>
+                      <Mail size={10} />
+                      <span>rent@mahamexpo.sa</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleRetryAfterRejection}
+                    className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
+                  >
+                    {isArabicLike ? "اختيار وحدة أخرى" : "Select Another Unit"}
+                  </button>
+                  <Link href="/help">
+                    <button className="w-full glass-card py-2.5 rounded-xl text-xs t-tertiary hover:t-secondary transition-colors text-center">
+                      {isArabicLike ? "تواصل مع الدعم" : "Contact Support"}
+                    </button>
+                  </Link>
+                </div>
               )}
 
               {bookingStep === "payment" && (
@@ -788,6 +1129,76 @@ export default function ExpoDetail() {
           </div>
         </div>
       </div>
+
+      {/* Compare Booths Modal */}
+      <AnimatePresence>
+        {showCompare && compareList.length >= 2 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
+            onClick={() => setShowCompare(false)}>
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+              className="glass-card rounded-2xl p-5 max-w-2xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold t-primary flex items-center gap-2">
+                  <BarChart3 size={16} className="t-gold" />
+                  {isArabicLike ? "مقارنة الوحدات" : "Compare Booths"}
+                </h3>
+                <button onClick={() => setShowCompare(false)} className="glass-card p-1.5 rounded-full"><X size={14} className="t-secondary" /></button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <th className="py-2 px-3 text-start t-tertiary">{isArabicLike ? "الخاصية" : "Feature"}</th>
+                      {compareList.map(b => (
+                        <th key={b.id} className="py-2 px-3 text-center text-[#C5A55A] font-bold">{b.code}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <td className="py-2 px-3 t-tertiary">{isArabicLike ? "النوع" : "Type"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center t-secondary">{boothTypeLabel(b.type)}</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <td className="py-2 px-3 t-tertiary">{isArabicLike ? "المساحة" : "Area"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center t-secondary font-['Inter']">{b.sizeM2} m²</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <td className="py-2 px-3 t-tertiary">{isArabicLike ? "الأبعاد" : "Dimensions"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center t-secondary font-['Inter']">{b.dimensions}</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <td className="py-2 px-3 t-tertiary">{isArabicLike ? "الواجهات" : "Faces"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center t-secondary font-['Inter']">{b.faces}</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <td className="py-2 px-3 t-tertiary">{isArabicLike ? "المنطقة" : "Zone"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center t-secondary">{zoneLabel(b.zone)}</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--glass-border)]">
+                      <td className="py-2 px-3 t-tertiary">{isArabicLike ? "المميزات" : "Features"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center t-secondary text-[10px]">{b.featureKeys.map(f => t(f)).join(", ")}</td>)}
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 t-tertiary font-bold">{isArabicLike ? "السعر" : "Price"}</td>
+                      {compareList.map(b => <td key={b.id} className="py-2 px-3 text-center text-[#C5A55A] font-bold font-['Inter']">{b.price.toLocaleString()} {t("common.sar")}</td>)}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {compareList.map(b => (
+                  <button key={b.id} onClick={() => { setSelectedBooth(b); setShowCompare(false); }}
+                    className="flex-1 py-2 rounded-xl text-[11px] btn-gold flex items-center justify-center gap-1">
+                    {isArabicLike ? `اختر ${b.code}` : `Select ${b.code}`}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

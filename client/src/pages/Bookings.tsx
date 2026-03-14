@@ -24,21 +24,27 @@ export default function Bookings() {
   const [showGuard, setShowGuard] = useState(false);
   const { canBook, trader, bookings, contracts, kycData } = useAuth();
 
+  const isArabicLike = ["ar", "fa"].includes(lang);
   const statusLabel = (status: string) => {
     const map: Record<string, string> = {
       confirmed: t("bookings.confirmed"), active: t("bookings.active"),
-      pending_payment: t("bookings.pendingPayment"), pending_review: t("bookings.underReview"),
+      pending_payment: t("bookings.pendingPayment"),
+      pending_review: isArabicLike ? "بانتظار موافقة المشرف" : "Awaiting Supervisor Approval",
+      approved: isArabicLike ? "مقبول — بانتظار الدفع" : "Approved — Awaiting Payment",
+      rejected: isArabicLike ? "مرفوض" : "Rejected",
       cancelled: t("bookings.cancelled"),
     };
     return map[status] || status;
   };
   const statusColor: Record<string, string> = {
     confirmed: "#4ADE80", active: "#60A5FA", pending_payment: "#FBBF24",
-    pending_review: "#A78BFA", cancelled: "#F87171",
+    pending_review: "#A78BFA", approved: "#34D399", rejected: "#F87171",
+    cancelled: "#F87171",
   };
   const StatusIcon: Record<string, any> = {
     confirmed: CheckCircle, active: Zap, pending_payment: Clock,
-    pending_review: AlertTriangle, cancelled: XCircle,
+    pending_review: Clock, approved: CheckCircle, rejected: XCircle,
+    cancelled: XCircle,
   };
 
   const filtered = bookings.filter(b => {
