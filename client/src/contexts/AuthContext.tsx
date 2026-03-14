@@ -126,8 +126,9 @@ interface AuthContextType {
   saveKYCData: (data: KYCData) => void;
   // Bookings
   bookings: BookingRecord[];
-  addBooking: (booking: Omit<BookingRecord, "id" | "createdAt" | "paymentStatus" | "contractGenerated" | "contractId" | "status" | "paidAmount" | "remainingAmount">) => BookingRecord;
+  addBooking: (booking: Omit<BookingRecord, "id" | "createdAt" | "paymentStatus" | "contractGenerated" | "contractId" | "status" | "paidAmount" | "remainingAmount"> & { status?: BookingRecord["status"] }) => BookingRecord;
   updateBookingPayment: (bookingId: string, amount: number) => void;
+  updateBookingStatus: (bookingId: string, status: BookingRecord["status"]) => void;
   // Payments
   payments: PaymentRecord[];
   addPayment: (payment: Omit<PaymentRecord, "id" | "date" | "status">) => PaymentRecord;
@@ -273,11 +274,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(KYC_STORAGE_KEY, JSON.stringify(data));
   }, []);
 
-  const addBooking = useCallback((booking: Omit<BookingRecord, "id" | "createdAt" | "paymentStatus" | "contractGenerated" | "contractId" | "status" | "paidAmount" | "remainingAmount">): BookingRecord => {
+  const addBooking = useCallback((booking: Omit<BookingRecord, "id" | "createdAt" | "paymentStatus" | "contractGenerated" | "contractId" | "status" | "paidAmount" | "remainingAmount"> & { status?: BookingRecord["status"] }): BookingRecord => {
     const newBooking: BookingRecord = {
       ...booking,
       id: generateId("BK"),
-      status: "pending_payment",
+      status: booking.status || "pending_review",
       paymentStatus: "unpaid",
       paidAmount: 0,
       remainingAmount: booking.price,
@@ -305,6 +306,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const updateBookingStatus = useCallback((bookingId: string, status: BookingRecord["status"]) => {
+    setBookings(prev => prev.map(b => {
+      if (b.id !== bookingId) return b;
+      return { ...b, status };
+    }));
+  }, []);
+
   const addPayment = useCallback((payment: Omit<PaymentRecord, "id" | "date" | "status">): PaymentRecord => {
     const newPayment: PaymentRecord = {
       ...payment,
@@ -317,12 +325,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addContract = useCallback((bookingId: string, paymentId: string): ContractRecord | null => {
-    // We need to get the latest booking state
-    let targetBooking: BookingRecord | undefined;
-    setBookings(prev => {
-      targetBooking = prev.find(b => b.id === bookingId);
-      return prev;
-    });
+    // Use bookings ref to get latest state without triggering setState during render
+    const targetBooking = bookings.find(b => b.id === bookingId);
     if (!targetBooking) return null;
 
     const contractId = generateId("CT");
@@ -351,7 +355,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, contractGenerated: true, contractId } : b));
 
     return newContract;
-  }, []);
+  }, [bookings]);
 
   const markContractSent = useCallback((contractId: string, channel: string) => {
     setContracts(prev => prev.map(c =>
@@ -424,7 +428,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{
       isAuthenticated, isLoading, trader, authStep, otpCode, otpSent, otpVerified, phoneNumber, canBook,
       kycData, saveKYCData,
-      bookings, addBooking, updateBookingPayment,
+      bookings, addBooking, updateBookingPayment, updateBookingStatus,
       payments, addPayment,
       contracts, addContract, markContractSent,
       notifications, unreadCount, pendingBookingsCount,

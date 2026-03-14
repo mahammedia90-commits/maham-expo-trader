@@ -134,7 +134,8 @@ export default function ExpoDetail() {
   const isArabicLike = ["ar", "fa"].includes(lang);
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { addBooking, addPayment, addNotification, addPendingBooking, canBook } = useAuth();
+  const { addBooking, addPayment, addNotification, addPendingBooking, canBook, updateBookingStatus, updateBookingPayment } = useAuth();
+  const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
 
   // Find the expo from events data
   const expo = events2026.find(e => e.id === params.id) || events2026[0];
@@ -224,6 +225,12 @@ export default function ExpoDetail() {
 
   const handleHoldBooth = () => {
     if (!selectedBooth) return;
+    // فرض توثيق الحساب (KYC) قبل أي حجز
+    if (!canBook) {
+      toast.error(t("expoDetail.verifyAccountFirst"));
+      setTimeout(() => navigate("/kyc"), 1500);
+      return;
+    }
     setBooths(prev => prev.map(b => b.id === selectedBooth.id ? { ...b, status: "my-hold" as BoothStatus } : b));
     setHoldBooth(selectedBooth);
     setCountdown(30 * 60);
@@ -236,6 +243,26 @@ export default function ExpoDetail() {
   };
 
   const handleContractAccepted = () => {
+    if (!holdBooth) return;
+    // حفظ الحجز بحالة pending_review عند إرسال الطلب للمشرف
+    const newBooking = addBooking({
+      expoId: expo.id,
+      expoNameAr: expo.nameAr,
+      expoNameEn: expo.nameEn,
+      unitAr: `${t("expoDetail.booth")} ${holdBooth.code} — ${zoneLabel(holdBooth.zone)}`,
+      unitEn: `Booth ${holdBooth.code} — Zone ${holdBooth.zone}`,
+      zone: holdBooth.zone,
+      boothType: holdBooth.type,
+      boothSize: holdBooth.size,
+      price: holdBooth.price,
+      deposit: holdBooth.price * 0.05,
+      services: holdBooth.featureKeys.map(fk => t(fk)),
+      location: expo.location,
+    });
+    // تعيين الحالة إلى pending_review
+    updateBookingStatus(newBooking.id, "pending_review");
+    setPendingBookingId(newBooking.id);
+    addPendingBooking();
     setBookingStep("review");
     setReviewStatus("pending");
     setReviewTimer(0);
@@ -255,6 +282,8 @@ export default function ExpoDetail() {
           if (approved) {
             setReviewStatus("approved");
             setBookingStep("approved");
+            // تحديث حالة الحجز إلى approved
+            if (pendingBookingId) updateBookingStatus(pendingBookingId, "approved");
             toast.success(isArabicLike ? "تمت الموافقة على طلبك! يمكنك الدفع الآن" : "Your request has been approved! You can pay now");
             addNotification({
               type: "booking",
@@ -268,6 +297,8 @@ export default function ExpoDetail() {
           } else {
             setReviewStatus("rejected");
             setBookingStep("rejected");
+            // تحديث حالة الحجز إلى rejected
+            if (pendingBookingId) updateBookingStatus(pendingBookingId, "rejected");
             setRejectionReason(isArabicLike ? "لا يتوافق النشاط التجاري مع فئة المعرض" : "Business activity does not match expo category");
             toast.error(isArabicLike ? "تم رفض الطلب — يرجى مراجعة السبب" : "Request rejected — please review the reason");
             addNotification({
@@ -308,35 +339,15 @@ export default function ExpoDetail() {
   };
 
   const handleConfirmPayment = () => {
-    if (!holdBooth || !selectedBooth) return;
+    if (!holdBooth || !selectedBooth || !pendingBookingId) return;
 
-    // Check if user can book (KYC verified)
-    if (!canBook) {
-      toast.error(t("expoDetail.verifyAccountFirst"));
-      setTimeout(() => navigate("/kyc"), 1500);
-      return;
-    }
+    // 1. تحديث حالة الحجز إلى pending_payment
+    updateBookingStatus(pendingBookingId, "pending_payment");
 
-    // 1. Create booking via AuthContext
-    const newBooking = addBooking({
-      expoId: expo.id,
-      expoNameAr: expo.nameAr,
-      expoNameEn: expo.nameEn,
-      unitAr: `${t("expoDetail.booth")} ${holdBooth.code} — ${zoneLabel(holdBooth.zone)}`,
-      unitEn: `Booth ${holdBooth.code} — Zone ${holdBooth.zone}`,
-      zone: holdBooth.zone,
-      boothType: holdBooth.type,
-      boothSize: holdBooth.size,
-      price: holdBooth.price,
-      deposit: holdBooth.price * 0.05,
-      services: holdBooth.featureKeys.map(fk => t(fk)),
-      location: expo.location,
-    });
-
-    // 2. Create payment record
+    // 2. إنشاء سجل دفع (عربون 5%)
     const depositAmount = holdBooth.price * 0.05;
-    const newPayment = addPayment({
-      bookingId: newBooking.id,
+    addPayment({
+      bookingId: pendingBookingId,
       amount: depositAmount,
       method: "Credit Card",
       type: "deposit",
@@ -344,29 +355,29 @@ export default function ExpoDetail() {
       descEn: `Deposit for Booth ${holdBooth.code} — ${expo.nameEn}`,
     });
 
-    // 3. Add pending booking count
-    addPendingBooking();
+    // 3. تحديث المبلغ المدفوع
+    updateBookingPayment(pendingBookingId, depositAmount);
 
-    // 4. Add notification
+    // 4. إضافة إشعار
     addNotification({
       type: "booking",
       titleAr: t("expoDetail.newBookingNotif").replace("{code}", holdBooth.code),
-      titleEn: `New Booking — Booth ${holdBooth.code}`,
-      message: t("expoDetail.bookingCreatedNotif")
-        .replace("{code}", holdBooth.code)
-        .replace("{expo}", isRTL ? expo.nameAr : expo.nameEn)
-        .replace("{id}", newBooking.id),
+      titleEn: `Payment Confirmed — Booth ${holdBooth.code}`,
+      message: isArabicLike
+        ? `تم دفع العربون ${depositAmount.toLocaleString()} ر.س للجناح ${holdBooth.code} — رقم الحجز: ${pendingBookingId}`
+        : `Deposit of ${depositAmount.toLocaleString()} SAR paid for Booth ${holdBooth.code} — Booking: ${pendingBookingId}`,
       link: "/bookings",
     });
 
-    // 5. Update local booth state
+    // 5. تحديث حالة البوث محلياً
     setBooths(prev => prev.map(b => b.id === holdBooth.id ? { ...b, status: "sold" as BoothStatus } : b));
     setHoldBooth(null);
     setSelectedBooth(null);
     setCountdown(0);
     setBookingStep("select");
+    setPendingBookingId(null);
 
-    toast.success(t("expoDetail.bookingCreatedToast").replace("{id}", newBooking.id));
+    toast.success(t("expoDetail.bookingCreatedToast").replace("{id}", pendingBookingId));
     setTimeout(() => navigate("/bookings"), 2000);
   };
 

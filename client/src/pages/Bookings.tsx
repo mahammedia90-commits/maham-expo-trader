@@ -84,6 +84,49 @@ export default function Bookings() {
         )}
       </div>
 
+      {/* Approved Bookings Banner — Pay Now */}
+      {bookings.some(b => b.status === "approved") && (
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(74, 222, 128, 0.08)", border: "1px solid rgba(74, 222, 128, 0.15)" }}>
+          <CheckCircle size={14} className="text-[var(--status-green)] shrink-0" />
+          <div className="flex-1">
+            <p className="text-[11px] text-[var(--status-green)] font-semibold">{isArabicLike ? "تمت الموافقة على طلبك! أكمل الدفع الآن" : "Your request was approved! Complete payment now"}</p>
+            <p className="text-[9px] t-muted">{isArabicLike ? "يجب إتمام الدفع خلال فترة التثبيت المؤقت" : "Payment must be completed within the hold period"}</p>
+          </div>
+          <Link href={`/expos/${bookings.find(b => b.status === 'approved')?.expoId || ''}`}>
+            <button className="btn-gold px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-1">
+              <CreditCard size={11} /> {t("payments.payNow")}
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Pending Review Banner */}
+      {bookings.some(b => b.status === "pending_review") && (
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(167, 139, 250, 0.08)", border: "1px solid rgba(167, 139, 250, 0.15)" }}>
+          <Clock size={14} className="text-purple-400 shrink-0 animate-pulse" />
+          <div className="flex-1">
+            <p className="text-[11px] text-purple-400 font-semibold">{isArabicLike ? "طلبك قيد المراجعة من المشرف" : "Your request is under supervisor review"}</p>
+            <p className="text-[9px] t-muted">{isArabicLike ? "ستتلقى إشعاراً بالنتيجة خلال دقائق" : "You will receive a notification shortly"}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Rejected Booking Banner */}
+      {bookings.some(b => b.status === "rejected") && (
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(248, 113, 113, 0.08)", border: "1px solid rgba(248, 113, 113, 0.15)" }}>
+          <XCircle size={14} className="text-red-400 shrink-0" />
+          <div className="flex-1">
+            <p className="text-[11px] text-red-400 font-semibold">{isArabicLike ? "تم رفض أحد طلباتك" : "One of your requests was rejected"}</p>
+            <p className="text-[9px] t-muted">{isArabicLike ? "يمكنك التقدم بطلب جديد لوحدة أخرى" : "You can apply for a different unit"}</p>
+          </div>
+          <Link href="/expos">
+            <button className="glass-card px-3 py-1.5 rounded-lg text-[10px] t-secondary flex items-center gap-1">
+              <Plus size={11} /> {isArabicLike ? "طلب جديد" : "New Request"}
+            </button>
+          </Link>
+        </div>
+      )}
+
       {/* Price Alert / Incentive Banner */}
       {bookings.some(b => b.status === "pending_payment") && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(251, 191, 36, 0.06)", border: "1px solid rgba(251, 191, 36, 0.12)" }}>
@@ -129,7 +172,7 @@ export default function Bookings() {
             className={`w-full glass-card rounded-xl ${isRTL ? "pr-9 pl-3" : "pl-9 pr-3"} py-2.5 text-xs t-primary placeholder:t-muted gold-focus bg-transparent`} />
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-          {["all", "confirmed", "active", "pending_payment", "pending_review", "cancelled"].map((s) => (
+          {["all", "confirmed", "active", "pending_payment", "pending_review", "approved", "rejected", "cancelled"].map((s) => (
             <button key={s} onClick={() => setFilterStatus(s)}
               className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] transition-all whitespace-nowrap shrink-0 ${filterStatus === s ? "btn-gold" : "glass-card t-secondary"}`}>
               {s === "all" ? t("common.all") : statusLabel(s)}
@@ -258,6 +301,23 @@ export default function Bookings() {
                                 <CreditCard size={14} />
                               </button>
                             </Link>
+                          )}
+                          {b.status === "approved" && (
+                            <Link href={`/expos/${b.expoId}`}>
+                              <button className="px-2.5 py-1.5 rounded-lg text-[10px] btn-gold flex items-center gap-1" title={isArabicLike ? 'إكمال الدفع' : 'Complete Payment'}>
+                                <CreditCard size={12} /> {isArabicLike ? 'ادفع' : 'Pay'}
+                              </button>
+                            </Link>
+                          )}
+                          {b.status === "pending_review" && (
+                            <span className="px-2 py-1 rounded-lg text-[10px] text-purple-400 animate-pulse flex items-center gap-1">
+                              <Clock size={11} /> {isArabicLike ? 'قيد المراجعة' : 'Reviewing'}
+                            </span>
+                          )}
+                          {b.status === "rejected" && (
+                            <span className="px-2 py-1 rounded-lg text-[10px] text-red-400 flex items-center gap-1">
+                              <XCircle size={11} /> {isArabicLike ? 'مرفوض' : 'Rejected'}
+                            </span>
                           )}
                         </div>
                       </td>
