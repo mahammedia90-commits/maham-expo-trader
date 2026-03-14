@@ -10,11 +10,14 @@ import { toast } from "sonner";
 import { generateContractPDF } from "@/lib/pdfGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import type { ContractRecord } from "@/contexts/AuthContext";
 import ContractShare from "@/components/ContractShare";
 
 export default function Contracts() {
   const { t, lang, isRTL } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const { trader, kycData, contracts, bookings, markContractSent } = useAuth();
   const [selectedContract, setSelectedContract] = useState<ContractRecord | null>(null);
   const [shareContract, setShareContract] = useState<ContractRecord | null>(null);
@@ -62,7 +65,7 @@ export default function Contracts() {
     <div className="space-y-4 sm:space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("contracts.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("contracts.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">Smart E-Contracts</p>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] t-tertiary">

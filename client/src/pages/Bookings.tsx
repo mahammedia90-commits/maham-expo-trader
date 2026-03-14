@@ -13,11 +13,14 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import BookingGuard from "@/components/BookingGuard";
 import { generateBookingPDF } from "@/lib/pdfGenerator";
 
 export default function Bookings() {
   const { t, lang, isRTL } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -66,7 +69,7 @@ export default function Bookings() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("bookings.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("bookings.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">Booking Management</p>
         </div>
         {canBook ? (

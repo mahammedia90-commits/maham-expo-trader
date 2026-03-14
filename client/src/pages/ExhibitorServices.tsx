@@ -370,7 +370,7 @@ export default function ExhibitorServices() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold t-primary">{isArabicLike ? "خدمات وعمليات التاجر" : "Trader Services & Operations"}</h1>
+          <h1 className="text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{isArabicLike ? "خدمات وعمليات التاجر" : "Trader Services & Operations"}</h1>
           <p className="text-xs t-tertiary mt-1">{isArabicLike ? "كل ما تحتاجه لنجاح مشاركتك — خدمات، عمليات، تصاريح وباجات" : "Everything you need — services, operations, permits & badges"}</p>
         </div>
         <button

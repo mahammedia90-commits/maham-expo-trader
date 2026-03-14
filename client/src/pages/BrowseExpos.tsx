@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import BookingGuard from "@/components/BookingGuard";
 import { events2026, eventCategories, eventStats, type ExpoEvent, type ExpoUnit } from "@/data/events2026";
 
@@ -40,6 +41,8 @@ export default function BrowseExpos() {
   const [cityFilter, setCityFilter] = useState("الكل");
   const { canBook, addNotification, addPendingBooking, addBooking } = useAuth();
   const { t, lang, isRTL, dir } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [, navigate] = useLocation();
 
   // Live Activity State
@@ -235,7 +238,7 @@ export default function BrowseExpos() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold t-primary truncate">{t("expos.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient truncate" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("expos.title")}</h2>
           <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>{events2026.length} {t("expos.eventsAvailable")}</p>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -355,7 +358,8 @@ export default function BrowseExpos() {
           const viewers = viewerCounts[expo.id] || 0;
           return (
             <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer" onClick={() => setSelectedExpo(expo)}>
+              className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.01]" onClick={() => setSelectedExpo(expo)}
+              style={{ boxShadow: isDark ? 'var(--glow-gold)' : '0 4px 15px rgba(0,0,0,0.04)' }}>
               <div className="relative h-36 sm:h-44 overflow-hidden">
                 <img src={expo.image} alt={getExpoName(expo)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />

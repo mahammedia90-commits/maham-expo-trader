@@ -14,10 +14,13 @@ import { toast } from "sonner";
 import { generatePaymentsPDF, generateContractPDF } from "@/lib/pdfGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import type { BookingRecord } from "@/contexts/AuthContext";
 
 export default function Payments() {
   const { t, lang, isRTL } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const {
     trader, kycData, bookings, payments,
     addPayment, updateBookingPayment, addContract, markContractSent,
@@ -206,7 +209,7 @@ export default function Payments() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("payments.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("payments.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">Payments & Billing</p>
         </div>
         <div className="flex items-center gap-2">

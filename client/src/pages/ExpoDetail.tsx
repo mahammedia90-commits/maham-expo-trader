@@ -4,7 +4,7 @@
  * Features: Booth selection, temporary hold (30min), pricing, AI suggestions
  * Fully localized via useLanguage()
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { events2026 } from "@/data/events2026";
 import ContractPreview from "@/components/ContractPreview";
 import InteractiveFloorMap from "@/components/InteractiveFloorMap";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type BoothStatus = "available" | "reserved" | "sold" | "my-hold";
 type BoothType = "standard" | "premium" | "corner" | "island" | "kiosk";
@@ -141,6 +142,8 @@ const generateBooths = (): Booth[] => {
 
 export default function ExpoDetail() {
   const { t, lang, isRTL } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const isArabicLike = ["ar", "fa"].includes(lang);
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -470,12 +473,13 @@ export default function ExpoDetail() {
       {/* Back Navigation */}
       <div className="flex items-center gap-3">
         <Link href="/expos">
-          <button className="glass-card p-2 rounded-lg t-secondary hover:text-[#C5A55A] transition-colors">
+          <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}
+            className="glass-card p-2.5 rounded-xl t-secondary hover:text-[#C5A55A] transition-colors">
             <BackArrow size={18} />
-          </button>
+          </motion.button>
         </Link>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold t-primary">{t("expoDetail.floorPlan")}</h2>
+          <h2 className="text-lg font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("expoDetail.floorPlan")}</h2>
           <p className="text-[10px] t-muted truncate">{isArabicLike ? expo.nameAr : expo.nameEn}</p>
         </div>
         {/* Live viewers */}
@@ -542,7 +546,8 @@ export default function ExpoDetail() {
       </AnimatePresence>
 
       {/* Expo Info Bar */}
-      <div className="glass-card rounded-2xl p-5">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+        className="glass-card rounded-2xl p-5" style={{ boxShadow: isDark ? 'var(--glow-gold)' : '0 4px 20px rgba(0,0,0,0.05)' }}>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="flex items-center gap-2">
             <MapPin size={14} className="text-[#C5A55A]/60" />
@@ -565,7 +570,7 @@ export default function ExpoDetail() {
             <p className="text-xs text-green-400/70">{t("expoDetail.officiallyLicensed")}</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -575,10 +580,10 @@ export default function ExpoDetail() {
           { label: t("expoDetail.reserved"), value: stats.reserved, color: "text-yellow-400" },
           { label: t("expoDetail.sold"), value: stats.sold, color: "text-red-400" },
         ].map((s, i) => (
-          <div key={i} className="glass-card rounded-xl p-3 text-center">
+          <motion.div key={i} whileHover={{ scale: 1.03, y: -2 }} className="glass-card rounded-xl p-3 text-center cursor-default">
             <p className={`text-xl font-bold font-['Inter'] ${s.color}`}>{s.value}</p>
             <p className="text-[10px] t-tertiary mt-0.5">{s.label}</p>
-          </div>
+          </motion.div>
         ))}
       </div>
 

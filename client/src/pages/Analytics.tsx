@@ -10,6 +10,7 @@ import { generateAnalyticsPDF } from "@/lib/pdfGenerator";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { events2026, eventStats } from "@/data/events2026";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -83,7 +84,7 @@ export default function Analytics() {
     <div className="space-y-4 sm:space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("analytics.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("analytics.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">AI-Powered Analytics & Reports</p>
         </div>
         <button

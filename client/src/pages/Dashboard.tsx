@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { events2026, eventStats } from "@/data/events2026";
 import { Sparkles, Rocket, Eye } from "lucide-react";
 
@@ -23,6 +24,8 @@ const statusIcon = (s: string) => {
 export default function Dashboard() {
   const { bookings, contracts, payments, trader } = useAuth();
   const { t, lang, isRTL } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const isArabicLike = lang === "ar" || lang === "fa";
   const isFirstVisit = bookings.length === 0 && contracts.length === 0;
 
@@ -121,13 +124,14 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {stats.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-            className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-5">
+            whileHover={{ y: -3, scale: 1.01 }}
+            className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-5 cursor-default" style={{ boxShadow: isDark ? 'var(--glow-gold)' : '0 4px 15px rgba(0,0,0,0.04)' }}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center" style={{ backgroundColor: `color-mix(in srgb, ${s.color} 15%, transparent)` }}>
                 <s.icon size={15} style={{ color: s.color }} />
               </div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold t-primary font-['Inter']">{s.value}</p>
+            <p className="text-lg sm:text-2xl font-bold t-primary font-['Inter']" style={{ fontFamily: "'Playfair Display', 'Inter', serif" }}>{s.value}</p>
             <p className="text-[10px] sm:text-xs t-secondary mt-0.5">{s.label}</p>
           </motion.div>
         ))}
@@ -181,8 +185,8 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3">
             {quickActions.map((a, i) => (
               <Link key={i} href={a.path}>
-                <div className="flex items-center gap-2 sm:gap-3 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl cursor-pointer transition-colors"
-                  style={{ backgroundColor: "var(--glass-bg)" }}>
+                <div className="flex items-center gap-2 sm:gap-3 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl cursor-pointer transition-all hover:scale-[1.02]"
+                  style={{ backgroundColor: "var(--glass-bg)", border: '1px solid var(--glass-border)' }}>
                   <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gold-subtle flex items-center justify-center shrink-0">
                     <a.icon size={14} className="t-gold" />
                   </div>
@@ -208,7 +212,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
           {upcomingEvents.map((e, i) => (
             <Link key={i} href="/expos">
-              <div className="p-3 sm:p-4 rounded-xl cursor-pointer transition-colors group" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+              <div className="p-3 sm:p-4 rounded-xl cursor-pointer transition-all group hover:scale-[1.02]" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
                 <div className="flex items-start gap-3 mb-2">
                   <img src={e.image} alt={e.nameAr} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                   <div className="min-w-0">

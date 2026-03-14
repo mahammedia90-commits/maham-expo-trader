@@ -49,7 +49,7 @@ export default function Reviews() {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-lg sm:text-xl font-bold t-primary">{t("reviews.title")}</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("reviews.title")}</h2>
         <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Ratings & Reviews</p>
       </div>
 

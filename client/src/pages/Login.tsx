@@ -52,6 +52,7 @@ export default function Login() {
   const [, navigate] = useLocation();
   const [langOpen, setLangOpen] = useState(false);
   const isArabicLike = ["ar", "fa"].includes(lang);
+  const isDark = theme === "dark";
 
   // BUG-09: Login vs Register tabs
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -154,12 +155,15 @@ export default function Login() {
   const currentStepIndex = steps.findIndex(s => s.key === authStep);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir={dir}
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden luxury-bg-pattern" dir={dir}
       style={{ background: "var(--background)" }}>
       
+      {/* Luxury ambient glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full opacity-[0.04]"
-          style={{ background: `radial-gradient(circle, var(--gold-accent), transparent)` }} />
+        <div className="absolute top-[-20%] right-[-10%] w-[700px] h-[700px] rounded-full"
+          style={{ background: `radial-gradient(circle, ${isDark ? 'rgba(212,175,55,0.05)' : 'rgba(139,105,20,0.03)'}, transparent)` }} />
+        <div className="absolute bottom-[-30%] left-[-15%] w-[500px] h-[500px] rounded-full"
+          style={{ background: `radial-gradient(circle, ${isDark ? 'rgba(212,175,55,0.03)' : 'rgba(139,105,20,0.02)'}, transparent)` }} />
       </div>
 
       {/* Top controls */}
@@ -198,11 +202,11 @@ export default function Login() {
 
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5 }} className="w-full max-w-md relative z-10">
-        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-8 shadow-2xl"
-          style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)" }}>
+        <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-9 gradient-border"
+          style={{ background: isDark ? 'rgba(12,12,24,0.92)' : 'rgba(255,255,255,0.97)', backdropFilter: 'blur(60px)', border: "1px solid var(--glass-border)", boxShadow: isDark ? 'var(--glow-gold), 0 25px 80px rgba(0,0,0,0.3)' : '0 25px 60px rgba(0,0,0,0.08)' }}>
           
           <div className="flex justify-center mb-5">
-            <img src={LOGO_URL} alt="Maham Expo" className="h-14 object-contain" style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
+            <img src={LOGO_URL} alt="Maham Expo" className="h-14 object-contain" style={{ filter: isDark ? 'drop-shadow(0 0 20px rgba(212,175,55,0.12))' : 'brightness(0.25) contrast(1.2)' }} />
           </div>
 
           {/* BUG-09: Login/Register Tabs */}

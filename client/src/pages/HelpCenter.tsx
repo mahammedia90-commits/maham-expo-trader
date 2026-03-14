@@ -52,7 +52,7 @@ export default function HelpCenter() {
   return (
     <div className="space-y-4 sm:space-y-5">
       <div>
-        <h2 className="text-lg sm:text-xl font-bold t-primary">{t("help.title")}</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("help.title")}</h2>
         <p className="text-[10px] t-gold/50 font-['Inter']">Help Center & Support</p>
       </div>
 

@@ -263,7 +263,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Logo */}
         <div className="flex flex-col items-center justify-center py-6 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
-          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-10 w-10" : "h-16 w-auto max-w-[200px]"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
+          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-10 w-10" : "h-16 w-auto max-w-[200px]"}`} style={{ filter: theme === 'dark' ? 'drop-shadow(0 0 15px rgba(212,175,55,0.1))' : 'brightness(0.25) contrast(1.2)' }} />
           {!collapsed && (
             <>
               <p className="text-[9px] t-tertiary mt-2 text-center leading-tight font-semibold">{isRTL ? "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات" : "Maham Expo for Exhibitions & Conferences"}</p>
@@ -499,11 +499,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 24px))" }}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 px-3 sm:px-6 py-2 sm:py-3" style={{
+        <header className="sticky top-0 z-30 px-3 sm:px-6 py-2.5 sm:py-3" style={{
           background: "var(--sidebar-bg)",
-          backdropFilter: "blur(40px)",
-          WebkitBackdropFilter: "blur(40px)",
+          backdropFilter: "blur(60px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(60px) saturate(1.4)",
           borderBottom: "1px solid var(--glass-border)",
+          boxShadow: theme === 'dark' ? '0 4px 20px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.04)',
         }}>
           <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2">
@@ -519,21 +520,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               )}
               <div>
-                <h1 className="text-sm sm:text-base font-bold text-gold-gradient">
+                <h1 className="text-sm sm:text-base font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
                   {currentItem ? t(currentItem.labelKey) : t("nav.dashboard")}
                 </h1>
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Theme Toggle */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}
                 onClick={toggleTheme}
-                className="p-2 rounded-lg transition-all"
-                style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
+                className="p-2 rounded-xl transition-all"
+                style={{ color: "var(--text-tertiary)", background: theme === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', border: "1px solid var(--glass-border)" }}
                 title={theme === "dark" ? "Light Mode" : "Dark Mode"}
               >
                 {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
+              </motion.button>
 
               {/* Language Switcher — compact in header */}
               <LanguageSwitcher compact />
@@ -560,10 +562,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span className="text-[9px]" style={{ color: "var(--gold-accent)", opacity: 0.6 }}>{traderCompany}</span>
               </div>
               <Link href="/profile">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
-                  style={{ background: `linear-gradient(135deg, var(--gold-accent), var(--gold-light))` }}>
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer"
+                  style={{ background: `linear-gradient(135deg, var(--gold-accent), var(--gold-light))`, boxShadow: '0 2px 12px rgba(212,175,55,0.2)' }}>
                   <User size={14} style={{ color: "var(--btn-gold-text)" }} />
-                </div>
+                </motion.div>
               </Link>
             </div>
           </div>

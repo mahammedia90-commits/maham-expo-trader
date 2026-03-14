@@ -8,6 +8,7 @@ import { User, Shield, CheckCircle, Building2, Phone, Mail, Globe, MapPin, Lock,
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Profile() {
   const { t, lang, isRTL } = useLanguage();
@@ -45,7 +46,7 @@ export default function Profile() {
     <div className="space-y-5 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold t-primary">{t("profile.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("profile.title")}</h2>
           <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Trader Profile & Account Settings</p>
         </div>
         <button onClick={() => setShowLogoutConfirm(true)}
