@@ -55,7 +55,7 @@ export default function Notifications() {
     <div className="space-y-3 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("notif.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("notif.title")}</h2>
           <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>Notifications — {unreadCount} unread</p>
         </div>
         {unreadCount > 0 && (

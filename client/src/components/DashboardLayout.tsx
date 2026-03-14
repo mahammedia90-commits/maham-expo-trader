@@ -207,6 +207,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
   const { trader, logout, unreadCount, pendingBookingsCount } = useAuth();
   const { t, lang, isRTL, dir } = useLanguage();
   const traderName = trader?.name || t("settings.profile");
@@ -257,13 +258,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex" dir={dir}>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col sidebar-glass fixed top-0 ${sidebarSide} h-screen z-40 transition-all duration-300 ${
+        className={`hidden lg:flex flex-col fixed top-0 ${sidebarSide} h-screen z-40 transition-all duration-300 ${
           collapsed ? "w-20" : "w-64"
         }`}
+        style={{
+          background: isDark ? 'rgba(6,6,10,0.92)' : 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(40px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(40px) saturate(1.5)',
+          borderRight: isRTL ? 'none' : '1px solid var(--glass-border)',
+          borderLeft: isRTL ? '1px solid var(--glass-border)' : 'none',
+          boxShadow: isDark ? (isRTL ? '-6px 0 40px rgba(0,0,0,0.25)' : '6px 0 40px rgba(0,0,0,0.25)') : (isRTL ? '-2px 0 15px rgba(0,0,0,0.04)' : '2px 0 15px rgba(0,0,0,0.04)'),
+        }}
       >
         {/* Logo */}
-        <div className="flex flex-col items-center justify-center py-6 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
-          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-10 w-10" : "h-16 w-auto max-w-[200px]"}`} style={{ filter: theme === 'dark' ? 'drop-shadow(0 0 15px rgba(212,175,55,0.1))' : 'brightness(0.25) contrast(1.2)' }} />
+        <div className="flex flex-col items-center justify-center py-6 px-4" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-10 w-10" : "h-16 w-auto max-w-[200px]"}`} style={{ filter: theme === 'dark' ? 'drop-shadow(0 0 15px rgba(197,165,90,0.1))' : 'brightness(0.25) contrast(1.2)' }} />
           {!collapsed && (
             <>
               <p className="text-[9px] t-tertiary mt-2 text-center leading-tight font-semibold">{isRTL ? "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات" : "Maham Expo for Exhibitions & Conferences"}</p>
@@ -328,7 +337,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Bottom: Collapse Only */}
-        <div className="border-t" style={{ borderColor: "var(--glass-border)" }}>
+        <div style={{ borderTop: '1px solid var(--glass-border)' }}>
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex items-center justify-center w-full py-3 transition-colors"
@@ -344,7 +353,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ========== MOBILE BOTTOM NAV — ALWAYS VISIBLE ========== */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50" style={{
-        background: "var(--bg-primary, #0a0a0a)",
+        background: isDark ? 'rgba(6,6,10,0.95)' : 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
         borderTop: "1px solid var(--glass-border)",
         paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)",
       }}>
@@ -520,7 +531,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               )}
               <div>
-                <h1 className="text-sm sm:text-base font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+                <h1 className="text-sm sm:text-base font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
                   {currentItem ? t(currentItem.labelKey) : t("nav.dashboard")}
                 </h1>
               </div>
@@ -564,7 +575,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link href="/profile">
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                   className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer"
-                  style={{ background: `linear-gradient(135deg, var(--gold-accent), var(--gold-light))`, boxShadow: '0 2px 12px rgba(212,175,55,0.2)' }}>
+                  style={{ background: `linear-gradient(135deg, var(--gold-accent), var(--gold-light))`, boxShadow: '0 2px 12px rgba(197,165,90,0.2)' }}>
                   <User size={14} style={{ color: "var(--btn-gold-text)" }} />
                 </motion.div>
               </Link>

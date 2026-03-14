@@ -238,7 +238,7 @@ export default function BrowseExpos() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient truncate" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("expos.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient truncate" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("expos.title")}</h2>
           <p className="text-[10px] sm:text-xs t-gold font-['Inter']" style={{ opacity: 0.6 }}>{events2026.length} {t("expos.eventsAvailable")}</p>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

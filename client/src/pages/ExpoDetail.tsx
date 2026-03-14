@@ -479,7 +479,7 @@ export default function ExpoDetail() {
           </motion.button>
         </Link>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("expoDetail.floorPlan")}</h2>
+          <h2 className="text-lg font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("expoDetail.floorPlan")}</h2>
           <p className="text-[10px] t-muted truncate">{isArabicLike ? expo.nameAr : expo.nameEn}</p>
         </div>
         {/* Live viewers */}

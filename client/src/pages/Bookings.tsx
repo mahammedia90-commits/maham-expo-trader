@@ -69,7 +69,7 @@ export default function Bookings() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("bookings.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("bookings.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">Booking Management</p>
         </div>
         {canBook ? (

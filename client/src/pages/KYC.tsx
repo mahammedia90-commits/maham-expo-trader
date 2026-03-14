@@ -104,7 +104,7 @@ export default function KYC() {
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto px-1">
       <div>
-        <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("kyc.title")}</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("kyc.title")}</h2>
         <p className="text-[10px] sm:text-xs t-gold/50 font-['Inter']">Know Your Customer — Required before booking</p>
       </div>
 

@@ -152,9 +152,9 @@ export default function Login() {
       {/* Luxury ambient glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] right-[-10%] w-[700px] h-[700px] rounded-full"
-          style={{ background: `radial-gradient(circle, ${isDark ? 'rgba(212,175,55,0.05)' : 'rgba(139,105,20,0.03)'}, transparent)` }} />
+          style={{ background: `radial-gradient(circle, ${isDark ? 'rgba(197,165,90,0.05)' : 'rgba(139,105,20,0.03)'}, transparent)` }} />
         <div className="absolute bottom-[-30%] left-[-15%] w-[500px] h-[500px] rounded-full"
-          style={{ background: `radial-gradient(circle, ${isDark ? 'rgba(212,175,55,0.03)' : 'rgba(139,105,20,0.02)'}, transparent)` }} />
+          style={{ background: `radial-gradient(circle, ${isDark ? 'rgba(197,165,90,0.03)' : 'rgba(139,105,20,0.02)'}, transparent)` }} />
       </div>
 
       {/* Top controls */}
@@ -198,12 +198,12 @@ export default function Login() {
           
           {/* Logo */}
           <div className="flex justify-center mb-4">
-            <img src={LOGO_URL} alt="Maham Expo" className="h-14 object-contain" style={{ filter: isDark ? 'drop-shadow(0 0 20px rgba(212,175,55,0.12))' : 'brightness(0.25) contrast(1.2)' }} />
+            <img src={LOGO_URL} alt="Maham Expo" className="h-14 object-contain" style={{ filter: isDark ? 'drop-shadow(0 0 20px rgba(197,165,90,0.12))' : 'brightness(0.25) contrast(1.2)' }} />
           </div>
 
           {/* Title */}
           <div className="text-center mb-5">
-            <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {isArabicLike ? "مرحباً بك في مهام إكسبو" : "Welcome to Maham Expo"}
             </h1>
             <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>
@@ -223,7 +223,7 @@ export default function Login() {
                       background: i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-bg)",
                       color: i <= currentStepIndex ? "var(--btn-gold-text)" : "var(--text-tertiary)",
                       border: `1px solid ${i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)"}`,
-                      boxShadow: i === currentStepIndex ? '0 0 12px rgba(212,175,55,0.3)' : 'none',
+                      boxShadow: i === currentStepIndex ? '0 0 12px rgba(197,165,90,0.3)' : 'none',
                     }}>
                     {i < currentStepIndex ? <CheckCircle2 size={14} /> : step.num}
                   </motion.div>

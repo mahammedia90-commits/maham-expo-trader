@@ -209,7 +209,7 @@ export default function Payments() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("payments.title")}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("payments.title")}</h2>
           <p className="text-[10px] t-gold/50 font-['Inter']">Payments & Billing</p>
         </div>
         <div className="flex items-center gap-2">

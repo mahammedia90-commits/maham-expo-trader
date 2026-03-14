@@ -50,7 +50,7 @@ export default function Home() {
   const { t, lang, setLang, isRTL, dir } = useLanguage();
   const isDark = theme === "dark";
   const isArabicLike = ["ar", "fa"].includes(lang);
-  const bg = isDark ? "#080812" : "#FAF9F5";
+  const bg = isDark ? "#0A0A12" : "#FAF9F5";
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [langOpen, setLangOpen] = useState(false);
 
@@ -186,7 +186,7 @@ export default function Home() {
         {/* Gradient overlays */}
         <div className="absolute inset-0" style={{
           background: isDark
-            ? `radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.06) 0%, transparent 60%), linear-gradient(to bottom, rgba(8,8,18,0.4), rgba(8,8,18,0.2), ${bg})`
+            ? `radial-gradient(ellipse at 50% 30%, rgba(197,165,90,0.06) 0%, transparent 60%), linear-gradient(to bottom, rgba(8,8,18,0.4), rgba(8,8,18,0.2), ${bg})`
             : `radial-gradient(ellipse at 50% 30%, rgba(139,105,20,0.04) 0%, transparent 60%), linear-gradient(to bottom, rgba(250,249,245,0.5), rgba(250,249,245,0.3), ${bg})`
         }} />
         {/* Floating gold particles */}
@@ -197,7 +197,7 @@ export default function Home() {
               style={{
                 width: 3 + i * 1.5,
                 height: 3 + i * 1.5,
-                background: `radial-gradient(circle, ${isDark ? 'rgba(212,175,55,0.4)' : 'rgba(139,105,20,0.2)'}, transparent)`,
+                background: `radial-gradient(circle, ${isDark ? 'rgba(197,165,90,0.4)' : 'rgba(139,105,20,0.2)'}, transparent)`,
                 left: `${15 + i * 14}%`,
                 top: `${20 + (i % 3) * 25}%`,
               }}
@@ -215,13 +215,13 @@ export default function Home() {
             <motion.img
               src={LOGO_URL} alt="Maham Expo"
               className="h-16 sm:h-20 mx-auto mb-8 object-contain"
-              style={{ filter: isDark ? 'drop-shadow(0 0 30px rgba(212,175,55,0.15))' : 'brightness(0.25) contrast(1.2)' }}
+              style={{ filter: isDark ? 'drop-shadow(0 0 30px rgba(197,165,90,0.15))' : 'brightness(0.25) contrast(1.2)' }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             />
             <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold mb-4 leading-tight tracking-tight">
-              <span className="text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>{t("home.title")}</span>
+              <span className="text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>{t("home.title")}</span>
             </h1>
             <motion.p
               className="text-sm sm:text-lg max-w-3xl mx-auto mb-4 leading-relaxed"
@@ -263,7 +263,7 @@ export default function Home() {
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2">
-          <div className="w-7 h-11 rounded-full flex items-start justify-center p-2" style={{ border: `1px solid ${isDark ? 'rgba(212,175,55,0.2)' : 'rgba(139,105,20,0.15)'}` }}>
+          <div className="w-7 h-11 rounded-full flex items-start justify-center p-2" style={{ border: `1px solid ${isDark ? 'rgba(197,165,90,0.2)' : 'rgba(139,105,20,0.15)'}` }}>
             <motion.div
               className="w-1.5 h-3 rounded-full"
               style={{ backgroundColor: "var(--gold-accent)" }}
@@ -281,7 +281,7 @@ export default function Home() {
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "القطاعات" : "SECTORS"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {t("home.sectionTitle.sectors")}
             </h2>
           </SectionReveal>
@@ -291,7 +291,7 @@ export default function Home() {
               <motion.div key={i} variants={staggerItem}
                 className="glass-card rounded-2xl p-6 text-center group shimmer">
                 <div className="w-16 h-16 rounded-2xl bg-gold-subtle flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-all duration-500"
-                  style={{ boxShadow: isDark ? '0 0 30px rgba(212,175,55,0.08)' : 'none' }}>
+                  style={{ boxShadow: isDark ? '0 0 30px rgba(197,165,90,0.08)' : 'none' }}>
                   <s.icon size={26} className="t-gold" />
                 </div>
                 <h3 className="text-sm font-bold t-primary">{s.name}</h3>
@@ -302,13 +302,13 @@ export default function Home() {
       </section>
 
       {/* ═══════ HOW IT WORKS — Timeline ═══════ */}
-      <section className="py-24 px-6 relative" style={{ backgroundColor: isDark ? "rgba(212,175,55,0.015)" : "rgba(139,105,20,0.02)" }}>
+      <section className="py-24 px-6 relative" style={{ backgroundColor: isDark ? "rgba(197,165,90,0.015)" : "rgba(139,105,20,0.02)" }}>
         <div className="max-w-5xl mx-auto">
           <SectionReveal className="text-center mb-16">
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "كيف يعمل" : "HOW IT WORKS"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {t("home.sectionTitle.howItWorks")}
             </h2>
           </SectionReveal>
@@ -356,7 +356,7 @@ export default function Home() {
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "المميزات" : "FEATURES"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {t("home.sectionTitle.features")}
             </h2>
           </SectionReveal>
@@ -366,7 +366,7 @@ export default function Home() {
               <motion.div key={i} variants={staggerItem}
                 className="glass-card rounded-2xl p-6 group gradient-border">
                 <div className="w-12 h-12 rounded-xl bg-gold-subtle flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-500"
-                  style={{ boxShadow: isDark ? '0 0 20px rgba(212,175,55,0.06)' : 'none' }}>
+                  style={{ boxShadow: isDark ? '0 0 20px rgba(197,165,90,0.06)' : 'none' }}>
                   <f.icon size={22} className="t-gold" />
                 </div>
                 <h3 className="text-sm font-bold t-primary mb-1">{f.title}</h3>
@@ -378,13 +378,13 @@ export default function Home() {
       </section>
 
       {/* ═══════ WHY MAHAM EXPO ═══════ */}
-      <section className="py-24 px-6 relative" style={{ backgroundColor: isDark ? "rgba(212,175,55,0.015)" : "rgba(139,105,20,0.02)" }}>
+      <section className="py-24 px-6 relative" style={{ backgroundColor: isDark ? "rgba(197,165,90,0.015)" : "rgba(139,105,20,0.02)" }}>
         <div className="max-w-6xl mx-auto">
           <SectionReveal className="text-center mb-16">
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "لماذا نحن" : "WHY US"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-3" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-3" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {isArabicLike ? "لماذا Maham Expo؟" : "Why Maham Expo?"}
             </h2>
             <p className="text-sm max-w-2xl mx-auto" style={{ color: isDark ? 'var(--text-tertiary)' : '#4A4A65' }}>
@@ -414,7 +414,7 @@ export default function Home() {
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "حاسبة العائد" : "ROI CALCULATOR"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-3" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-3" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {isArabicLike ? "حاسبة العائد على الاستثمار" : "ROI Calculator"}
             </h2>
             <p className="text-sm max-w-2xl mx-auto" style={{ color: isDark ? 'var(--text-tertiary)' : '#4A4A65' }}>
@@ -488,22 +488,22 @@ export default function Home() {
       </section>
 
       {/* ═══════ CTA ═══════ */}
-      <section className="py-24 px-6" style={{ backgroundColor: isDark ? "rgba(212,175,55,0.015)" : "rgba(139,105,20,0.02)" }}>
+      <section className="py-24 px-6" style={{ backgroundColor: isDark ? "rgba(197,165,90,0.015)" : "rgba(139,105,20,0.02)" }}>
         <div className="max-w-3xl mx-auto text-center">
           <SectionReveal>
             <div className="glass-card rounded-3xl p-10 sm:p-14 gradient-border relative overflow-hidden">
               {/* Background glow */}
               <div className="absolute inset-0 pointer-events-none" style={{
                 background: isDark
-                  ? 'radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.06) 0%, transparent 70%)'
+                  ? 'radial-gradient(ellipse at 50% 50%, rgba(197,165,90,0.06) 0%, transparent 70%)'
                   : 'radial-gradient(ellipse at 50% 50%, rgba(139,105,20,0.03) 0%, transparent 70%)'
               }} />
               <div className="relative z-10">
                 <div className="w-18 h-18 rounded-3xl bg-gold-subtle flex items-center justify-center mx-auto mb-8"
-                  style={{ width: 72, height: 72, boxShadow: isDark ? '0 0 40px rgba(212,175,55,0.12)' : 'none' }}>
+                  style={{ width: 72, height: 72, boxShadow: isDark ? '0 0 40px rgba(197,165,90,0.12)' : 'none' }}>
                   <Rocket size={32} className="t-gold" />
                 </div>
-                <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-4" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+                <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-4" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
                   {isArabicLike ? "كن أول قصة نجاح" : "Be the First Success Story"}
                 </h2>
                 <p className="text-sm max-w-xl mx-auto mb-10" style={{ color: isDark ? 'var(--text-tertiary)' : '#4A4A65' }}>
@@ -530,7 +530,7 @@ export default function Home() {
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "السياسات" : "POLICIES"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {isArabicLike ? "السياسات والأحكام" : "Policies & Terms"}
             </h2>
           </SectionReveal>
@@ -574,13 +574,13 @@ export default function Home() {
       </section>
 
       {/* ═══════ FAQ ═══════ */}
-      <section className="py-24 px-6" style={{ backgroundColor: isDark ? "rgba(212,175,55,0.015)" : "rgba(139,105,20,0.02)" }}>
+      <section className="py-24 px-6" style={{ backgroundColor: isDark ? "rgba(197,165,90,0.015)" : "rgba(139,105,20,0.02)" }}>
         <div className="max-w-3xl mx-auto">
           <SectionReveal className="text-center mb-16">
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "var(--gold-accent)" }}>
               {isArabicLike ? "الأسئلة الشائعة" : "FAQ"}
             </p>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {t("home.sectionTitle.faq")}
             </h2>
           </SectionReveal>
@@ -616,7 +616,7 @@ export default function Home() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <SectionReveal>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-5" style={{ fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gold-gradient mb-5" style={{ fontFamily: "'Playfair Display', 'Noto Sans Arabic', serif" }}>
               {t("home.cta.title")}
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
@@ -644,7 +644,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
             <div>
-              <img src={LOGO_URL} alt="Maham Expo" className="h-12 mb-4 object-contain" style={{ filter: isDark ? 'drop-shadow(0 0 20px rgba(212,175,55,0.1))' : 'brightness(0.25) contrast(1.2)' }} />
+              <img src={LOGO_URL} alt="Maham Expo" className="h-12 mb-4 object-contain" style={{ filter: isDark ? 'drop-shadow(0 0 20px rgba(197,165,90,0.1))' : 'brightness(0.25) contrast(1.2)' }} />
               <p className="text-xs t-tertiary leading-relaxed">
                 {t("home.footer.about")}
               </p>
