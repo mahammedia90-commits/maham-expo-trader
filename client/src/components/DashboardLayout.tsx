@@ -14,7 +14,7 @@ import {
   Settings2, BarChart3, Bot, User, ChevronLeft, ChevronRight,
   Menu, X, Building2, MessageSquare, Star, Bell,
   Shield, HelpCircle, Sun, Moon, LogOut, Phone, Mail, ArrowRight,
-  Globe, Check, Users
+  Globe, Check, Users, Package
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,7 +50,7 @@ function useNavSections(t: (key: string) => string): { titleKey: string; items: 
       titleKey: "nav.operations",
       items: [
         { path: "/operations", icon: Settings2, labelKey: "nav.operations" },
-        { path: "/crm", icon: Users, labelKey: "crm.title" },
+        { path: "/services", icon: Package, labelKey: "nav.services" },
         { path: "/team", icon: Users, labelKey: "nav.team" },
         { path: "/analytics", icon: BarChart3, labelKey: "nav.analytics" },
         { path: "/ai-assistant", icon: Bot, labelKey: "nav.ai" },

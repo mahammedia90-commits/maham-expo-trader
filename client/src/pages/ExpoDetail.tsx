@@ -18,6 +18,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { events2026 } from "@/data/events2026";
 import ContractPreview from "@/components/ContractPreview";
+import InteractiveFloorMap from "@/components/InteractiveFloorMap";
 
 type BoothStatus = "available" | "reserved" | "sold" | "my-hold";
 type BoothType = "standard" | "premium" | "corner" | "island" | "kiosk";
@@ -84,18 +85,19 @@ const boothBorders: Record<BoothStatus, string> = {
 
 const generateBooths = (): Booth[] => {
   const booths: Booth[] = [];
+  // Zones aligned with InteractiveFloorMap (MAP_W=1200, MAP_H=700)
   const zones = [
-    { name: "A", startX: 40, startY: 60 },
-    { name: "B", startX: 40, startY: 260 },
-    { name: "C", startX: 440, startY: 60 },
-    { name: "D", startX: 440, startY: 260 },
+    { name: "A", startX: 65, startY: 55 },   // Main Zone
+    { name: "B", startX: 65, startY: 395 },   // Tech Zone
+    { name: "C", startX: 635, startY: 55 },   // Services Zone
+    { name: "D", startX: 635, startY: 395 },  // VIP Zone
   ];
 
   const types: { type: BoothType; w: number; h: number; price: number; size: string; sizeM2: number; featureKeys: string[]; faces: number; dimensions: string }[] = [
-    { type: "standard", w: 55, h: 45, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"], faces: 1, dimensions: "3m × 3m" },
-    { type: "premium", w: 70, h: 45, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"], faces: 1, dimensions: "4m × 3m" },
-    { type: "corner", w: 70, h: 55, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"], faces: 2, dimensions: "4m × 4m" },
-    { type: "island", w: 85, h: 65, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"], faces: 4, dimensions: "6m × 4m" },
+    { type: "standard", w: 70, h: 55, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"], faces: 1, dimensions: "3m × 3m" },
+    { type: "premium", w: 85, h: 55, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"], faces: 1, dimensions: "4m × 3m" },
+    { type: "corner", w: 85, h: 65, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"], faces: 2, dimensions: "4m × 4m" },
+    { type: "island", w: 100, h: 75, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"], faces: 4, dimensions: "6m × 4m" },
   ];
 
   const statuses: BoothStatus[] = ["available", "available", "available", "reserved", "sold", "available"];
@@ -114,8 +116,8 @@ const generateBooths = (): Booth[] => {
           sizeM2: tp.sizeM2,
           price: tp.price,
           status: s,
-          x: zone.startX + col * 75,
-          y: zone.startY + row * 60,
+          x: zone.startX + col * 90,
+          y: zone.startY + row * 75,
           w: tp.w,
           h: tp.h,
           zone: zone.name,
@@ -574,62 +576,18 @@ export default function ExpoDetail() {
 
       {/* Interactive Booth Map + Detail Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* SVG Map */}
-        <div className="lg:col-span-2 glass-card rounded-2xl p-4 overflow-auto">
-          <svg viewBox="0 0 850 460" className="w-full h-auto" style={{ minHeight: 350 }}>
-            <rect x="0" y="0" width="850" height="460" fill="rgba(10,10,18,0.5)" rx="12" />
-            
-            {/* Zone Labels */}
-            <text x="200" y="45" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.mainZone")}</text>
-            <text x="200" y="245" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.techZone")}</text>
-            <text x="600" y="45" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.servicesZone")}</text>
-            <text x="600" y="245" fill="rgba(197,165,90,0.4)" fontSize="11" textAnchor="middle" fontFamily="Inter">{t("expoDetail.vipZone")}</text>
-
-            {/* Entrance */}
-            <rect x="370" y="420" width="110" height="30" fill="rgba(197,165,90,0.1)" stroke="rgba(197,165,90,0.3)" strokeWidth="1" rx="6" />
-            <text x="425" y="440" fill="rgba(197,165,90,0.6)" fontSize="10" textAnchor="middle" fontFamily="Inter">{t("expoDetail.entrance")}</text>
-
-            {/* Booths */}
-            {filteredBooths.map((booth) => (
-              <g
-                key={booth.id}
-                onClick={() => handleBoothClick(booth)}
-                className={`cursor-pointer transition-all ${booth.status === "sold" ? "opacity-40" : "hover:opacity-90"}`}
-              >
-                <rect
-                  x={booth.x}
-                  y={booth.y}
-                  width={booth.w}
-                  height={booth.h}
-                  fill={boothColors[booth.status]}
-                  stroke={selectedBooth?.id === booth.id ? "#C5A55A" : boothBorders[booth.status]}
-                  strokeWidth={selectedBooth?.id === booth.id ? 2 : 1}
-                  rx="4"
-                />
-                <text
-                  x={booth.x + booth.w / 2}
-                  y={booth.y + booth.h / 2 - 4}
-                  fill="rgba(255,255,255,0.7)"
-                  fontSize="9"
-                  textAnchor="middle"
-                  fontFamily="Inter"
-                  fontWeight="600"
-                >
-                  {booth.code}
-                </text>
-                <text
-                  x={booth.x + booth.w / 2}
-                  y={booth.y + booth.h / 2 + 8}
-                  fill="rgba(255,255,255,0.3)"
-                  fontSize="7"
-                  textAnchor="middle"
-                  fontFamily="Inter"
-                >
-                  {booth.size}m
-                </text>
-              </g>
-            ))}
-          </svg>
+        {/* Interactive Floor Map */}
+        <div className="lg:col-span-2">
+          <InteractiveFloorMap
+            booths={filteredBooths}
+            selectedBooth={selectedBooth}
+            onBoothClick={handleBoothClick}
+            zoneFilter={zoneFilter}
+            typeFilter={typeFilter}
+            t={t}
+            isRTL={isRTL}
+            isArabicLike={isArabicLike}
+          />
         </div>
 
         {/* Detail Panel */}

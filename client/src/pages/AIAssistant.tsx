@@ -156,6 +156,17 @@ export default function AIAssistant() {
       };
     }
 
+    // SERVICES
+    if (q.includes("خدم") || q.includes("service") || q.includes("تصميم") || q.includes("design") || q.includes("كهرباء") || q.includes("electric") || q.includes("لوجست") || q.includes("logist") || q.includes("تسويق") || q.includes("market") || q.includes("ضيافة") || q.includes("cater") || q.includes("تصوير") || q.includes("photo") || q.includes("ترجمة") || q.includes("translat") || q.includes("طباعة") || q.includes("print") || q.includes("تأمين") || q.includes("insur") || q.includes("服务") || q.includes("услуг") || q.includes("hizmet") || q.includes("خدمات")) {
+      return {
+        id: Date.now() + 1, role: "assistant", time,
+        content: `🛠️ ${t("ai.servicesTitle") || (lang === "ar" ? "خدمات التاجر المتاحة" : "Available Exhibitor Services")}:\n\n📐 ${lang === "ar" ? "تصميم وبناء البوث" : "Booth Design & Build"} — ${lang === "ar" ? "تصميم 3D، بناء مخصص، أثاث، إضاءة" : "3D design, custom build, furniture, lighting"}\n⚡ ${lang === "ar" ? "الكهرباء والإنترنت" : "Electricity & Internet"} — ${lang === "ar" ? "توصيلات كهرباء، إنترنت فائق السرعة، شاشات" : "Power connections, high-speed internet, screens"}\n🚚 ${lang === "ar" ? "اللوجستيات" : "Logistics"} — ${lang === "ar" ? "نقل، شحن، تركيب وتفكيك" : "Transport, shipping, setup & dismantling"}\n📢 ${lang === "ar" ? "التسويق" : "Marketing"} — ${lang === "ar" ? "إعلانات، تسويق رقمي، هدايا ترويجية" : "Ads, digital marketing, promotional gifts"}\n☕ ${lang === "ar" ? "الضيافة" : "Hospitality"} — ${lang === "ar" ? "قهوة، بوفيه، طاقم ضيافة" : "Coffee, buffet, hospitality staff"}\n📸 ${lang === "ar" ? "التصوير" : "Photography"} — ${lang === "ar" ? "تصوير فوتو وفيديو، بث مباشر" : "Photo & video, live streaming"}\n🌐 ${lang === "ar" ? "الترجمة" : "Translation"} — ${lang === "ar" ? "مترجم فوري، مقدم فعاليات" : "Interpreter, event MC"}\n🛡️ ${lang === "ar" ? "التأمين" : "Insurance"} — ${lang === "ar" ? "تأمين شامل، تراخيص" : "Full insurance, permits"}\n🖨️ ${lang === "ar" ? "الطباعة" : "Printing"} — ${lang === "ar" ? "بانرات، بروشورات، بطاقات أعمال" : "Banners, brochures, business cards"}\n\n💡 ${lang === "ar" ? "يمكنك طلب أي خدمة مباشرة من صفحة الخدمات وإضافتها للسلة" : "You can order any service directly from the services page"}`,
+        actions: [
+          { label: lang === "ar" ? "خدمات التاجر" : "Exhibitor Services", path: "/services" },
+        ],
+      };
+    }
+
     // HELP
     if (q.includes("مساعد") || q.includes("help") || q.includes("دعم") || q.includes("support") || q.includes("帮助") || q.includes("помощ") || q.includes("yardım") || q.includes("کمک")) {
       return {
