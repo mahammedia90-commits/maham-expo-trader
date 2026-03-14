@@ -1,6 +1,6 @@
 /**
- * Login Page — Smooth Registration with Login/Register Tabs
- * BUG-05 to BUG-09 fixed, FEAT-05 added
+ * Login Page — Simple flow: Phone → OTP → Business Info (4 fields)
+ * No login/register tabs — single unified flow
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -10,8 +10,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import {
   Phone, ArrowLeft, ArrowRight, CheckCircle2, Building2, User, MapPin, Briefcase,
-  Sun, Moon, Loader2, ShieldCheck, Lock, Sparkles, Globe, Check, MessageCircle,
-  FileText
+  Sun, Moon, Loader2, ShieldCheck, Globe, Check, MessageCircle, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,10 +39,15 @@ const REGIONS = [
   { value: "makkah", ar: "مكة المكرمة", en: "Makkah", zh: "麦加", ru: "Мекка", fa: "مکه مکرمه", tr: "Mekke" },
   { value: "madinah", ar: "المدينة المنورة", en: "Madinah", zh: "麦地那", ru: "Медина", fa: "مدینه منوره", tr: "Medine" },
   { value: "eastern", ar: "المنطقة الشرقية", en: "Eastern Province", zh: "东部省", ru: "Восточная провинция", fa: "منطقه شرقی", tr: "Doğu Bölgesi" },
+  { value: "tabuk", ar: "تبوك", en: "Tabuk", zh: "塔布克", ru: "Табук", fa: "تبوک", tr: "Tebük" },
+  { value: "asir", ar: "عسير", en: "Asir", zh: "阿西尔", ru: "Асир", fa: "عسیر", tr: "Asir" },
+  { value: "qassim", ar: "القصيم", en: "Qassim", zh: "盖西姆", ru: "Касим", fa: "قصیم", tr: "Kasım" },
+  { value: "hail", ar: "حائل", en: "Hail", zh: "哈伊勒", ru: "Хаиль", fa: "حائل", tr: "Hail" },
+  { value: "jazan", ar: "جازان", en: "Jazan", zh: "吉赞", ru: "Джизан", fa: "جازان", tr: "Cizan" },
+  { value: "najran", ar: "نجران", en: "Najran", zh: "奈季兰", ru: "Наджран", fa: "نجران", tr: "Necran" },
+  { value: "baha", ar: "الباحة", en: "Al Baha", zh: "巴哈", ru: "Эль-Баха", fa: "باحه", tr: "El Baha" },
   { value: "other", ar: "أخرى", en: "Other", zh: "其他", ru: "Другое", fa: "سایر", tr: "Diğer" },
 ];
-
-
 
 export default function Login() {
   const { authStep, phoneNumber, setPhoneNumber, sendOTP, verifyOTP, completeRegistration, otpCode, setAuthStep } = useAuth();
@@ -53,9 +57,6 @@ export default function Login() {
   const [langOpen, setLangOpen] = useState(false);
   const isArabicLike = ["ar", "fa"].includes(lang);
   const isDark = theme === "dark";
-
-  // BUG-09: Login vs Register tabs
-  const [mode, setMode] = useState<"login" | "register">("login");
 
   const [phoneInput, setPhoneInput] = useState(phoneNumber || "");
   const [phoneSending, setPhoneSending] = useState(false);
@@ -68,7 +69,6 @@ export default function Login() {
   const [companyName, setCompanyName] = useState("");
   const [activity, setActivity] = useState("");
   const [region, setRegion] = useState("");
-
   const [infoSubmitting, setInfoSubmitting] = useState(false);
 
   const BackArrow = isRTL ? ArrowLeft : ArrowRight;
@@ -76,6 +76,14 @@ export default function Login() {
   useEffect(() => { if (authStep === "complete") navigate("/expos"); }, [authStep, navigate]);
   useEffect(() => { if (resendTimer > 0) { const t = setTimeout(() => setResendTimer(resendTimer - 1), 1000); return () => clearTimeout(t); } }, [resendTimer]);
   useEffect(() => { if (authStep === "otp") setTimeout(() => otpRefs[0].current?.focus(), 300); }, [authStep]);
+
+  // Steps for progress indicator
+  const steps = [
+    { key: "phone" as AuthStep, num: 1, label: isArabicLike ? "رقم الجوال" : "Phone" },
+    { key: "otp" as AuthStep, num: 2, label: isArabicLike ? "رمز التحقق" : "OTP" },
+    { key: "info" as AuthStep, num: 3, label: isArabicLike ? "بياناتك" : "Info" },
+  ];
+  const currentStepIndex = steps.findIndex(s => s.key === authStep);
 
   const handlePhoneSubmit = useCallback(async () => {
     const cleaned = phoneInput.replace(/\s/g, "");
@@ -107,18 +115,14 @@ export default function Login() {
     const success = await verifyOTP(code);
     setOtpVerifying(false);
     if (success) {
-      toast.success(isArabicLike ? "تم التحقق بنجاح" : "Verified successfully");
-      // In login mode, skip info step and go directly
-      if (mode === "login") {
-        completeRegistration({ name: "تاجر", companyName: "شركة", activity: "other", region: "riyadh" });
-        navigate("/expos");
-      }
+      toast.success(isArabicLike ? "تم التحقق بنجاح ✓" : "Verified successfully ✓");
+      // Always go to info step to collect business data
     } else {
       setOtpError(true);
       setOtpDigits(["", "", "", ""]);
       otpRefs[0].current?.focus();
     }
-  }, [verifyOTP, isArabicLike, mode, completeRegistration, navigate]);
+  }, [verifyOTP, isArabicLike]);
 
   const handleResendOTP = useCallback(async () => {
     if (resendTimer > 0) return;
@@ -132,27 +136,14 @@ export default function Login() {
   const handleInfoSubmit = useCallback(async () => {
     if (!traderName.trim() || !companyName.trim() || !activity || !region) return;
     setInfoSubmitting(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 800));
     completeRegistration({ name: traderName.trim(), companyName: companyName.trim(), activity, region });
     setInfoSubmitting(false);
-    toast.success(isArabicLike ? "مرحباً بك!" : "Welcome!");
+    toast.success(isArabicLike ? "مرحباً بك في مهام إكسبو!" : "Welcome to Maham Expo!");
     navigate("/expos");
   }, [traderName, companyName, activity, region, completeRegistration, navigate, isArabicLike]);
 
   const stepVariants = { enter: { opacity: 0, x: isRTL ? -30 : 30 }, center: { opacity: 1, x: 0 }, exit: { opacity: 0, x: isRTL ? 30 : -30 } };
-
-  // Steps differ based on mode
-  const loginSteps = [
-    { key: "phone" as AuthStep, num: 1, label: isArabicLike ? "رقم الجوال" : "Phone Number" },
-    { key: "otp" as AuthStep, num: 2, label: isArabicLike ? "رمز التحقق" : "Verification Code" },
-  ];
-  const registerSteps = [
-    { key: "phone" as AuthStep, num: 1, label: isArabicLike ? "رقم الجوال" : "Phone Number" },
-    { key: "otp" as AuthStep, num: 2, label: isArabicLike ? "رمز التحقق" : "Verification Code" },
-    { key: "info" as AuthStep, num: 3, label: isArabicLike ? "بيانات نشاطك" : "Business Info" },
-  ];
-  const steps = mode === "login" ? loginSteps : registerSteps;
-  const currentStepIndex = steps.findIndex(s => s.key === authStep);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden luxury-bg-pattern" dir={dir}
@@ -205,78 +196,68 @@ export default function Login() {
         <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-9 gradient-border"
           style={{ background: isDark ? 'rgba(12,12,24,0.92)' : 'rgba(255,255,255,0.97)', backdropFilter: 'blur(60px)', border: "1px solid var(--glass-border)", boxShadow: isDark ? 'var(--glow-gold), 0 25px 80px rgba(0,0,0,0.3)' : '0 25px 60px rgba(0,0,0,0.08)' }}>
           
-          <div className="flex justify-center mb-5">
+          {/* Logo */}
+          <div className="flex justify-center mb-4">
             <img src={LOGO_URL} alt="Maham Expo" className="h-14 object-contain" style={{ filter: isDark ? 'drop-shadow(0 0 20px rgba(212,175,55,0.12))' : 'brightness(0.25) contrast(1.2)' }} />
           </div>
 
-          {/* BUG-09: Login/Register Tabs */}
-          <div className="flex rounded-xl overflow-hidden mb-5" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
-            <button
-              onClick={() => { setMode("login"); if (authStep === "info") setAuthStep("phone"); }}
-              className="flex-1 py-2.5 text-sm font-bold transition-all"
-              style={{
-                background: mode === "login" ? "var(--gold-accent)" : "transparent",
-                color: mode === "login" ? "var(--btn-gold-text)" : "var(--text-tertiary)",
-              }}>
-              {isArabicLike ? "دخول" : "Login"}
-            </button>
-            <button
-              onClick={() => setMode("register")}
-              className="flex-1 py-2.5 text-sm font-bold transition-all"
-              style={{
-                background: mode === "register" ? "var(--gold-accent)" : "transparent",
-                color: mode === "register" ? "var(--btn-gold-text)" : "var(--text-tertiary)",
-              }}>
-              {isArabicLike ? "حساب جديد" : "New Account"}
-            </button>
+          {/* Title */}
+          <div className="text-center mb-5">
+            <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "'Playfair Display', 'IBM Plex Sans Arabic', serif" }}>
+              {isArabicLike ? "مرحباً بك في مهام إكسبو" : "Welcome to Maham Expo"}
+            </h1>
+            <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>
+              {isArabicLike ? "سجّل برقم جوالك للبدء" : "Register with your phone to get started"}
+            </p>
           </div>
 
-          {/* BUG-08: Progress Steps with labels */}
+          {/* Progress Steps */}
           <div className="flex items-center justify-center gap-1 mb-6">
             {steps.map((step, i) => (
               <div key={step.key} className="flex items-center gap-1">
                 <div className="flex flex-col items-center gap-1">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                  <motion.div
+                    animate={{ scale: i === currentStepIndex ? 1.1 : 1 }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                     style={{
                       background: i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-bg)",
                       color: i <= currentStepIndex ? "var(--btn-gold-text)" : "var(--text-tertiary)",
                       border: `1px solid ${i <= currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)"}`,
+                      boxShadow: i === currentStepIndex ? '0 0 12px rgba(212,175,55,0.3)' : 'none',
                     }}>
                     {i < currentStepIndex ? <CheckCircle2 size={14} /> : step.num}
-                  </div>
+                  </motion.div>
                   <span className="text-[9px] font-medium whitespace-nowrap" style={{ color: i <= currentStepIndex ? "var(--gold-accent)" : "var(--text-muted)" }}>
                     {step.label}
                   </span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="w-8 h-[2px] rounded-full mb-4" style={{ background: i < currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)" }} />
+                  <div className="w-8 h-[2px] rounded-full mb-4 transition-all" style={{ background: i < currentStepIndex ? "var(--gold-accent)" : "var(--glass-border)" }} />
                 )}
               </div>
             ))}
           </div>
 
           <AnimatePresence mode="wait">
-            {/* STEP 1: Phone */}
+            {/* ═══════════ STEP 1: Phone Number ═══════════ */}
             {authStep === "phone" && (
               <motion.div key="phone" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
-                {/* BUG-05: Value proposition block */}
+                {/* Value proposition */}
                 <div className="rounded-xl p-3 mb-5" style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
                   <p className="text-[11px] font-medium mb-2" style={{ color: "var(--gold-accent)" }}>
                     {isArabicLike ? "بتسجيلك ستتمكن من:" : "By registering you can:"}
                   </p>
                   <div className="space-y-1">
-                    <p className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
-                      {isArabicLike ? "تصفح الوحدات المتاحة الآن" : "Browse available units now"}
-                    </p>
-                    <p className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
-                      {isArabicLike ? "حجز مكانك بعربون 5% فقط" : "Book your spot with only 5% deposit"}
-                    </p>
-                    <p className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
-                      <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
-                      {isArabicLike ? "استلام عقد إلكتروني خلال دقائق" : "Receive an electronic contract within minutes"}
-                    </p>
+                    {[
+                      isArabicLike ? "تصفح الوحدات المتاحة الآن" : "Browse available units now",
+                      isArabicLike ? "حجز مكانك بعربون 5% فقط" : "Book your spot with only 5% deposit",
+                      isArabicLike ? "استلام عقد إلكتروني خلال دقائق" : "Receive an electronic contract within minutes",
+                    ].map((text, i) => (
+                      <p key={i} className="text-[10px] flex items-center gap-1.5" style={{ color: "var(--text-secondary)" }}>
+                        <CheckCircle2 size={10} style={{ color: "var(--gold-accent)" }} />
+                        {text}
+                      </p>
+                    ))}
                   </div>
                 </div>
 
@@ -292,34 +273,39 @@ export default function Login() {
                     </div>
                     <input type="tel" value={phoneInput} onChange={(e) => setPhoneInput(e.target.value.replace(/[^\d\s]/g, ""))}
                       onKeyDown={(e) => e.key === "Enter" && handlePhoneSubmit()}
-                      placeholder={isArabicLike ? "5XXXXXXXX" : "5XXXXXXXX"}
-                      className="flex-1 px-4 py-3.5 rounded-xl text-base outline-none"
+                      placeholder="5XXXXXXXX"
+                      className="flex-1 px-4 py-3.5 rounded-xl text-base outline-none transition-all"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)", direction: "ltr", textAlign: "left", letterSpacing: "1px" }}
                       autoFocus maxLength={14} />
                   </div>
                 </div>
+
                 <button onClick={handlePhoneSubmit} disabled={phoneSending || phoneInput.replace(/\s/g, "").length < 9}
                   className="w-full py-3.5 rounded-xl text-base font-semibold btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  {phoneSending ? <><Loader2 size={18} className="animate-spin" /> {isArabicLike ? "جاري الإرسال..." : "Sending..."}</> : isArabicLike ? "إرسال رمز التحقق" : "Send Verification Code"}
+                  {phoneSending ? (
+                    <><Loader2 size={18} className="animate-spin" /> {isArabicLike ? "جاري الإرسال..." : "Sending..."}</>
+                  ) : (
+                    <>{isArabicLike ? "إرسال رمز التحقق" : "Send Verification Code"}</>
+                  )}
                 </button>
-                {/* BUG-06: Arabic trust signals */}
+
+                {/* Trust signals */}
                 <div className="flex items-center justify-center gap-3 mt-5 pt-4" style={{ borderTop: "1px solid var(--glass-border)" }}>
-                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-                    {isArabicLike ? "🔒 تشفير بنكي 256-bit" : "🔒 256-bit encryption"}
-                  </span>
-                  <span className="text-[10px]" style={{ color: "var(--glass-border)" }}>·</span>
-                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-                    {isArabicLike ? "لا رسوم تسجيل" : "No registration fees"}
-                  </span>
-                  <span className="text-[10px]" style={{ color: "var(--glass-border)" }}>·</span>
-                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-                    {isArabicLike ? "بياناتك محمية" : "Your data is protected"}
-                  </span>
+                  {[
+                    isArabicLike ? "🔒 تشفير بنكي 256-bit" : "🔒 256-bit encryption",
+                    isArabicLike ? "لا رسوم تسجيل" : "No fees",
+                    isArabicLike ? "بياناتك محمية" : "Data protected",
+                  ].map((text, i) => (
+                    <span key={i} className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+                      {i > 0 && <span className="mx-1" style={{ color: "var(--glass-border)" }}>·</span>}
+                      {text}
+                    </span>
+                  ))}
                 </div>
               </motion.div>
             )}
 
-            {/* STEP 2: OTP */}
+            {/* ═══════════ STEP 2: OTP Verification ═══════════ */}
             {authStep === "otp" && (
               <motion.div key="otp" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
                 <div className="text-center mb-5">
@@ -327,28 +313,33 @@ export default function Login() {
                     style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
                     <ShieldCheck size={24} style={{ color: "var(--gold-accent)" }} />
                   </div>
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{isArabicLike ? "أدخل رمز التحقق المرسل إلى" : "Enter the verification code sent to"}</p>
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    {isArabicLike ? "أدخل رمز التحقق المرسل إلى" : "Enter the code sent to"}
+                  </p>
                   <p className="text-base font-bold mt-1" style={{ color: "var(--text-primary)", direction: "ltr" }}>+966 {phoneInput}</p>
                   <p className="text-[10px] mt-1 px-3 py-1 rounded-full inline-block"
                     style={{ background: "var(--gold-bg)", color: "var(--gold-accent)" }}>
                     Demo: {otpCode}
                   </p>
                 </div>
+
                 <div className="flex justify-center gap-3 mb-5" dir="ltr">
                   {otpDigits.map((digit, i) => (
                     <input key={i} ref={otpRefs[i]} type="text" inputMode="numeric" maxLength={1} value={digit}
                       onChange={(e) => handleOtpInput(i, e.target.value)} onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className={`w-14 h-14 text-center text-2xl font-bold rounded-xl outline-none ${otpError ? "animate-shake" : ""}`}
+                      className={`w-14 h-14 text-center text-2xl font-bold rounded-xl outline-none transition-all ${otpError ? "animate-shake" : ""}`}
                       style={{ background: "var(--glass-bg)", border: `2px solid ${otpError ? "var(--status-red)" : digit ? "var(--gold-accent)" : "var(--glass-border)"}`, color: "var(--text-primary)" }} />
                   ))}
                 </div>
+
                 {otpVerifying && (
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <Loader2 size={16} className="animate-spin" style={{ color: "var(--gold-accent)" }} />
                     <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{isArabicLike ? "جاري التحقق..." : "Verifying..."}</span>
                   </div>
                 )}
-                {/* BUG-07: OTP fallback with countdown + WhatsApp */}
+
+                {/* Resend & WhatsApp */}
                 <div className="text-center mb-4 space-y-2">
                   {resendTimer > 0 ? (
                     <div className="flex items-center justify-center gap-2">
@@ -376,6 +367,7 @@ export default function Login() {
                     </a>
                   </div>
                 </div>
+
                 <button onClick={() => { setAuthStep("phone"); setOtpDigits(["", "", "", ""]); }}
                   className="w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
                   style={{ color: "var(--text-tertiary)", background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
@@ -385,68 +377,102 @@ export default function Login() {
               </motion.div>
             )}
 
-            {/* STEP 3: Info (Register mode only) — FEAT-05 expanded */}
-            {authStep === "info" && mode === "register" && (
+            {/* ═══════════ STEP 3: Business Info (4 fields only) ═══════════ */}
+            {authStep === "info" && (
               <motion.div key="info" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
                 <div className="text-center mb-4">
                   <div className="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center"
                     style={{ background: "var(--gold-bg)", border: "1px solid var(--gold-border)" }}>
-                    <User size={20} style={{ color: "var(--gold-accent)" }} />
+                    <Sparkles size={20} style={{ color: "var(--gold-accent)" }} />
                   </div>
-                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{isArabicLike ? "أكمل بيانات نشاطك" : "Complete Your Business Info"}</p>
+                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                    {isArabicLike ? "خطوة أخيرة — عرّفنا بنشاطك" : "Last step — Tell us about your business"}
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {isArabicLike ? "4 حقول فقط وستكون جاهزاً" : "Just 4 fields and you're ready"}
+                  </p>
                 </div>
+
                 <div className="space-y-3">
+                  {/* Trader Name */}
                   <div>
                     <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
-                      <User size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "الاسم الكامل" : "Full Name"} <span style={{ color: "var(--status-red)" }}>*</span>
+                      <User size={11} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "اسم التاجر" : "Trader Name"}
                     </label>
                     <input type="text" value={traderName} onChange={(e) => setTraderName(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                      placeholder={isArabicLike ? "مثال: أحمد محمد" : "e.g. Ahmed Mohammed"}
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} autoFocus />
                   </div>
+
+                  {/* Company Name */}
                   <div>
                     <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
-                      <Building2 size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "اسم النشاط التجاري" : "Business Name"} <span style={{ color: "var(--status-red)" }}>*</span>
+                      <Building2 size={11} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "اسم المؤسسة أو الشركة" : "Company / Establishment Name"}
                     </label>
                     <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                      placeholder={isArabicLike ? "مثال: مؤسسة النجاح التجارية" : "e.g. Success Trading Est."}
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
                       style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-primary)" }} />
                   </div>
+
+                  {/* Activity Type */}
                   <div>
                     <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
-                      <Briefcase size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "القطاع" : "Sector"} <span style={{ color: "var(--status-red)" }}>*</span>
+                      <Briefcase size={11} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "نوع النشاط" : "Business Type"}
                     </label>
                     <select value={activity} onChange={(e) => setActivity(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl text-sm outline-none appearance-none cursor-pointer"
                       style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", color: activity ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{isArabicLike ? "اختر القطاع" : "Select Sector"}</option>
+                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>
+                        {isArabicLike ? "اختر نوع النشاط" : "Select Business Type"}
+                      </option>
                       {ACTIVITIES.map(a => (
-                        <option key={a.value} value={a.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(a as any)[lang] || a.en}</option>
+                        <option key={a.value} value={a.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>
+                          {(a as any)[lang] || a.en}
+                        </option>
                       ))}
                     </select>
                   </div>
+
+                  {/* Region */}
                   <div>
                     <label className="flex items-center gap-1.5 text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
-                      <MapPin size={11} style={{ color: "var(--gold-accent)" }} /> {isArabicLike ? "المدينة" : "City"} <span style={{ color: "var(--status-red)" }}>*</span>
+                      <MapPin size={11} style={{ color: "var(--gold-accent)" }} />
+                      {isArabicLike ? "المنطقة" : "Region"}
                     </label>
                     <select value={region} onChange={(e) => setRegion(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl text-sm outline-none appearance-none cursor-pointer"
                       style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", color: region ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{isArabicLike ? "اختر المدينة" : "Select City"}</option>
-                      {REGIONS.map(r => (<option key={r.value} value={r.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(r as any)[lang] || r.en}</option>))}
+                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>
+                        {isArabicLike ? "اختر المنطقة" : "Select Region"}
+                      </option>
+                      {REGIONS.map(r => (
+                        <option key={r.value} value={r.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>
+                          {(r as any)[lang] || r.en}
+                        </option>
+                      ))}
                     </select>
                   </div>
-
                 </div>
+
                 <button onClick={handleInfoSubmit}
                   disabled={infoSubmitting || !traderName.trim() || !companyName.trim() || !activity || !region}
-                  className="w-full py-3 rounded-xl text-base font-semibold btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4">
-                  {infoSubmitting ? <><Loader2 size={18} className="animate-spin" /> {isArabicLike ? "جاري التسجيل..." : "Registering..."}</> : isArabicLike ? "دخول لوحة التحكم" : "Enter Dashboard"}
+                  className="w-full py-3.5 rounded-xl text-base font-semibold btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-5">
+                  {infoSubmitting ? (
+                    <><Loader2 size={18} className="animate-spin" /> {isArabicLike ? "جاري التسجيل..." : "Registering..."}</>
+                  ) : (
+                    <><Sparkles size={16} /> {isArabicLike ? "ابدأ الآن" : "Get Started"}</>
+                  )}
                 </button>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+
         <p className="text-center text-[10px] mt-4" style={{ color: "var(--text-muted)" }}>
           © {new Date().getFullYear()} Maham Expo for Exhibitions & Conferences
         </p>
