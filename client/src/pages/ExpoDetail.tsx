@@ -155,7 +155,9 @@ export default function ExpoDetail() {
   const [countdown, setCountdown] = useState(0);
   const [zoneFilter, setZoneFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "contract" | "review" | "approved" | "rejected" | "payment">("select");
+  const [bookingStep, setBookingStep] = useState<"select" | "confirm" | "deposit_info" | "deposit_pay" | "contract" | "review" | "approved" | "rejected" | "payment">("select");
+  const [showVisitRequest, setShowVisitRequest] = useState(false);
+  const [depositPaid, setDepositPaid] = useState(false);
   const [reviewStatus, setReviewStatus] = useState<"pending" | "approved" | "rejected">("pending");
   const [reviewTimer, setReviewTimer] = useState(0);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -178,10 +180,14 @@ export default function ExpoDetail() {
 
   const zoneLabel = (zone: string): string => {
     const map: Record<string, string> = {
-      A: t("expoDetail.mainZone"),
-      B: t("expoDetail.techZone"),
-      C: t("expoDetail.servicesZone"),
-      D: t("expoDetail.vipZone"),
+      A: isArabicLike ? "غار ثور" : "Ghar Thawr",
+      B: isArabicLike ? "الجحفة" : "Al-Juhfah",
+      C: isArabicLike ? "الريم" : "Al-Reem",
+      D: isArabicLike ? "العرج" : "Al-Arj",
+      E: isArabicLike ? "القاهة" : "Al-Qahah",
+      F: isArabicLike ? "الروحاء" : "Al-Rawha",
+      G: isArabicLike ? "ذو الحليفة" : "Dhul Hulayfah",
+      H: isArabicLike ? "المدينة المنورة" : "Al-Madinah",
     };
     return map[zone] || zone;
   };
@@ -249,11 +255,30 @@ export default function ExpoDetail() {
   };
 
   const handleProceedToContract = () => {
+    setBookingStep("deposit_info");
+  };
+
+  const handleAcceptDepositTerms = () => {
+    setBookingStep("deposit_pay");
+  };
+
+  const handlePayDeposit = () => {
+    if (!holdBooth || !selectedBooth) return;
+    const depositAmount = holdBooth.price * 0.05;
+    // دفع العربون 5% قبل إرسال الطلب للمشرف
+    setDepositPaid(true);
+    toast.success(isArabicLike ? `تم دفع العربون ${depositAmount.toLocaleString()} ر.س بنجاح` : `Deposit of ${depositAmount.toLocaleString()} SAR paid successfully`);
     setBookingStep("contract");
+  };
+
+  const handleRequestVisit = () => {
+    toast.success(isArabicLike ? "تم إرسال طلب الزيارة — سيتم التواصل معك خلال 24 ساعة" : "Visit request sent — we will contact you within 24 hours");
+    setShowVisitRequest(false);
   };
 
   const handleContractAccepted = () => {
     if (!holdBooth) return;
+    const depositAmount = holdBooth.price * 0.05;
     // حفظ الحجز بحالة pending_review عند إرسال الطلب للمشرف
     const newBooking = addBooking({
       expoId: expo.id,
@@ -265,18 +290,28 @@ export default function ExpoDetail() {
       boothType: holdBooth.type,
       boothSize: holdBooth.size,
       price: holdBooth.price,
-      deposit: holdBooth.price * 0.05,
+      deposit: depositAmount,
       services: holdBooth.featureKeys.map(fk => t(fk)),
       location: expo.location,
     });
     // تعيين الحالة إلى pending_review
     updateBookingStatus(newBooking.id, "pending_review");
+    // تسجيل دفع العربون (تم دفعه مسبقاً)
+    addPayment({
+      bookingId: newBooking.id,
+      amount: depositAmount,
+      method: "Credit Card",
+      type: "deposit",
+      descAr: `عربون تثبيت الجناح ${holdBooth.code} — ${expo.nameAr}`,
+      descEn: `Deposit for Booth ${holdBooth.code} — ${expo.nameEn}`,
+    });
+    updateBookingPayment(newBooking.id, depositAmount);
     setPendingBookingId(newBooking.id);
     addPendingBooking();
     setBookingStep("review");
     setReviewStatus("pending");
     setReviewTimer(0);
-    toast.success(isArabicLike ? "تم إرسال طلبك للمشرف — بانتظار الموافقة" : "Request sent to supervisor — awaiting approval");
+    toast.success(isArabicLike ? "تم إرسال طلبك للمشرف — بانتظار الموافقة (الرد خلال 30 دقيقة)" : "Request sent to supervisor — awaiting approval (response within 30 minutes)");
   };
 
   // Simulate admin review process (10-15 seconds)
@@ -309,7 +344,7 @@ export default function ExpoDetail() {
             setBookingStep("rejected");
             // تحديث حالة الحجز إلى rejected
             if (pendingBookingId) updateBookingStatus(pendingBookingId, "rejected");
-            setRejectionReason(isArabicLike ? "لا يتوافق النشاط التجاري مع فئة المعرض" : "Business activity does not match expo category");
+            setRejectionReason(isArabicLike ? "لا يتوافق النشاط التجاري مع فئة المعرض. سيتم استرداد العربون كاملاً خلال 5-7 أيام عمل." : "Business activity does not match expo category. Deposit will be fully refunded within 5-7 business days.");
             toast.error(isArabicLike ? "تم رفض الطلب — يرجى مراجعة السبب" : "Request rejected — please review the reason");
             addNotification({
               type: "system",
@@ -350,32 +385,32 @@ export default function ExpoDetail() {
 
   const handleConfirmPayment = () => {
     if (!holdBooth || !selectedBooth || !pendingBookingId) return;
+    const remainingAmount = holdBooth.price * 0.95;
 
-    // 1. تحديث حالة الحجز إلى pending_payment
+    // 1. تحديث حالة الحجز إلى confirmed
     updateBookingStatus(pendingBookingId, "pending_payment");
 
-    // 2. إنشاء سجل دفع (عربون 5%)
-    const depositAmount = holdBooth.price * 0.05;
+    // 2. إنشاء سجل دفع المتبقي 95%
     addPayment({
       bookingId: pendingBookingId,
-      amount: depositAmount,
+      amount: remainingAmount,
       method: "Credit Card",
-      type: "deposit",
-      descAr: t("expoDetail.depositDesc").replace("{code}", holdBooth.code).replace("{expo}", expo.nameAr),
-      descEn: `Deposit for Booth ${holdBooth.code} — ${expo.nameEn}`,
+      type: "full_payment",
+      descAr: `دفعة إتمام الحجز للجناح ${holdBooth.code} — ${expo.nameAr}`,
+      descEn: `Final payment for Booth ${holdBooth.code} — ${expo.nameEn}`,
     });
 
-    // 3. تحديث المبلغ المدفوع
-    updateBookingPayment(pendingBookingId, depositAmount);
+    // 3. تحديث المبلغ المدفوع (العربون + المتبقي)
+    updateBookingPayment(pendingBookingId, holdBooth.price);
 
     // 4. إضافة إشعار
     addNotification({
       type: "booking",
-      titleAr: t("expoDetail.newBookingNotif").replace("{code}", holdBooth.code),
-      titleEn: `Payment Confirmed — Booth ${holdBooth.code}`,
+      titleAr: `تم تأكيد الحجز — الجناح ${holdBooth.code}`,
+      titleEn: `Booking Confirmed — Booth ${holdBooth.code}`,
       message: isArabicLike
-        ? `تم دفع العربون ${depositAmount.toLocaleString()} ر.س للجناح ${holdBooth.code} — رقم الحجز: ${pendingBookingId}`
-        : `Deposit of ${depositAmount.toLocaleString()} SAR paid for Booth ${holdBooth.code} — Booking: ${pendingBookingId}`,
+        ? `تم دفع المبلغ المتبقي ${remainingAmount.toLocaleString()} ر.س للجناح ${holdBooth.code} — رقم الحجز: ${pendingBookingId}`
+        : `Remaining ${remainingAmount.toLocaleString()} SAR paid for Booth ${holdBooth.code} — Booking: ${pendingBookingId}`,
       link: "/bookings",
     });
 
@@ -546,6 +581,85 @@ export default function ExpoDetail() {
           </div>
         ))}
       </div>
+
+      {/* Action Buttons: Visit Request + Compare */}
+      <div className="flex gap-3 flex-wrap">
+        <button
+          onClick={() => setShowVisitRequest(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all hover:scale-[1.02]" style={{ backgroundColor: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)", color: "#C5A55A" }}
+        >
+          <MapPin size={14} />
+          {isArabicLike ? "طلب زيارة الموقع — 1,500 ر.س" : "Request Site Visit — 1,500 SAR"}
+        </button>
+      </div>
+
+      {/* Visit Request Modal */}
+      <AnimatePresence>
+        {showVisitRequest && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
+            onClick={() => setShowVisitRequest(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card rounded-2xl p-6 max-w-md w-full space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(197,165,90,0.1)", border: "2px solid rgba(197,165,90,0.2)" }}>
+                  <MapPin size={28} className="text-[#C5A55A]" />
+                </div>
+                <h3 className="text-lg font-bold t-secondary mb-1">
+                  {isArabicLike ? "طلب زيارة الموقع" : "Request Site Visit"}
+                </h3>
+                <p className="text-xs t-tertiary leading-relaxed">
+                  {isArabicLike
+                    ? "يمكنك زيارة الموقع والاطلاع على الوحدات المتاحة ميدانياً قبل اتخاذ قرار الحجز. سيتم ترتيب الزيارة مع فريق مهام إكسبو خلال 24 ساعة."
+                    : "Visit the site and view available units in person before making a booking decision. The visit will be arranged with the Maham Expo team within 24 hours."}
+                </p>
+              </div>
+
+              <div className="glass-card rounded-xl p-4 space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="t-tertiary">{isArabicLike ? "رسوم الزيارة" : "Visit Fee"}</span>
+                  <span className="t-secondary font-bold font-['Inter']">1,500 {t("common.sar")}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="t-tertiary">{isArabicLike ? "المدة" : "Duration"}</span>
+                  <span className="t-secondary">{isArabicLike ? "ساعتان" : "2 hours"}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="t-tertiary">{isArabicLike ? "يشمل" : "Includes"}</span>
+                  <span className="t-secondary">{isArabicLike ? "جولة + مرافق + استشارة" : "Tour + Guide + Consultation"}</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl text-[9px] t-muted" style={{ backgroundColor: "rgba(74,222,128,0.03)", border: "1px solid rgba(74,222,128,0.1)" }}>
+                {isArabicLike
+                  ? "ملاحظة: في حال حجز وحدة بعد الزيارة، يتم خصم رسوم الزيارة من إجمالي قيمة العقد."
+                  : "Note: If you book a unit after the visit, the visit fee will be deducted from the total contract value."}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowVisitRequest(false)}
+                  className="flex-1 glass-card py-2.5 rounded-xl text-xs t-tertiary hover:t-secondary transition-colors"
+                >
+                  {isArabicLike ? "إلغاء" : "Cancel"}
+                </button>
+                <button
+                  onClick={handleRequestVisit}
+                  className="flex-1 btn-gold py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 size={12} />
+                  {isArabicLike ? "تأكيد طلب الزيارة" : "Confirm Visit Request"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
@@ -719,11 +833,12 @@ export default function ExpoDetail() {
                   <div className="flex items-center justify-between mb-2">
                     {[
                       { key: "confirm", ar: "التأكيد", en: "Confirm" },
+                      { key: "deposit_info", ar: "العربون", en: "Deposit" },
                       { key: "contract", ar: "العقد", en: "Contract" },
                       { key: "review", ar: "المراجعة", en: "Review" },
                       { key: "payment", ar: "الدفع", en: "Payment" },
                     ].map((step, i, arr) => {
-                      const stepOrder = ["confirm", "contract", "review", "approved", "payment"];
+                      const stepOrder = ["confirm", "deposit_info", "deposit_pay", "contract", "review", "approved", "payment"];
                       const currentIdx = stepOrder.indexOf(bookingStep);
                       const stepIdx = stepOrder.indexOf(step.key);
                       const isActive = stepIdx <= currentIdx;
@@ -839,6 +954,84 @@ export default function ExpoDetail() {
                 </div>
               )}
 
+              {/* Deposit Info Step - توضيح العربون */}
+              {bookingStep === "deposit_info" && holdBooth && (
+                <div className="space-y-3">
+                  <div className="glass-card rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CreditCard size={16} className="text-[#C5A55A]" />
+                      <h4 className="text-sm font-bold t-primary">{isArabicLike ? "عربون تثبيت الحجز" : "Booking Deposit"}</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="t-secondary">{isArabicLike ? "سعر الوحدة" : "Unit Price"}</span>
+                        <span className="t-primary font-bold font-['Inter']">{holdBooth.price.toLocaleString()} {isArabicLike ? "ر.س" : "SAR"}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="t-secondary">{isArabicLike ? "نسبة العربون" : "Deposit Rate"}</span>
+                        <span className="text-[#C5A55A] font-bold font-['Inter']">5%</span>
+                      </div>
+                      <div className="border-t border-[var(--glass-border)] pt-2 flex justify-between text-xs">
+                        <span className="t-primary font-bold">{isArabicLike ? "مبلغ العربون المطلوب" : "Required Deposit"}</span>
+                        <span className="text-[#C5A55A] font-bold text-base font-['Inter']">{(holdBooth.price * 0.05).toLocaleString()} {isArabicLike ? "ر.س" : "SAR"}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="glass-card rounded-xl p-3 border-l-2 border-amber-500/50">
+                    <div className="flex items-start gap-2">
+                      <Info size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                      <div className="text-[10px] t-secondary leading-relaxed space-y-1">
+                        <p className="font-semibold t-primary">{isArabicLike ? "سياسة العربون:" : "Deposit Policy:"}</p>
+                        <p>{isArabicLike ? "• يُدفع العربون (5%) لتثبيت حجزك قبل إرسال الطلب للمشرف" : "• Deposit (5%) is paid to secure your booking before supervisor review"}</p>
+                        <p>{isArabicLike ? "• سيتم مراجعة طلبك خلال 30 دقيقة كحد أقصى" : "• Your request will be reviewed within 30 minutes maximum"}</p>
+                        <p className="text-green-400">{isArabicLike ? "• في حال الرفض: يُسترد العربون كاملاً خلال 5-7 أيام عمل" : "• If rejected: deposit is fully refunded within 5-7 business days"}</p>
+                        <p>{isArabicLike ? "• في حال الموافقة: يُخصم العربون من إجمالي المبلغ عند إتمام الدفع" : "• If approved: deposit is deducted from total amount upon final payment"}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={handleAcceptDepositTerms} className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                    <CreditCard size={14} />
+                    {isArabicLike ? "موافق — المتابعة لدفع العربون" : "Agree — Proceed to Pay Deposit"}
+                  </button>
+                  <button onClick={() => setBookingStep("confirm")} className="w-full glass-card py-2.5 rounded-xl text-xs t-tertiary hover:t-secondary transition-colors">
+                    {isArabicLike ? "رجوع" : "Back"}
+                  </button>
+                </div>
+              )}
+
+              {/* Deposit Payment Step */}
+              {bookingStep === "deposit_pay" && holdBooth && (
+                <div className="space-y-3">
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(197,165,90,0.1)", border: "2px solid rgba(197,165,90,0.3)" }}>
+                      <CreditCard size={24} className="text-[#C5A55A]" />
+                    </div>
+                    <h4 className="text-sm font-bold t-primary mb-1">{isArabicLike ? "دفع العربون" : "Pay Deposit"}</h4>
+                    <p className="text-2xl font-bold text-[#C5A55A] font-['Inter'] mb-1">{(holdBooth.price * 0.05).toLocaleString()} <span className="text-sm">{isArabicLike ? "ر.س" : "SAR"}</span></p>
+                    <p className="text-[10px] t-muted">{isArabicLike ? "شامل ضريبة القيمة المضافة" : "VAT included"}</p>
+                  </div>
+                  <div className="glass-card rounded-xl p-3">
+                    <p className="text-[10px] t-secondary text-center">{isArabicLike ? "اختر طريقة الدفع" : "Select Payment Method"}</p>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {[
+                        { icon: "💳", label: isArabicLike ? "بطاقة ائتمان" : "Credit Card" },
+                        { icon: "🏬", label: isArabicLike ? "مدى" : "Mada" },
+                        { icon: "🏦", label: isArabicLike ? "تحويل بنكي" : "Bank Transfer" },
+                        { icon: "📱", label: "Apple Pay" },
+                      ].map((m, i) => (
+                        <button key={i} onClick={handlePayDeposit} className="glass-card p-2.5 rounded-lg text-center hover:border-[#C5A55A]/50 transition-all border border-transparent">
+                          <span className="text-lg block mb-0.5">{m.icon}</span>
+                          <span className="text-[10px] t-secondary">{m.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={() => setBookingStep("deposit_info")} className="w-full glass-card py-2.5 rounded-xl text-xs t-tertiary hover:t-secondary transition-colors">
+                    {isArabicLike ? "رجوع" : "Back"}
+                  </button>
+                </div>
+              )}
+
               {bookingStep === "contract" && selectedBooth && (
                 <ContractPreview
                   boothCode={selectedBooth.code}
@@ -932,8 +1125,8 @@ export default function ExpoDetail() {
                     </h4>
                     <p className="text-[10px] t-tertiary leading-relaxed mb-3">
                       {isArabicLike
-                        ? "تمت الموافقة على طلبك من قبل المشرف. يمكنك الآن إتمام الدفع لتأكيد الحجز. سيتم إرسال رابط الدفع أيضاً عبر SMS والبريد الإلكتروني."
-                        : "Your request has been approved by the supervisor. You can now complete the payment to confirm your booking. A payment link will also be sent via SMS and email."}
+                        ? `تمت الموافقة على طلبك من قبل المشرف. تم دفع العربون (${(selectedBooth!.price * 0.05).toLocaleString()} ر.س) مسبقاً. المتبقي: ${(selectedBooth!.price * 0.95).toLocaleString()} ر.س لإتمام الحجز.`
+                        : `Your request has been approved. Deposit (${(selectedBooth!.price * 0.05).toLocaleString()} SAR) already paid. Remaining: ${(selectedBooth!.price * 0.95).toLocaleString()} SAR to complete booking.`}
                     </p>
                     <div className="flex items-center justify-center gap-3 mb-3">
                       <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(74,222,128,0.08)" }}>
@@ -956,10 +1149,10 @@ export default function ExpoDetail() {
                     className="w-full btn-gold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 font-bold"
                   >
                     <CreditCard size={14} />
-                    {isArabicLike ? `ادفع الآن — ${(selectedBooth!.price * 0.05).toLocaleString()} ${t("common.sar")}` : `Pay Now — ${(selectedBooth!.price * 0.05).toLocaleString()} ${t("common.sar")}`}
+                    {isArabicLike ? `ادفع المتبقي — ${(selectedBooth!.price * 0.95).toLocaleString()} ${t("common.sar")}` : `Pay Remaining — ${(selectedBooth!.price * 0.95).toLocaleString()} ${t("common.sar")}`}
                   </button>
-                  <p className="text-[8px] t-muted text-center">
-                    {isArabicLike ? "يجب إتمام الدفع خلال فترة التثبيت المؤقت" : "Payment must be completed within the hold period"}
+                    <p className="text-[8px] t-muted text-center">
+                    {isArabicLike ? "يجب إتمام الدفع خلال فترة التثبيت المؤقت — العربون تم دفعه مسبقاً" : "Payment must be completed within the hold period — deposit already paid"}
                   </p>
                 </div>
               )}
@@ -979,6 +1172,20 @@ export default function ExpoDetail() {
                         ? "نأسف، تم رفض طلبك من قبل الجهة المشغلة. يمكنك التواصل مع الدعم أو اختيار وحدة أخرى."
                         : "Sorry, your request has been rejected by the operator. You can contact support or select another unit."}
                     </p>
+                    {/* Deposit Refund Notice */}
+                    <div className="p-3 rounded-xl mb-3" style={{ backgroundColor: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)" }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <CreditCard size={12} className="text-green-400" />
+                        <span className="text-[10px] text-green-400 font-bold">
+                          {isArabicLike ? "استرداد العربون" : "Deposit Refund"}
+                        </span>
+                      </div>
+                      <p className="text-[9px] t-secondary leading-relaxed">
+                        {isArabicLike
+                          ? `سيتم استرداد مبلغ العربون (${selectedBooth ? (selectedBooth.price * 0.05).toLocaleString() : "0"} ر.س) كاملاً إلى حسابك خلال 5-7 أيام عمل.`
+                          : `Your deposit (${selectedBooth ? (selectedBooth.price * 0.05).toLocaleString() : "0"} SAR) will be fully refunded to your account within 5-7 business days.`}
+                      </p>
+                    </div>
                     {rejectionReason && (
                       <div className="p-2.5 rounded-lg mb-3" style={{ backgroundColor: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
                         <p className="text-[9px] t-muted mb-1">{isArabicLike ? "سبب الرفض:" : "Reason:"}</p>
@@ -1035,16 +1242,16 @@ export default function ExpoDetail() {
                         <span className="t-secondary font-bold font-['Inter']">{selectedBooth.price.toLocaleString()} {t("common.sar")}</span>
                       </div>
                     </div>
-                    <div className="mt-3 p-2.5 rounded-lg text-center" style={{ backgroundColor: "rgba(197,165,90,0.05)", border: "1px solid rgba(197,165,90,0.15)" }}>
-                      <p className="text-[9px] t-tertiary mb-1">{isArabicLike ? "\u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0645\u0637\u0644\u0648\u0628 \u0627\u0644\u0622\u0646" : "Amount Due Now"}</p>
-                      <p className="text-lg font-bold text-[#C5A55A] font-['Inter']">{(selectedBooth.price * 0.05).toLocaleString()} <span className="text-xs">{t("common.sar")}</span></p>
-                      <p className="text-[8px] t-muted">{isArabicLike ? "\u0639\u0631\u0628\u0648\u0646 \u063a\u064a\u0631 \u0645\u0633\u062a\u0631\u062f (5%)" : "Non-refundable deposit (5%)"}</p>
-                    </div>
-                    <div className="mt-2 p-2 rounded-lg" style={{ backgroundColor: "var(--glass-bg)" }}>
-                      <div className="flex justify-between text-[9px]">
-                        <span className="t-tertiary">{isArabicLike ? "\u0627\u0644\u0645\u062a\u0628\u0642\u064a (\u064a\u064f\u062f\u0641\u0639 \u0642\u0628\u0644 30 \u064a\u0648\u0645\u0627\u064b \u0645\u0646 \u0627\u0644\u0645\u0639\u0631\u0636)" : "Remaining (due 30 days before expo)"}</span>
-                        <span className="t-secondary font-['Inter']">{(selectedBooth.price * 0.95).toLocaleString()} {t("common.sar")}</span>
+                    <div className="mt-3 p-2.5 rounded-lg" style={{ backgroundColor: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)" }}>
+                      <div className="flex justify-between text-[9px] mb-1">
+                        <span className="text-green-400">{isArabicLike ? "العربون المدفوع" : "Deposit Paid"}</span>
+                        <span className="text-green-400 font-['Inter'] font-bold">-{(selectedBooth.price * 0.05).toLocaleString()} {t("common.sar")} ✓</span>
                       </div>
+                    </div>
+                    <div className="mt-2 p-2.5 rounded-lg text-center" style={{ backgroundColor: "rgba(197,165,90,0.05)", border: "1px solid rgba(197,165,90,0.15)" }}>
+                      <p className="text-[9px] t-tertiary mb-1">{isArabicLike ? "المبلغ المتبقي المطلوب" : "Remaining Amount Due"}</p>
+                      <p className="text-lg font-bold text-[#C5A55A] font-['Inter']">{(selectedBooth.price * 0.95).toLocaleString()} <span className="text-xs">{t("common.sar")}</span></p>
+                      <p className="text-[8px] t-muted">{isArabicLike ? "إجمالي الوحدة بعد خصم العربون" : "Unit total after deposit deduction"}</p>
                     </div>
                   </div>
 
@@ -1055,7 +1262,7 @@ export default function ExpoDetail() {
                       <span className="text-[9px] font-bold text-yellow-400">{isArabicLike ? "\u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0625\u0644\u063a\u0627\u0621" : "Cancellation Policy"}</span>
                     </div>
                     <div className="space-y-1 text-[8px] t-muted">
-                      <p>{isArabicLike ? "\u2022 \u0627\u0644\u0639\u0631\u0628\u0648\u0646 \u063a\u064a\u0631 \u0645\u0633\u062a\u0631\u062f \u0641\u064a \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0627\u0644\u0627\u062a" : "\u2022 Deposit is non-refundable"}</p>
+                      <p>{isArabicLike ? "\u2022 \u0627\u0644\u0639\u0631\u0628\u0648\u0646 \u063a\u064a\u0631 \u0645\u0633\u062a\u0631\u062f \u0641\u064a \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0627\u0644\u0627\u062a" : "\u2022 Deposit (5%) is non-refundable after approval and full payment"}</p>
                       <p>{isArabicLike ? "\u2022 \u0625\u0644\u063a\u0627\u0621 \u0642\u0628\u0644 15+ \u064a\u0648\u0645\u0627\u064b: \u0627\u0633\u062a\u0631\u062f\u0627\u062f 50% \u0645\u0646 \u0627\u0644\u0645\u062a\u0628\u0642\u064a" : "\u2022 Cancel 15+ days before: 50% refund of remaining"}</p>
                       <p>{isArabicLike ? "\u2022 \u0625\u0644\u063a\u0627\u0621 \u0642\u0628\u0644 \u0623\u0642\u0644 \u0645\u0646 15 \u064a\u0648\u0645\u0627\u064b: \u0644\u0627 \u064a\u0648\u062c\u062f \u0627\u0633\u062a\u0631\u062f\u0627\u062f" : "\u2022 Cancel <15 days: no refund"}</p>
                     </div>
@@ -1077,10 +1284,10 @@ export default function ExpoDetail() {
                     className="w-full btn-gold py-3 rounded-xl text-sm flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 size={14} />
-                    {t("expoDetail.confirmPayment")} — {(selectedBooth.price * 0.05).toLocaleString()} {t("common.sar")}
+                    {isArabicLike ? `تأكيد الدفع — ${(selectedBooth.price * 0.95).toLocaleString()} ${t("common.sar")}` : `Confirm Payment — ${(selectedBooth.price * 0.95).toLocaleString()} ${t("common.sar")}`}
                   </button>
                   <p className="text-[9px] t-muted text-center">
-                    {t("expoDetail.depositNonRefundable")}
+                    {isArabicLike ? "العربون تم خصمه من الإجمالي — المبلغ المعروض هو المتبقي فقط" : "Deposit deducted from total — amount shown is remaining only"}
                   </p>
                 </div>
               )}
