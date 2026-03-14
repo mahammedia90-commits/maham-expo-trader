@@ -183,7 +183,7 @@ export default function KYC() {
                 <InputField label={t("kyc.crNumberField")} placeholder="XXXXXXXXXX" icon={Hash} field="crNumber" />
                 <div>
                   <label className="text-[11px] t-tertiary mb-1.5 block font-medium">{t("kyc.businessType")}</label>
-                  <select value={formData.businessType} onChange={(e) => updateField("businessType", e.target.value)} className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-sm t-secondary focus:outline-none focus:border-[var(--gold-border)] transition-colors">
+                  <select value={formData.businessType} onChange={(e) => updateField("businessType", e.target.value)} className="w-full bg-[var(--modal-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-sm t-secondary focus:outline-none focus:border-[var(--gold-border)] transition-colors">
                     <option value="">{t("kyc.selectBusinessType")}</option>
                     <option value="food_beverage">{t("kyc.foodBeverage")}</option>
                     <option value="retail">{t("kyc.retail")}</option>
@@ -357,28 +357,23 @@ export default function KYC() {
               </div>
 
               <div className="space-y-3 mb-4">
-                <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
-                  <input type="checkbox" checked={agreedTerms} onChange={(e) => setAgreedTerms(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
-                  <p className="text-xs sm:text-sm t-secondary font-medium">{t("kyc.agreeTerms")}</p>
+                <label className="flex items-start gap-3 p-4 sm:p-5 rounded-xl bg-gold-subtle border-2 border-[var(--gold-border)]/30 cursor-pointer hover:border-[var(--gold-border)] transition-all">
+                  <input type="checkbox" checked={agreedAll} onChange={(e) => {
+                    setAgreedAll(e.target.checked);
+                    setAgreedTerms(e.target.checked);
+                    setAgreedPrivacy(e.target.checked);
+                    setAgreedIP(e.target.checked);
+                    setAgreedPenalty(e.target.checked);
+                  }} className="mt-0.5 accent-[#C5A55A] w-5 h-5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm sm:text-base t-gold font-bold mb-1">{t("kyc.agreeAll")}</p>
+                    <p className="text-[10px] sm:text-xs t-tertiary leading-relaxed">
+                      {isRTL
+                        ? "بالموافقة على هذا الإقرار، أؤكد اطلاعي الكامل على جميع الشروط والأحكام وسياسة الخصوصية وحقوق الملكية الفكرية وجدول المخالفات والجزاءات المنصوص عليها أعلاه، وأوافق على الالتزام بها جميعاً."
+                        : "By agreeing, I confirm that I have fully read and understood all terms & conditions, privacy policy, intellectual property rights, and the violations & penalties schedule stated above, and I agree to comply with all of them."}
+                    </p>
+                  </div>
                 </label>
-                <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
-                  <input type="checkbox" checked={agreedPrivacy} onChange={(e) => setAgreedPrivacy(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
-                  <p className="text-xs sm:text-sm t-secondary font-medium">{t("kyc.agreePrivacy")}</p>
-                </label>
-                <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
-                  <input type="checkbox" checked={agreedIP} onChange={(e) => setAgreedIP(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
-                  <p className="text-xs sm:text-sm t-secondary font-medium">{t("kyc.agreeIP")}</p>
-                </label>
-                <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] cursor-pointer hover:border-[var(--gold-border)] transition-colors">
-                  <input type="checkbox" checked={agreedPenalty} onChange={(e) => setAgreedPenalty(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-4 h-4 flex-shrink-0" />
-                  <p className="text-xs sm:text-sm t-secondary font-medium">{t("kyc.agreePenalty")}</p>
-                </label>
-                <div className="pt-2 border-t border-[var(--glass-border)]">
-                  <label className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-gold-subtle border border-[var(--gold-border)]/20 cursor-pointer hover:border-[var(--gold-border)] transition-colors">
-                    <input type="checkbox" checked={agreedAll} onChange={(e) => setAgreedAll(e.target.checked)} className="mt-0.5 accent-[#C5A55A] w-5 h-5 flex-shrink-0" />
-                    <p className="text-xs sm:text-sm t-gold font-bold">{t("kyc.agreeAll")}</p>
-                  </label>
-                </div>
               </div>
 
               <div className="bg-[var(--glass-bg)] rounded-xl p-3 sm:p-4 border border-[var(--glass-border)]">

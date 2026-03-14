@@ -262,13 +262,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         {/* Logo */}
-        <div className="flex flex-col items-center justify-center py-5 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
-          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-8" : "h-12"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.3)' }} />
+        <div className="flex flex-col items-center justify-center py-6 px-4 border-b" style={{ borderColor: "var(--glass-border)" }}>
+          <img src={LOGO_URL} alt="Maham Expo" className={`object-contain transition-all duration-300 ${collapsed ? "h-10 w-10" : "h-16 w-auto max-w-[200px]"}`} style={{ filter: theme === 'dark' ? 'none' : 'brightness(0.25) contrast(1.2)' }} />
           {!collapsed && (
             <>
-              <p className="text-[8px] t-muted mt-1.5 text-center leading-tight">{isRTL ? "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات" : "Maham Expo for Exhibitions & Conferences"}</p>
-              <p className="text-[7px] t-muted text-center leading-tight font-['Inter']" style={{ opacity: 0.6 }}>{isRTL ? "Maham Expo for Exhibitions & Conferences" : "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات"}</p>
-              <p className="text-[7px] t-muted text-center leading-tight" style={{ opacity: 0.5 }}>{isRTL ? "فرع من شركة مهام للخدمات وتقنية المعلومات" : "A branch of Maham Services & IT Company"}</p>
+              <p className="text-[9px] t-tertiary mt-2 text-center leading-tight font-semibold">{isRTL ? "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات" : "Maham Expo for Exhibitions & Conferences"}</p>
+              <p className="text-[8px] t-muted text-center leading-tight font-['Inter'] mt-0.5" style={{ opacity: 0.7 }}>{isRTL ? "Maham Expo for Exhibitions & Conferences" : "شركة مهام إكسبو لتنظيم المعارض والمؤتمرات"}</p>
+              <p className="text-[7px] t-muted text-center leading-tight mt-0.5" style={{ opacity: 0.5 }}>{isRTL ? "فرع من شركة مهام للخدمات وتقنية المعلومات" : "A branch of Maham Services & IT Company"}</p>
             </>
           )}
         </div>

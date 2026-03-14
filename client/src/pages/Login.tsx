@@ -340,10 +340,10 @@ export default function Login() {
                     </label>
                     <select value={activity} onChange={(e) => setActivity(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl text-sm outline-none appearance-none cursor-pointer"
-                      style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: activity ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      <option value="">{t("auth.activity")}</option>
+                      style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", color: activity ? "var(--text-primary)" : "var(--text-muted)" }}>
+                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{t("auth.activity")}</option>
                       {ACTIVITIES.map(a => (
-                        <option key={a.value} value={a.value}>{(a as any)[lang] || a.en}</option>
+                        <option key={a.value} value={a.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(a as any)[lang] || a.en}</option>
                       ))}
                     </select>
                   </div>
@@ -353,9 +353,9 @@ export default function Login() {
                     </label>
                     <select value={region} onChange={(e) => setRegion(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl text-sm outline-none appearance-none cursor-pointer"
-                      style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: region ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      <option value="">{t("auth.region")}</option>
-                      {REGIONS.map(r => (<option key={r.value} value={r.value}>{(r as any)[lang] || r.en}</option>))}
+                      style={{ background: "var(--modal-bg)", border: "1px solid var(--glass-border)", color: region ? "var(--text-primary)" : "var(--text-muted)" }}>
+                      <option value="" style={{ background: "var(--modal-bg)", color: "var(--text-muted)" }}>{t("auth.region")}</option>
+                      {REGIONS.map(r => (<option key={r.value} value={r.value} style={{ background: "var(--modal-bg)", color: "var(--text-primary)" }}>{(r as any)[lang] || r.en}</option>))}
                     </select>
                   </div>
                 </div>
