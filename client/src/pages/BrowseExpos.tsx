@@ -1,5 +1,6 @@
 /**
  * BrowseExpos — Explore real 2026 Saudi exhibitions and events
+ * ENHANCED: Scarcity, Live Activity, Early Booking, Price Alert, Advanced Filters
  * RULES:
  * 1. Anyone can browse — no restrictions
  * 2. Only KYC-verified traders can book a unit
@@ -8,19 +9,24 @@
  * 5. Investor/organizer info is NEVER shown to traders
  * 6. FULLY LOCALIZED — no hardcoded Arabic strings
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import {
   Building2, Search, MapPin, Calendar, Star,
   Clock, X, Grid3X3, List, Sparkles, CreditCard, Map,
-  Users, TrendingUp, Filter, ChevronDown, Eye
+  Users, TrendingUp, Filter, ChevronDown, Eye, Flame,
+  AlertTriangle, Zap, ArrowRight, Globe, Tag, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import BookingGuard from "@/components/BookingGuard";
 import { events2026, eventCategories, eventStats, type ExpoEvent, type ExpoUnit } from "@/data/events2026";
+
+// Simulated live activity data
+const LIVE_CITIES = ["Dubai", "Istanbul", "Riyadh", "Cairo", "Doha", "Kuwait", "Muscat", "Amman", "Jeddah", "Dammam"];
+const LIVE_CITIES_AR = ["دبي", "إسطنبول", "الرياض", "القاهرة", "الدوحة", "الكويت", "مسقط", "عمّان", "جدة", "الدمام"];
 
 export default function BrowseExpos() {
   const [search, setSearch] = useState("");
@@ -36,23 +42,54 @@ export default function BrowseExpos() {
   const { t, lang, isRTL, dir } = useLanguage();
   const [, navigate] = useLocation();
 
+  // Live Activity State
+  const [liveActivity, setLiveActivity] = useState<{ city: string; mins: number; expo: string } | null>(null);
+  const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({});
+
   const isArabicLike = lang === "ar" || lang === "fa";
 
-  // Helper: get localized category label from eventCategories data
+  // Simulate live activity notifications
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomExpo = events2026[Math.floor(Math.random() * events2026.length)];
+      const cityIdx = Math.floor(Math.random() * LIVE_CITIES.length);
+      setLiveActivity({
+        city: isArabicLike ? LIVE_CITIES_AR[cityIdx] : LIVE_CITIES[cityIdx],
+        mins: Math.floor(Math.random() * 15) + 1,
+        expo: isArabicLike ? randomExpo.nameAr : randomExpo.nameEn,
+      });
+      // Auto-hide after 5s
+      setTimeout(() => setLiveActivity(null), 5000);
+    }, 12000);
+    return () => clearInterval(interval);
+  }, [isArabicLike]);
+
+  // Simulate viewer counts
+  useEffect(() => {
+    const counts: Record<string, number> = {};
+    events2026.forEach(e => {
+      counts[e.id] = Math.floor(Math.random() * 20) + 3;
+    });
+    setViewerCounts(counts);
+    const interval = setInterval(() => {
+      setViewerCounts(prev => {
+        const next = { ...prev };
+        const keys = Object.keys(next);
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        next[key] = Math.max(2, next[key] + (Math.random() > 0.5 ? 1 : -1));
+        return next;
+      });
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
   const getCatLabel = (cat: { ar: string; en: string }) => isArabicLike ? cat.ar : cat.en;
-
-  // Helper: get localized city
-  const getCityLabel = (cityAr: string, cityEn: string) => isArabicLike ? cityAr : cityEn;
-
-  // Helper: get localized expo name
   const getExpoName = (e: ExpoEvent) => isArabicLike ? e.nameAr : e.nameEn;
   const getExpoDesc = (e: ExpoEvent) => isArabicLike ? e.descAr : e.descEn;
   const getExpoCity = (e: ExpoEvent) => isArabicLike ? e.city : e.cityEn;
   const getExpoLocation = (e: ExpoEvent) => isArabicLike ? e.location : e.locationEn;
   const getExpoVenue = (e: ExpoEvent) => isArabicLike ? e.venue : e.venueEn;
   const getExpoCategory = (e: ExpoEvent) => isArabicLike ? e.category : e.categoryEn;
-
-  // Helper: get localized unit info
   const getUnitName = (u: ExpoUnit) => isArabicLike ? u.nameAr : u.nameEn;
   const getUnitType = (u: ExpoUnit) => isArabicLike ? u.type : u.typeEn;
   const getUnitServices = (u: ExpoUnit) => isArabicLike ? u.services : u.servicesEn;
@@ -62,7 +99,6 @@ export default function BrowseExpos() {
     return ["الكل", ...Array.from(set)];
   }, []);
 
-  // Map city Arabic to English for display
   const cityDisplayMap: Record<string, string> = useMemo(() => {
     const map: Record<string, string> = { "الكل": t("common.all") };
     events2026.forEach(e => { map[e.city] = isArabicLike ? e.city : e.cityEn; });
@@ -113,7 +149,23 @@ export default function BrowseExpos() {
     return map[status] || { label: status, color: "var(--text-tertiary)" };
   };
 
-  /** Book a specific unit — creates real booking record */
+  // Scarcity helpers
+  const getScarcityLevel = (expo: ExpoEvent) => {
+    const pct = (expo.availableUnits / expo.totalUnits) * 100;
+    if (pct <= 10) return "critical";
+    if (pct <= 25) return "low";
+    if (pct <= 50) return "medium";
+    return "normal";
+  };
+
+  const isEarlyBooking = (expo: ExpoEvent) => {
+    const start = new Date(expo.dateStart);
+    const now = new Date();
+    const daysUntil = Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return daysUntil > 60;
+  };
+
+  /** Book a specific unit */
   const handleBookUnit = (expo: ExpoEvent, unit: ExpoUnit) => {
     if (!canBook) {
       setSelectedExpo(null);
@@ -159,6 +211,27 @@ export default function BrowseExpos() {
 
   return (
     <div className="space-y-4 sm:space-y-5">
+      {/* Live Activity Banner */}
+      <AnimatePresence>
+        {liveActivity && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -20, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(74, 222, 128, 0.08)", border: "1px solid rgba(74, 222, 128, 0.15)" }}>
+              <div className="w-2 h-2 rounded-full bg-[var(--status-green)] animate-pulse shrink-0" />
+              <Zap size={12} className="text-[var(--status-green)] shrink-0" />
+              <p className="text-[11px] t-secondary flex-1 truncate">
+                {t("incentive.liveActivity").replace("{city}", liveActivity.city).replace("{mins}", String(liveActivity.mins))}
+              </p>
+              <span className="text-[9px] t-muted font-['Inter'] shrink-0">{t("incentive.justBooked")}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -176,6 +249,15 @@ export default function BrowseExpos() {
             <List size={16} />
           </button>
         </div>
+      </div>
+
+      {/* Price Alert Banner */}
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(251, 191, 36, 0.06)", border: "1px solid rgba(251, 191, 36, 0.12)" }}>
+        <AlertTriangle size={13} className="text-[var(--status-yellow)] shrink-0" />
+        <p className="text-[10px] t-secondary flex-1">{t("incentive.priceAlert")}</p>
+        <span className="text-[9px] px-2 py-0.5 rounded-full font-['Inter']" style={{ backgroundColor: "rgba(251, 191, 36, 0.1)", color: "var(--status-yellow)" }}>
+          {t("incentive.priceIncrease")}
+        </span>
       </div>
 
       {/* Search & Category Filters */}
@@ -222,7 +304,7 @@ export default function BrowseExpos() {
                 <div className="flex gap-1 flex-wrap">
                   {eventCategories.slice(8).map(cat => (
                     <button key={cat.ar} onClick={() => setActiveCategory(cat.ar)}
-                      className={`px-1.5 py-0.5 rounded text-[9px] ${activeCategory === cat.ar ? "btn-gold" : "glass-card t-muted"}`}>
+                      className={`px-2 py-0.5 rounded text-[9px] transition-all ${activeCategory === cat.ar ? "bg-gold-subtle t-gold" : "glass-card t-muted"}`}>
                       {getCatLabel(cat)}
                     </button>
                   ))}
@@ -237,7 +319,7 @@ export default function BrowseExpos() {
         )}
       </AnimatePresence>
 
-      {/* Stats Bar */}
+      {/* Stats Bar with Scarcity */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
           { label: t("expos.eventsAvailable"), value: eventStats.openEvents, color: "var(--status-green)", icon: Building2 },
@@ -253,39 +335,77 @@ export default function BrowseExpos() {
         ))}
       </div>
 
-      {/* Results count */}
+      {/* Today's bookings indicator */}
       <div className="flex items-center justify-between">
         <p className="text-[10px] t-muted">{filtered.length} {t("expos.results")} {search && `${t("expos.for")} "${search}"`}</p>
+        <div className="flex items-center gap-1.5">
+          <Flame size={11} className="text-[var(--status-yellow)]" />
+          <span className="text-[10px] t-muted font-['Inter']">
+            {t("incentive.bookedToday").replace("{n}", String(Math.floor(Math.random() * 8) + 5))}
+          </span>
+        </div>
       </div>
 
       {/* Expo Grid */}
       <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4" : "space-y-3"}>
         {filtered.map((expo, i) => {
           const sc = getStatusStyle(expo.status);
+          const scarcity = getScarcityLevel(expo);
+          const early = isEarlyBooking(expo);
+          const viewers = viewerCounts[expo.id] || 0;
           return (
             <motion.div key={expo.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               className="glass-card rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer" onClick={() => setSelectedExpo(expo)}>
               <div className="relative h-36 sm:h-44 overflow-hidden">
                 <img src={expo.image} alt={getExpoName(expo)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--surface-dark), transparent, transparent)" }} />
+                {/* Status Badge */}
                 <span className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-md`}
                   style={{ backgroundColor: `color-mix(in srgb, ${sc.color} 15%, transparent)`, color: sc.color, border: `1px solid color-mix(in srgb, ${sc.color} 25%, transparent)` }}>
                   {sc.label}
                 </span>
-                {expo.featured && (
-                  <span className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} px-2 py-1 rounded-full text-[10px] bg-gold-subtle border-gold flex items-center gap-1`}
-                    style={{ color: "var(--gold-light)", border: "1px solid var(--gold-border)" }}>
-                    <Sparkles size={10} /> {t("expos.featured")}
-                  </span>
+                {/* Featured / Early Booking Badge */}
+                <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex flex-col gap-1`}>
+                  {expo.featured && (
+                    <span className="px-2 py-1 rounded-full text-[10px] bg-gold-subtle flex items-center gap-1"
+                      style={{ color: "var(--gold-light)", border: "1px solid var(--gold-border)" }}>
+                      <Sparkles size={10} /> {t("expos.featured")}
+                    </span>
+                  )}
+                  {early && (
+                    <span className="px-2 py-1 rounded-full text-[10px] flex items-center gap-1 backdrop-blur-md"
+                      style={{ backgroundColor: "rgba(96, 165, 250, 0.15)", color: "#60A5FA", border: "1px solid rgba(96, 165, 250, 0.25)" }}>
+                      <Tag size={9} /> {t("incentive.earlyBadge")}
+                    </span>
+                  )}
+                </div>
+                {/* Bottom badges */}
+                <div className={`absolute bottom-3 ${isRTL ? 'right-3' : 'left-3'} flex items-center gap-1.5`}>
+                  <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                    <Star size={10} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
+                    <span className="text-[10px] text-white font-['Inter']">{expo.rating}</span>
+                  </div>
+                  {/* Viewers now */}
+                  <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+                    <Eye size={10} className="text-white/70" />
+                    <span className="text-[10px] text-white/70 font-['Inter']">{viewers}</span>
+                  </div>
+                </div>
+                {/* Scarcity badge */}
+                {(scarcity === "critical" || scarcity === "low") && (
+                  <div className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'}`}>
+                    <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-medium animate-pulse"
+                      style={{
+                        backgroundColor: scarcity === "critical" ? "rgba(239, 68, 68, 0.2)" : "rgba(251, 191, 36, 0.2)",
+                        color: scarcity === "critical" ? "#EF4444" : "#FBBF24",
+                        border: `1px solid ${scarcity === "critical" ? "rgba(239, 68, 68, 0.3)" : "rgba(251, 191, 36, 0.3)"}`,
+                        backdropFilter: "blur(8px)",
+                      }}>
+                      <Flame size={9} />
+                      {scarcity === "critical" ? t("incentive.almostFull") : t("incentive.scarcity").replace("{n}", String(expo.availableUnits))}
+                    </span>
+                  </div>
                 )}
-                <div className={`absolute bottom-3 ${isRTL ? 'right-3' : 'left-3'} flex items-center gap-1 rounded-full px-2 py-0.5`} style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
-                  <Star size={10} style={{ color: "var(--gold-accent)", fill: "var(--gold-accent)" }} />
-                  <span className="text-[10px] text-white font-['Inter']">{expo.rating}</span>
-                </div>
-                <div className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'} flex items-center gap-1 rounded-full px-2 py-0.5`} style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
-                  <Eye size={10} className="text-white/70" />
-                  <span className="text-[10px] text-white/70 font-['Inter']">{expo.footfall.split(" ")[0]}</span>
-                </div>
               </div>
               <div className="p-3 sm:p-4 overflow-hidden">
                 <h3 className="text-sm font-bold t-primary mb-0.5 truncate">{getExpoName(expo)}</h3>
@@ -294,6 +414,7 @@ export default function BrowseExpos() {
                 <div className="flex items-center gap-3 text-[10px] t-muted mb-3 flex-wrap">
                   <span className="flex items-center gap-1 shrink-0"><MapPin size={10} />{getExpoCity(expo)}</span>
                   <span className="flex items-center gap-1 font-['Inter'] shrink-0"><Calendar size={10} />{expo.dateStart}</span>
+                  <span className="flex items-center gap-1 shrink-0"><Users size={10} />{expo.footfall.split(" ")[0]}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <div className="shrink-0">
@@ -308,6 +429,22 @@ export default function BrowseExpos() {
                     <p className="text-xs t-gold font-['Inter']">{expo.priceRange}</p>
                   </div>
                 </div>
+                {/* Scarcity progress bar */}
+                {(scarcity === "critical" || scarcity === "low" || scarcity === "medium") && (
+                  <div className="mt-2 pt-2" style={{ borderTop: "1px solid var(--glass-border)" }}>
+                    <div className="flex justify-between text-[9px] t-muted mb-1">
+                      <span>{t("expos.occupancy")}</span>
+                      <span className="font-['Inter']">{Math.round(((expo.totalUnits - expo.availableUnits) / expo.totalUnits) * 100)}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--glass-bg)" }}>
+                      <div className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${((expo.totalUnits - expo.availableUnits) / expo.totalUnits) * 100}%`,
+                          backgroundColor: scarcity === "critical" ? "var(--status-red)" : scarcity === "low" ? "var(--status-yellow)" : "var(--gold-accent)"
+                        }} />
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           );
@@ -331,7 +468,7 @@ export default function BrowseExpos() {
             <motion.div
               initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[600px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
+              className="fixed bottom-0 left-0 right-0 max-h-[92vh] lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[640px] lg:max-h-[85vh] z-50 overflow-y-auto rounded-t-2xl lg:rounded-2xl"
               style={{ background: "var(--modal-bg)", borderTop: "1px solid var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }} dir={dir}>
               <div className="flex justify-center pt-3 pb-1 sm:hidden">
                 <div className="w-10 h-1 rounded-full" style={{ background: "var(--glass-border)" }} />
@@ -349,6 +486,24 @@ export default function BrowseExpos() {
               </div>
 
               <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
+                {/* Scarcity Alert in Modal */}
+                {getScarcityLevel(selectedExpo) !== "normal" && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{
+                    backgroundColor: getScarcityLevel(selectedExpo) === "critical" ? "rgba(239, 68, 68, 0.08)" : "rgba(251, 191, 36, 0.08)",
+                    border: `1px solid ${getScarcityLevel(selectedExpo) === "critical" ? "rgba(239, 68, 68, 0.15)" : "rgba(251, 191, 36, 0.15)"}`,
+                  }}>
+                    <Flame size={14} className={getScarcityLevel(selectedExpo) === "critical" ? "text-[var(--status-red)]" : "text-[var(--status-yellow)]"} />
+                    <p className="text-[11px] t-secondary flex-1">
+                      {t("incentive.scarcity").replace("{n}", String(selectedExpo.availableUnits))}
+                    </p>
+                    {viewerCounts[selectedExpo.id] && (
+                      <span className="text-[9px] t-muted font-['Inter']">
+                        {t("incentive.viewersNow").replace("{n}", String(viewerCounts[selectedExpo.id]))}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-xs t-tertiary leading-relaxed">{getExpoDesc(selectedExpo)}</p>
                 {!isArabicLike && <p className="text-[10px] t-muted font-['Inter'] leading-relaxed">{selectedExpo.descAr}</p>}
                 {isArabicLike && <p className="text-[10px] t-muted font-['Inter'] leading-relaxed">{selectedExpo.descEn}</p>}
@@ -372,6 +527,53 @@ export default function BrowseExpos() {
                   ))}
                 </div>
 
+                {/* Participating Countries */}
+                <div>
+                  <h4 className="text-[11px] t-secondary font-medium mb-2 flex items-center gap-1.5">
+                    <Globe size={12} className="t-gold" /> {t("expo.countries")}
+                  </h4>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {["🇸🇦", "🇦🇪", "🇶🇦", "🇰🇼", "🇧🇭", "🇴🇲", "🇪🇬", "🇹🇷", "🇨🇳", "🇬🇧", "🇺🇸", "🇩🇪"].map((flag, i) => (
+                      <span key={i} className="text-base">{flag}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sponsorship Opportunities */}
+                <div>
+                  <h4 className="text-[11px] t-secondary font-medium mb-2 flex items-center gap-1.5">
+                    <Sparkles size={12} className="t-gold" /> {t("sponsor.title")}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { name: t("sponsor.gold"), price: "150,000", color: "#C5A55A", available: true },
+                      { name: t("sponsor.silver"), price: "75,000", color: "#94A3B8", available: true },
+                      { name: t("sponsor.startup"), price: "25,000", color: "#60A5FA", available: true },
+                      { name: t("sponsor.innovation"), price: "50,000", color: "#A78BFA", available: false },
+                    ].map((sp, i) => (
+                      <div key={i} className="p-2 rounded-lg" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-medium" style={{ color: sp.color }}>{sp.name}</span>
+                          <span className="text-[8px] px-1.5 py-0.5 rounded-full" style={{
+                            backgroundColor: sp.available ? "rgba(74, 222, 128, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                            color: sp.available ? "var(--status-green)" : "var(--status-red)",
+                          }}>
+                            {sp.available ? t("sponsor.available") : t("sponsor.reserved")}
+                          </span>
+                        </div>
+                        <p className="text-[10px] t-gold font-['Inter']">{sp.price} {t("expos.sar")}</p>
+                        {sp.available && (
+                          <button onClick={(e) => { e.stopPropagation(); toast.info(t("sponsor.inquire")); }}
+                            className="mt-1.5 w-full text-[9px] py-1 rounded text-center t-gold" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--gold-border)" }}>
+                            {t("sponsor.inquire")}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Occupancy Bar */}
                 <div>
                   <div className="flex justify-between text-[10px] t-muted mb-1.5">
                     <span>{t("expos.occupancy")}</span>
@@ -387,10 +589,18 @@ export default function BrowseExpos() {
                   </div>
                 </div>
 
+                {/* Early Booking Incentive */}
+                {isEarlyBooking(selectedExpo) && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(96, 165, 250, 0.08)", border: "1px solid rgba(96, 165, 250, 0.15)" }}>
+                    <Tag size={13} className="text-[#60A5FA] shrink-0" />
+                    <p className="text-[11px] t-secondary">{t("incentive.earlyBooking")}</p>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pb-2">
                   {selectedExpo.availableUnits > 0 && (selectedExpo.status === "open" || selectedExpo.status === "closing_soon") ? (
                     <>
-                      <Link href="/map" className="flex-1">
+                      <Link href={`/expos/${selectedExpo.id}`} className="flex-1">
                         <button className="w-full btn-gold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
                           <Map size={15} /> {t("expos.viewMap")}
                         </button>
@@ -445,7 +655,12 @@ export default function BrowseExpos() {
                   </button>
                 </div>
 
-                {/* KYC Requirement Notice */}
+                {/* Countdown incentive */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-3" style={{ backgroundColor: "rgba(197, 165, 90, 0.06)", border: "1px solid rgba(197, 165, 90, 0.12)" }}>
+                  <Clock size={12} className="t-gold shrink-0" />
+                  <p className="text-[10px] t-secondary">{t("incentive.countdown")}</p>
+                </div>
+
                 {!canBook && (
                   <div className="p-3 rounded-xl mb-3 bg-[var(--status-red)]/5 border border-[var(--status-red)]/10">
                     <p className="text-[11px] text-[var(--status-red)]">{t("expos.kycRequired")}</p>

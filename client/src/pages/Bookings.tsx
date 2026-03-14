@@ -8,7 +8,7 @@ import { Link } from "wouter";
 import {
   CalendarCheck, Search, Eye, Download, Plus, CheckCircle,
   AlertTriangle, XCircle, Clock, CreditCard, FileText, MapPin,
-  Shield, ChevronDown, X, Building2, Zap, Lock
+  Shield, ChevronDown, X, Building2, Zap, Lock, Flame, Tag
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -77,6 +77,17 @@ export default function Bookings() {
           </button>
         )}
       </div>
+
+      {/* Price Alert / Incentive Banner */}
+      {bookings.some(b => b.status === "pending_payment") && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(251, 191, 36, 0.06)", border: "1px solid rgba(251, 191, 36, 0.12)" }}>
+          <Flame size={13} className="text-[var(--status-yellow)] shrink-0" />
+          <p className="text-[10px] t-secondary flex-1">{t("incentive.countdown")}</p>
+          <Link href="/payments">
+            <span className="text-[10px] t-gold underline cursor-pointer">{t("payments.payNow")}</span>
+          </Link>
+        </div>
+      )}
 
       {/* KYC Notice */}
       {!canBook && (

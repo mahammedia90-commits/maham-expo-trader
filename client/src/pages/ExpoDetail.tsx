@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, ArrowLeft, MapPin, Calendar, Users, Star, Clock, Shield,
   CheckCircle2, Lock, Sparkles, Building2, Ruler, Zap, Eye,
-  CreditCard, Timer, Info
+  CreditCard, Timer, Info, Flame, Globe, AlertTriangle, Tag
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -282,6 +282,18 @@ export default function ExpoDetail() {
     sold: booths.filter(b => b.status === "sold").length,
   }), [booths]);
 
+  // Simulated viewer count
+  const [viewerCount, setViewerCount] = useState(Math.floor(Math.random() * 15) + 8);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setViewerCount(prev => Math.max(3, prev + (Math.random() > 0.5 ? 1 : -1)));
+    }, 7000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const scarcityPct = (stats.available / stats.total) * 100;
+  const isScarcity = scarcityPct <= 30;
+
   const BackArrow = isRTL ? ArrowRight : ArrowLeft;
 
   return (
@@ -293,10 +305,33 @@ export default function ExpoDetail() {
             <BackArrow size={18} />
           </button>
         </Link>
-        <div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold t-primary">{t("expoDetail.floorPlan")}</h2>
+          <p className="text-[10px] t-muted truncate">{isArabicLike ? expo.nameAr : expo.nameEn}</p>
+        </div>
+        {/* Live viewers */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(74, 222, 128, 0.08)", border: "1px solid rgba(74, 222, 128, 0.15)" }}>
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--status-green)] animate-pulse" />
+          <Eye size={11} className="text-[var(--status-green)]" />
+          <span className="text-[10px] text-[var(--status-green)] font-['Inter']">{viewerCount}</span>
+          <span className="text-[9px] t-muted">{t("incentive.viewersNow").replace("{n}", "")}</span>
         </div>
       </div>
+
+      {/* Scarcity Alert */}
+      {isScarcity && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl"
+          style={{ backgroundColor: scarcityPct <= 15 ? "rgba(239, 68, 68, 0.08)" : "rgba(251, 191, 36, 0.08)", border: `1px solid ${scarcityPct <= 15 ? "rgba(239, 68, 68, 0.15)" : "rgba(251, 191, 36, 0.15)"}` }}>
+          <Flame size={14} className={scarcityPct <= 15 ? "text-[var(--status-red)] animate-pulse" : "text-[var(--status-yellow)]"} />
+          <p className="text-[11px] t-secondary flex-1">
+            {t("incentive.scarcity").replace("{n}", String(stats.available))}
+          </p>
+          <span className="text-[9px] t-muted font-['Inter']">
+            {t("incentive.viewersNow").replace("{n}", String(viewerCount))}
+          </span>
+        </motion.div>
+      )}
 
       {/* Countdown Banner */}
       <AnimatePresence>
@@ -645,6 +680,50 @@ export default function ExpoDetail() {
             <p className="text-[11px] t-tertiary leading-relaxed">
               {t("expoDetail.aiSuggestionText")}
             </p>
+          </div>
+
+          {/* Participating Countries */}
+          <div className="glass-card rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe size={14} className="t-gold" />
+              <h4 className="text-xs font-bold t-secondary">{t("expo.countries")}</h4>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {["\u{1F1F8}\u{1F1E6}", "\u{1F1E6}\u{1F1EA}", "\u{1F1F6}\u{1F1E6}", "\u{1F1F0}\u{1F1FC}", "\u{1F1E7}\u{1F1ED}", "\u{1F1F4}\u{1F1F2}", "\u{1F1EA}\u{1F1EC}", "\u{1F1F9}\u{1F1F7}", "\u{1F1E8}\u{1F1F3}", "\u{1F1EC}\u{1F1E7}"].map((flag, i) => (
+                <span key={i} className="text-lg">{flag}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Sponsorship Opportunities */}
+          <div className="glass-card rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={14} className="t-gold" />
+              <h4 className="text-xs font-bold t-secondary">{t("sponsor.title")}</h4>
+            </div>
+            <div className="space-y-2">
+              {[
+                { name: t("sponsor.gold"), price: "150,000", color: "#C5A55A", avail: true },
+                { name: t("sponsor.silver"), price: "75,000", color: "#94A3B8", avail: true },
+                { name: t("sponsor.startup"), price: "25,000", color: "#60A5FA", avail: false },
+              ].map((sp, i) => (
+                <div key={i} className="flex items-center justify-between p-2 rounded-lg" style={{ backgroundColor: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: sp.color }} />
+                    <span className="text-[10px] t-secondary">{sp.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] t-gold font-['Inter']">{sp.price} {t("common.sar")}</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded-full" style={{
+                      backgroundColor: sp.avail ? "rgba(74, 222, 128, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                      color: sp.avail ? "var(--status-green)" : "var(--status-red)",
+                    }}>
+                      {sp.avail ? t("sponsor.available") : t("sponsor.reserved")}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

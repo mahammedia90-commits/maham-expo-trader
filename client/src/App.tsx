@@ -29,6 +29,7 @@ const KYC = lazy(() => import("./pages/KYC"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const BrowseExpos = lazy(() => import("./pages/BrowseExpos"));
 const ExpoDetail = lazy(() => import("./pages/ExpoDetail"));
+const CRM = lazy(() => import("./pages/CRM"));
 
 function PageLoader() {
   return (
@@ -70,6 +71,7 @@ function Router() {
         <Route path="/notifications" component={() => <DashPage><Notifications /></DashPage>} />
         <Route path="/kyc" component={() => <DashPage><KYC /></DashPage>} />
         <Route path="/help" component={() => <DashPage><HelpCenter /></DashPage>} />
+        <Route path="/crm" component={() => <DashPage><CRM /></DashPage>} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

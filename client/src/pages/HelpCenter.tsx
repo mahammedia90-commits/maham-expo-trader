@@ -59,8 +59,8 @@ export default function HelpCenter() {
       {/* Contact Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
-          { icon: Phone, label: t("help.phone"), value: "+966 11 XXX XXXX" },
-          { icon: Mail, label: t("help.email"), value: "support@mahamexpo.com" },
+          { icon: Phone, label: t("help.phone"), value: "+966 53 555 5900" },
+          { icon: Mail, label: t("help.email"), value: "info@mahamexpo.sa" },
           { icon: MessageSquare, label: t("help.liveChat"), value: t("help.available247") },
           { icon: Clock, label: t("help.workHours"), value: t("help.workHoursValue") },
         ].map((c, i) => (
