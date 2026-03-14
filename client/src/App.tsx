@@ -18,7 +18,6 @@ const ExpoMap = lazy(() => import("./pages/ExpoMap"));
 const Bookings = lazy(() => import("./pages/Bookings"));
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Payments = lazy(() => import("./pages/Payments"));
-const Operations = lazy(() => import("./pages/Operations"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -64,7 +63,7 @@ function Router() {
         <Route path="/bookings" component={() => <DashPage><Bookings /></DashPage>} />
         <Route path="/contracts" component={() => <DashPage><Contracts /></DashPage>} />
         <Route path="/payments" component={() => <DashPage><Payments /></DashPage>} />
-        <Route path="/operations" component={() => <DashPage><Operations /></DashPage>} />
+        <Route path="/operations" component={() => <DashPage><ExhibitorServices /></DashPage>} />
         <Route path="/analytics" component={() => <DashPage><Analytics /></DashPage>} />
         <Route path="/ai-assistant" component={() => <DashPage><AIAssistant /></DashPage>} />
         <Route path="/profile" component={() => <DashPage><Profile /></DashPage>} />

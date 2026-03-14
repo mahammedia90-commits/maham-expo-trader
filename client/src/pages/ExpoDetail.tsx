@@ -85,27 +85,35 @@ const boothBorders: Record<BoothStatus, string> = {
 
 const generateBooths = (): Booth[] => {
   const booths: Booth[] = [];
-  // Zones aligned with InteractiveFloorMap (MAP_W=1200, MAP_H=700)
+  // 8 Zones aligned with InteractiveFloorMap (MAP_W=1800, MAP_H=900)
+  // "On His Steps" — 8 real zones from Makkah to Madinah
   const zones = [
-    { name: "A", startX: 65, startY: 55 },   // Main Zone
-    { name: "B", startX: 65, startY: 395 },   // Tech Zone
-    { name: "C", startX: 635, startY: 55 },   // Services Zone
-    { name: "D", startX: 635, startY: 395 },  // VIP Zone
+    // Top row
+    { name: "A", startX: 55, startY: 50, cols: 4, rows: 4 },   // غار ثور
+    { name: "B", startX: 485, startY: 50, cols: 4, rows: 4 },  // الجحفة
+    { name: "C", startX: 915, startY: 50, cols: 4, rows: 4 },  // الريم
+    { name: "D", startX: 1345, startY: 50, cols: 4, rows: 4 }, // العرج
+    // Bottom row
+    { name: "E", startX: 55, startY: 510, cols: 4, rows: 4 },   // القاهة
+    { name: "F", startX: 485, startY: 510, cols: 4, rows: 4 },  // الروحاء
+    { name: "G", startX: 915, startY: 510, cols: 4, rows: 4 },  // ذو الحليفة
+    { name: "H", startX: 1345, startY: 510, cols: 4, rows: 4 }, // المدينة المنورة
   ];
 
   const types: { type: BoothType; w: number; h: number; price: number; size: string; sizeM2: number; featureKeys: string[]; faces: number; dimensions: string }[] = [
-    { type: "standard", w: 70, h: 55, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"], faces: 1, dimensions: "3m × 3m" },
-    { type: "premium", w: 85, h: 55, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"], faces: 1, dimensions: "4m × 3m" },
-    { type: "corner", w: 85, h: 65, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"], faces: 2, dimensions: "4m × 4m" },
-    { type: "island", w: 100, h: 75, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"], faces: 4, dimensions: "6m × 4m" },
+    { type: "standard", w: 75, h: 55, price: 8000, size: "3×3", sizeM2: 9, featureKeys: ["expoDetail.electricity", "expoDetail.internet"], faces: 1, dimensions: "3m × 3m" },
+    { type: "premium", w: 80, h: 55, price: 15000, size: "4×3", sizeM2: 12, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.premiumLocation"], faces: 1, dimensions: "4m × 3m" },
+    { type: "corner", w: 80, h: 60, price: 20000, size: "4×4", sizeM2: 16, featureKeys: ["expoDetail.electricity", "expoDetail.internet", "expoDetail.twoFacades"], faces: 2, dimensions: "4m × 4m" },
+    { type: "island", w: 90, h: 65, price: 45000, size: "6×4", sizeM2: 24, featureKeys: ["expoDetail.electricity3Phase", "expoDetail.highSpeedInternet", "expoDetail.centralAC", "expoDetail.ledScreen"], faces: 4, dimensions: "6m × 4m" },
+    { type: "kiosk", w: 55, h: 45, price: 5000, size: "2×2", sizeM2: 4, featureKeys: ["expoDetail.electricity"], faces: 1, dimensions: "2m × 2m" },
   ];
 
-  const statuses: BoothStatus[] = ["available", "available", "available", "reserved", "sold", "available"];
+  const statuses: BoothStatus[] = ["available", "available", "available", "reserved", "sold", "available", "available", "reserved"];
 
   zones.forEach((zone) => {
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 5; col++) {
-        const idx = row * 5 + col;
+    for (let row = 0; row < zone.rows; row++) {
+      for (let col = 0; col < zone.cols; col++) {
+        const idx = row * zone.cols + col;
         const tp = types[idx % types.length];
         const s = statuses[(idx + zone.name.charCodeAt(0)) % statuses.length];
         booths.push({
@@ -114,10 +122,10 @@ const generateBooths = (): Booth[] => {
           type: tp.type,
           size: tp.size,
           sizeM2: tp.sizeM2,
-          price: tp.price,
+          price: tp.price + (zone.name === "H" ? 5000 : zone.name === "D" ? 3000 : 0), // المدينة والعرج أغلى
           status: s,
           x: zone.startX + col * 90,
-          y: zone.startY + row * 75,
+          y: zone.startY + 40 + row * 70,
           w: tp.w,
           h: tp.h,
           zone: zone.name,
@@ -547,10 +555,14 @@ export default function ExpoDetail() {
           className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs t-secondary focus:outline-none gold-focus"
         >
           <option value="all" className="bg-[#0A0A12]">{t("expoDetail.filterAllZones")}</option>
-          <option value="A" className="bg-[#0A0A12]">{t("expoDetail.mainZone")}</option>
-          <option value="B" className="bg-[#0A0A12]">{t("expoDetail.techZone")}</option>
-          <option value="C" className="bg-[#0A0A12]">{t("expoDetail.servicesZone")}</option>
-          <option value="D" className="bg-[#0A0A12]">{t("expoDetail.vipZone")}</option>
+          <option value="A" className="bg-[#0A0A12]">{isArabicLike ? "غار ثور" : "Ghar Thawr"} (A)</option>
+          <option value="B" className="bg-[#0A0A12]">{isArabicLike ? "الجحفة" : "Al-Juhfah"} (B)</option>
+          <option value="C" className="bg-[#0A0A12]">{isArabicLike ? "الريم" : "Al-Reem"} (C)</option>
+          <option value="D" className="bg-[#0A0A12]">{isArabicLike ? "العرج" : "Al-Arj"} (D)</option>
+          <option value="E" className="bg-[#0A0A12]">{isArabicLike ? "القاهة" : "Al-Qahah"} (E)</option>
+          <option value="F" className="bg-[#0A0A12]">{isArabicLike ? "الروحاء" : "Al-Rawha"} (F)</option>
+          <option value="G" className="bg-[#0A0A12]">{isArabicLike ? "ذو الحليفة" : "Dhul Hulayfah"} (G)</option>
+          <option value="H" className="bg-[#0A0A12]">{isArabicLike ? "المدينة المنورة" : "Al-Madinah"} (H)</option>
         </select>
         <select
           value={typeFilter}
@@ -562,6 +574,7 @@ export default function ExpoDetail() {
           <option value="premium" className="bg-[#0A0A12]">{t("expoDetail.premium")}</option>
           <option value="corner" className="bg-[#0A0A12]">{t("expoDetail.corner")}</option>
           <option value="island" className="bg-[#0A0A12]">{t("expoDetail.island")}</option>
+          <option value="kiosk" className="bg-[#0A0A12]">{isArabicLike ? "كشك" : "Kiosk"}</option>
         </select>
         {/* Legend */}
         <div className={`flex items-center gap-4 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
