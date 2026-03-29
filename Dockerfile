@@ -26,7 +26,6 @@ COPY patches/ ./patches/
 RUN pnpm install --frozen-lockfile
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/shared ./shared
 
 ENV NODE_ENV=production
